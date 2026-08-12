@@ -20,7 +20,7 @@ export default function Home({ featuredItems = [], properties = [], posts = [] }
         <PublicLayout>
             <SeoHead title="Pascoal Loteamentos" description="Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor." />
             <section className="relative flex min-h-[797px] items-center justify-center overflow-hidden px-5 pt-20 text-center text-white desktop:min-h-[100svh]">
-                <img src="/reference-assets/hero-home.jpg" alt="Vista aérea de empreendimentos em Toledo" className="absolute inset-0 h-full w-full object-cover" />
+                <img src="/reference-assets/hero-home.jpg" alt="Vista aérea de empreendimentos em Toledo" className="absolute inset-0 h-full w-full object-cover opacity-75" />
                 <div className="hero-overlay absolute inset-0" />
                 <div className="relative z-10 w-full">
                     <h1 className="mx-auto max-w-[1000px] text-[2.125rem] font-light leading-[1.08] tracking-[-.02em] tablet:text-[3rem] desktop:text-[3.9375rem]">Encontre o lugar onde sua próxima história começa.</h1>
@@ -62,3 +62,4 @@ export default function Home({ featuredItems = [], properties = [], posts = [] }
         </PublicLayout>
     );
 }
+
