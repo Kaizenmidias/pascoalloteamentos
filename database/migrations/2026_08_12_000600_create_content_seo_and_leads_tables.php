@@ -107,7 +107,7 @@ return new class extends Migration
         Schema::create('leads', function (Blueprint $table) {
             $table->id();
             $table->foreignId('property_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('condominium_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('condominium_id')->nullable()->constrained('condominiums')->nullOnDelete();
             $table->foreignId('subdivision_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
             $table->string('email')->nullable();
