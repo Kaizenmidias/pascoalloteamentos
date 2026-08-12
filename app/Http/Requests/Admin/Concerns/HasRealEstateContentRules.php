@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Requests\Admin\Concerns;
+
+trait HasRealEstateContentRules
+{
+    protected function contentRules(): array
+    {
+        return [
+            'gallery_images' => ['nullable', 'array', 'max:30'],
+            'gallery_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:12288'],
+            'remove_media_ids' => ['nullable', 'array'],
+            'remove_media_ids.*' => ['integer', 'exists:media_assets,id'],
+            'featured_media_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'floor_plans' => ['nullable', 'array', 'max:30'],
+            'floor_plans.*.name' => ['required', 'string', 'max:255'],
+            'floor_plans.*.description' => ['nullable', 'string'],
+            'floor_plans.*.area' => ['nullable', 'numeric', 'min:0'],
+            'floor_plans.*.bedrooms' => ['nullable', 'integer', 'min:0'],
+            'floor_plans.*.suites' => ['nullable', 'integer', 'min:0'],
+            'floor_plans.*.bathrooms' => ['nullable', 'integer', 'min:0'],
+            'floor_plans.*.parking_spaces' => ['nullable', 'integer', 'min:0'],
+            'construction_stages' => ['nullable', 'array', 'max:30'],
+            'construction_stages.*.name' => ['required', 'string', 'max:255'],
+            'construction_stages.*.code' => ['nullable', 'string', 'max:60'],
+            'construction_stages.*.progress_percent' => ['required', 'integer', 'between:0,100'],
+            'construction_stages.*.reference_date' => ['nullable', 'date'],
+            'construction_stages.*.description' => ['nullable', 'string'],
+            'faqs' => ['nullable', 'array', 'max:30'],
+            'faqs.*.question' => ['required', 'string', 'max:255'],
+            'faqs.*.answer' => ['required', 'string'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string', 'max:500'],
+            'seo_canonical_url' => ['nullable', 'url', 'max:2048'],
+            'seo_robots' => ['nullable', 'string', 'max:100'],
+        ];
+    }
+}

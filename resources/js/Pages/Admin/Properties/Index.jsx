@@ -1,0 +1,2 @@
+import AdminLayout from '../../../Components/Layout/AdminLayout'; import EntityTable from '../../../Components/Admin/EntityTable'; import Button from '../../../Components/UI/Button';
+export default function Index({items}){return <AdminLayout title="Imóveis"><div className="mb-5 flex justify-end"><Button href="/admin/properties/create">Novo imóvel</Button></div><EntityTable items={items} nameKey="title" basePath="/admin/properties" typeLabel="imóvel"/></AdminLayout>}

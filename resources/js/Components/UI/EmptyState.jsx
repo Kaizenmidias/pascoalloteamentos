@@ -1,0 +1,1 @@
+export default function EmptyState({ title='Nenhum conteúdo encontrado', children }) { return <div className="rounded-card border border-line bg-surface p-8 text-center"><h2 className="text-xl font-bold text-ink">{title}</h2>{children&&<p className="mt-2 text-muted">{children}</p>}</div>; }

@@ -1,0 +1,75 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../js/**/*.jsx';
+
+@font-face { font-family: 'Gotham Rounded'; src: url('/fonts/GothamRnd-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Gotham Rounded'; src: url('/fonts/GothamRnd-Book.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Gotham Rounded'; src: url('/fonts/GothamRnd-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Gotham Rounded'; src: url('/fonts/GothamRnd-Bold.woff2') format('woff2'); font-weight: 700 900; font-style: normal; font-display: swap; }
+
+@theme {
+    --font-sans: 'Gotham Rounded', ui-sans-serif, system-ui, sans-serif;
+    --color-brand: #971c20;
+    --color-brand-dark: #7f161a;
+    --color-brand-deep: #73070b;
+    --color-ink: #151515;
+    --color-text: #58595b;
+    --color-muted: #939598;
+    --color-line: #e6e6e6;
+    --color-surface: #f6f6f6;
+    --color-footer: #111111;
+    --radius-card: 0.9375rem;
+    --radius-pill: 1.5625rem;
+    --shadow-card: 0 12px 35px rgb(17 17 17 / 0.09);
+    --shadow-header: 0 4px 18px rgb(17 17 17 / 0.14);
+    --breakpoint-tablet: 48rem;
+    --breakpoint-desktop: 64.0625rem;
+}
+
+:root {
+    --site-content: 80rem;
+    --site-header: 89.375rem;
+    --section-space: clamp(4.5rem, 8vw, 7.5rem);
+    --gutter: clamp(1.25rem, 4vw, 2rem);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 20rem; background: white; overflow-x: hidden; font-weight: 300; line-height: 1.5; }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+@layer components {
+    .site-container { width: min(calc(100% - (2 * var(--gutter))), var(--site-content)); margin-inline: auto; }
+    .eyebrow { color: var(--color-brand); font-size: clamp(.9rem, 1.25vw, 1.25rem); font-weight: 300; letter-spacing: .015em; line-height: 1.2; text-transform: uppercase; }
+    .section-title { color: var(--color-ink); font-size: clamp(1.85rem, 3.1vw, 2.75rem); font-weight: 300; line-height: 1.14; letter-spacing: -.018em; }
+    .brand-button { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; border-radius: .4375rem; background: var(--color-brand); padding: .75rem 1.75rem; color: #fff !important; font-size: .75rem; font-weight: 500; letter-spacing: .015em; text-transform: uppercase; transition: transform .2s, background .2s, box-shadow .2s; }
+    .brand-button:visited { color: #fff !important; }
+    .brand-button:hover { background: var(--color-brand-dark); transform: translateY(-1px); }
+    .admin-input { width: 100%; border: 1px solid var(--color-line); border-radius: .75rem; background: white; padding: .75rem 1rem; outline: none; transition: border-color .2s, box-shadow .2s; }
+    .admin-input:focus { border-color: var(--color-brand); box-shadow: 0 0 0 3px rgb(166 25 31 / .12); }
+    .admin-label { display: block; margin-bottom: .4rem; color: var(--color-ink); font-size: .8rem; font-weight: 700; }
+    .hero-overlay { background: linear-gradient(90deg, rgb(0 0 0 / .62), rgb(0 0 0 / .34) 52%, rgb(0 0 0 / .5)); }
+    .red-overlay { background: rgb(141 7 12 / .78); }
+    .glass-card { border: 1px solid rgb(255 255 255 / .2); background: rgb(255 255 255 / .96); box-shadow: 0 12px 32px rgb(0 0 0 / .14); }
+}
+
+a.bg-brand, button.bg-brand { color: #fff !important; }
+
+@media (max-width: 48rem) {
+    :root { --section-space: 4.5rem; }
+    .eyebrow { font-size: .9375rem; }
+    .section-title { font-size: clamp(1.75rem, 8.5vw, 2rem); line-height: 1.18; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

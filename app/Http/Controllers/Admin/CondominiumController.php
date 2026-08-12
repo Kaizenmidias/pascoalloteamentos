@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreCondominiumRequest;
+use App\Http\Requests\Admin\UpdateCondominiumRequest;
+use App\Models\City;
+use App\Models\Condominium;
+use App\Models\CondominiumType;
+use App\Models\DevelopmentStatus;
+use App\Models\Feature;
+use App\Services\Admin\RealEstateContentService;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class CondominiumController extends Controller
+{
+    public function __construct(private readonly RealEstateContentService $content) {}
+
+    public function index(): Response
+    {
+        return Inertia::render('Admin/Condominiums/Index', ['items' => Condominium::with(['city', 'condominiumType'])->latest()->paginate(20)]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Admin/Condominiums/Form', ['item' => null, 'options' => $this->options()]);
+    }
+
+    public function store(StoreCondominiumRequest $request): RedirectResponse
+    {
+        $item = $this->content->save(new Condominium, $request->validated());
+
+        return redirect()->route('admin.condominiums.edit', $item)->with('success', 'Condomínio criado.');
+    }
+
+    public function edit(Condominium $condominium): Response
+    {
+        return Inertia::render('Admin/Condominiums/Form', ['item' => $condominium->load(['features', 'mediaAssets', 'floorPlans', 'constructionStages', 'faqs', 'seo']), 'options' => $this->options()]);
+    }
+
+    public function update(UpdateCondominiumRequest $request, Condominium $condominium): RedirectResponse
+    {
+        $this->content->save($condominium, $request->validated());
+
+        return redirect()->route('admin.condominiums.edit', $condominium)->with('success', 'Condomínio atualizado.');
+    }
+
+    private function options(): array
+    {
+        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'features' => Feature::orderBy('sort_order')->get()];
+    }
+}

@@ -1,0 +1,1 @@
+export default function PriceDisplay({value,prefix='A partir de'}){if(value==null)return <span className="font-bold text-brand">Consulte valores</span>;return <div><span className="block text-xs uppercase text-muted">{prefix}</span><strong className="text-2xl text-brand">{new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(value))}</strong></div>}

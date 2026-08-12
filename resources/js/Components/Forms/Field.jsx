@@ -1,0 +1,1 @@
+export default function Field({label,error,as='input',children,...props}){const Tag=as;return <label className="block"><span className="admin-label">{label}</span>{children??<Tag className="admin-input" {...props}/>} {error&&<span className="mt-1 block text-xs text-red-700">{error}</span>}</label>}
