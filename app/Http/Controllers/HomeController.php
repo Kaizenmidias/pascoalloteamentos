@@ -22,12 +22,25 @@ class HomeController extends Controller
         $properties = Property::query()->published()->with(['city.state', 'propertyType', 'developmentStatus', 'mediaAssets'])->featured()->latest('published_at')->limit(3)->get();
         $subdivisions = Subdivision::query()->published()->with(['city.state', 'subdivisionType', 'developmentStatus', 'mediaAssets'])->featured()->latest('published_at')->limit(3)->get();
 
+        $fallbackCondominiums = $condominiums->isNotEmpty()
+            ? collect()
+            : Condominium::query()->published()->with(['city.state', 'condominiumType', 'developmentStatus', 'mediaAssets'])->latest('published_at')->limit(3)->get();
+        $fallbackProperties = $properties->isNotEmpty()
+            ? collect()
+            : Property::query()->published()->with(['city.state', 'propertyType', 'developmentStatus', 'mediaAssets'])->latest('published_at')->limit(3)->get();
+        $fallbackSubdivisions = $subdivisions->isNotEmpty()
+            ? collect()
+            : Subdivision::query()->published()->with(['city.state', 'subdivisionType', 'developmentStatus', 'mediaAssets'])->latest('published_at')->limit(3)->get();
+
         // A coleção de destaques é apenas uma projeção de leitura para a Home.
         // As três entidades e suas tabelas continuam completamente independentes.
         $featuredItems = collect([
             ...$condominiums->map(fn (Condominium $item) => [...$item->toArray(), 'href' => "/condominios/{$item->slug}"]),
+            ...$fallbackCondominiums->map(fn (Condominium $item) => [...$item->toArray(), 'href' => "/condominios/{$item->slug}"]),
             ...$subdivisions->map(fn (Subdivision $item) => [...$item->toArray(), 'href' => "/loteamentos/{$item->slug}"]),
+            ...$fallbackSubdivisions->map(fn (Subdivision $item) => [...$item->toArray(), 'href' => "/loteamentos/{$item->slug}"]),
             ...$properties->map(fn (Property $item) => [...$item->toArray(), 'href' => "/imoveis/{$item->slug}"]),
+            ...$fallbackProperties->map(fn (Property $item) => [...$item->toArray(), 'href' => "/imoveis/{$item->slug}"]),
         ])->take(6)->values();
 
         return Inertia::render('Public/Home', [
