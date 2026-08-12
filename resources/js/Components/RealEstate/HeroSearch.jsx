@@ -4,7 +4,7 @@ import { useState } from 'react';
 const Select = ({ value, onChange, label, options = [] }) => (
     <label className="relative min-w-0 flex-1">
         <span className="sr-only">{label}</span>
-        <select value={value} onChange={onChange} className="h-14 w-full appearance-none border-0 bg-white px-4 pr-9 text-xs font-light uppercase text-text outline-none">
+        <select value={value} onChange={onChange} className="h-14 w-full appearance-none border-0 bg-white px-4 pr-9 text-xs font-medium uppercase text-text outline-none">
             <option value="">{label}</option>
             {options.map((option) => <option key={option.slug} value={option.slug}>{option.name}</option>)}
         </select>
@@ -22,7 +22,7 @@ export default function HeroSearch({ action = '/imoveis', filters = {}, types = 
             <Select label="Tipo de imóvel" value={values.type} onChange={update('type')} options={types} />
             <Select label="Selecione uma cidade" value={values.city} onChange={update('city')} options={cities} />
             <Select label="Status da obra" value={values.status} onChange={update('status')} options={statuses} />
-            <button className="brand-button m-1 min-h-12 shrink-0 tablet:min-w-48" type="submit">Aplicar filtros</button>
+            <button className="brand-button m-1 min-h-12 shrink-0 font-medium tablet:min-w-48" type="submit">Aplicar filtros</button>
         </form>
     );
 }
