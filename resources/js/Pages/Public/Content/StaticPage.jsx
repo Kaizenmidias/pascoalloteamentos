@@ -5,10 +5,10 @@ import Container from '../../../Components/UI/Container';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
 
 const Hero = ({ contact = false }) => (
-    <section className="relative flex min-h-[430px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
+    <section className="relative flex min-h-[600px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
         <img src={contact ? '/reference-assets/hero-contact.webp' : '/reference-assets/hero-home.jpg'} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="red-overlay absolute inset-0" />
-        {contact && <div className="absolute inset-0 bg-black/42" />}
+        {contact && <div className="absolute inset-0 bg-[#6f1116]/22" />}
         <div className="relative z-10 mx-auto w-full max-w-[80rem]">
             <h1 className={`mx-auto max-w-[80rem] text-[46px] font-light uppercase leading-[1.12] tracking-[-.015em] ${contact ? 'desktop:px-[70px]' : ''}`}>
                 {contact ? 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.' : 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.'}

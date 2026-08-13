@@ -25,10 +25,10 @@ export default function Index({ posts }) {
     return (
         <PublicLayout>
             <SeoHead title="Blog" description="Conteúdos para quem deseja morar, investir e acompanhar o mercado imobiliário." />
-            <section className="relative flex min-h-[430px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
+            <section className="relative flex min-h-[600px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
                 <img src="/reference-assets/blog-people.webp" alt="" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="red-overlay absolute inset-0" />
-                <div className="absolute inset-0 bg-black/45" />
+                <div className="absolute inset-0 bg-[#6f1116]/22" />
                 <div className="relative z-10 mx-auto w-full max-w-[80rem]">
                     <h1 className="mx-auto max-w-[72rem] text-[46px] font-normal uppercase leading-[1.08] tracking-[-.015em]">
                         Conteúdos para quem deseja morar, investir e acompanhar o mercado imobiliário.
