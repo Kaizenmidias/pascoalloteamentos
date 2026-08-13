@@ -55,8 +55,9 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
     return (
         <PublicLayout>
             <SeoHead title={eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase()} description={description} />
-            <section className="relative flex min-h-[580px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
+            <section className="relative flex min-h-[430px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
                 <img src={image} alt="Empreendimento residencial" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="red-overlay absolute inset-0" />
                 <div className={`absolute inset-0 ${overlay}`} />
                 <div className="relative z-10 mx-auto w-full max-w-[80rem] px-5 text-center">
                     <p className="text-base font-light uppercase desktop:text-xl">{eyebrow}</p>
