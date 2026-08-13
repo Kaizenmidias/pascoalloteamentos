@@ -14,7 +14,7 @@ const copy = {
 
 export default function EntityArchive({ entity, items, basePath, filters, cities, types, statuses }) {
     const [eyebrow, title, description] = copy[entity];
-    const heroContentPadding = entity === 'subdivisions' ? 'desktop:px-[100px]' : 'desktop:px-[170px]';
+    const heroContentPadding = entity === 'subdivisions' ? 'desktop:px-[60px]' : 'desktop:px-[170px]';
     const heroDescriptionPadding = entity === 'subdivisions' ? 'desktop:px-[120px]' : 'desktop:px-[170px]';
     return (
         <PublicLayout>
