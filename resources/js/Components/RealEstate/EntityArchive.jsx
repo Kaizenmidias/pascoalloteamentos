@@ -17,12 +17,12 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
     return (
         <PublicLayout>
             <SeoHead title={eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase()} description={description} />
-            <section className="relative flex min-h-[525px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
+            <section className="relative flex min-h-[580px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
                 <img src="/reference-assets/hero-archive.webp" alt="Empreendimento residencial" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="hero-overlay absolute inset-0" />
                 <div className="relative z-10 mx-auto w-full max-w-[80rem] px-5 text-center">
                     <p className="text-base font-light uppercase desktop:text-xl">{eyebrow}</p>
-                    <div className="mx-auto max-w-[80rem] px-0 desktop:px-[200px]">
+                    <div className="mx-auto max-w-[80rem] px-0 desktop:px-[170px]">
                         <h1 className="mx-auto mt-3 text-[clamp(2.125rem,5vw,3.9375rem)] font-light leading-[1.08] tracking-[-.02em]">{title}</h1>
                         <p className="mx-auto mt-5 text-base font-light leading-7 text-white/90 desktop:text-lg">{description}</p>
                     </div>
