@@ -33,8 +33,8 @@ export default function Home({ featuredItems = [], properties = [], posts = [] }
                 {featuredItems.map((item) => <EntityCard key={item.href} item={item} href={item.href} compact />)}
             </SectionIntro>
 
-            <section className="relative overflow-hidden desktop:min-h-[32rem]">
-                <div className="absolute inset-y-0 right-0 w-[52%] overflow-hidden bg-surface max-[63.999rem]:relative max-[63.999rem]:w-full max-[63.999rem]:min-h-80">
+            <section className="relative overflow-hidden bg-surface desktop:min-h-[32rem]">
+                <div className="absolute inset-0 overflow-hidden">
                     <img src="/reference-assets/home-building.webp" alt="Maquete de empreendimento Pascoal" className="absolute inset-0 h-full w-full object-cover object-center" />
                 </div>
                 <Container className="relative z-10 grid items-stretch py-0 desktop:grid-cols-[9%_41%_50%] desktop:py-8">
