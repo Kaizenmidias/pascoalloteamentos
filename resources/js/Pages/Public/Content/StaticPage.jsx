@@ -81,19 +81,13 @@ function About() {
                     </div>
                     <div className="grid gap-4 tablet:grid-cols-3">
                         {values.map(({ title, image, text }) => (
-                            <article key={title} className="group relative min-h-[22rem] overflow-hidden rounded-card bg-surface p-6 shadow-card tablet:p-7">
-                                <div className="overflow-hidden rounded-xl bg-neutral-100">
-                                    <img src={image} alt={title} className="h-56 w-full object-cover transition duration-500 ease-out group-hover:scale-105" />
-                                </div>
-                                <div className="flex h-full flex-col justify-end pt-6">
-                                    <span className="text-sm font-medium uppercase text-brand">{title}</span>
-                                    <div className="mt-4 space-y-3">
-                                        <div className="h-px w-10 bg-brand" />
-                                        <p className="text-sm leading-6 text-muted">Passe o mouse para ver o texto completo do card.</p>
-                                    </div>
-                                </div>
-                                <div className="pointer-events-none absolute inset-x-4 bottom-4 max-h-[calc(100%-2rem)] translate-y-8 rounded-xl bg-white p-4 opacity-0 shadow-card transition duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100">
-                                    <p className="text-sm leading-6 text-muted">{text}</p>
+                            <article key={title} className="group relative min-h-[24rem] overflow-hidden rounded-card shadow-card">
+                                <img src={image} alt={title} className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition duration-500 ease-out group-hover:from-black/85 group-hover:via-black/45" />
+                                <div className="absolute inset-x-0 bottom-0 z-10 p-6 tablet:p-7">
+                                    <span className="text-sm font-medium uppercase tracking-[0.08em] text-white">{title}</span>
+                                    <div className="mt-3 h-px w-10 bg-brand" />
+                                    <p className="mt-4 max-w-[22rem] text-sm leading-6 text-white/90">{text}</p>
                                 </div>
                             </article>
                         ))}
