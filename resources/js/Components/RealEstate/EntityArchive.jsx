@@ -14,7 +14,8 @@ const copy = {
 
 export default function EntityArchive({ entity, items, basePath, filters, cities, types, statuses }) {
     const [eyebrow, title, description] = copy[entity];
-    const heroContentPadding = entity === 'subdivisions' ? 'desktop:px-[140px]' : 'desktop:px-[170px]';
+    const heroContentPadding = entity === 'subdivisions' ? 'desktop:px-[100px]' : 'desktop:px-[170px]';
+    const heroDescriptionPadding = entity === 'subdivisions' ? 'desktop:px-[120px]' : 'desktop:px-[170px]';
     return (
         <PublicLayout>
             <SeoHead title={eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase()} description={description} />
@@ -25,7 +26,7 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
                     <p className="text-base font-light uppercase desktop:text-xl">{eyebrow}</p>
                     <div className={`mx-auto max-w-[80rem] px-0 ${heroContentPadding}`}>
                         <h1 className="mx-auto mt-3 text-[clamp(2.125rem,5vw,3.9375rem)] font-light leading-[1.08] tracking-[-.02em]">{title}</h1>
-                        <p className="mx-auto mt-5 text-base font-light leading-7 text-white/90 desktop:text-lg">{description}</p>
+                        <p className={`mx-auto mt-5 text-base font-light leading-7 text-white/90 desktop:text-lg ${heroDescriptionPadding}`}>{description}</p>
                     </div>
                     <HeroSearch action={basePath} filters={filters} cities={cities} types={types} statuses={statuses} />
                 </div>
