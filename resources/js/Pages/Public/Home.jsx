@@ -37,9 +37,8 @@ export default function Home({ featuredItems = [], properties = [], posts = [] }
                 <div className="absolute inset-0 overflow-hidden">
                     <img src="/reference-assets/home-building.webp" alt="Maquete de empreendimento Pascoal" className="absolute inset-0 h-full w-full object-cover object-center" />
                 </div>
-                <Container className="relative z-10 grid items-stretch py-0 desktop:grid-cols-[9%_41%_50%] desktop:py-8">
-                    <div className="hidden desktop:block" />
-                    <div className="bg-white px-6 py-10 shadow-card tablet:px-8 tablet:py-12 desktop:-ml-10 desktop:self-center desktop:px-10 desktop:py-11">
+                <Container className="relative z-10 grid items-stretch py-0 desktop:grid-cols-[41%_59%] desktop:py-8">
+                    <div className="bg-white px-6 py-10 shadow-card tablet:px-8 tablet:py-12 desktop:self-center desktop:px-10 desktop:py-11">
                         <div className="w-full">
                             <p className="eyebrow">Sobre nós</p>
                             <h2 className="section-title mt-3">Mais de 30 anos criando espaços que valorizam pessoas.</h2>
