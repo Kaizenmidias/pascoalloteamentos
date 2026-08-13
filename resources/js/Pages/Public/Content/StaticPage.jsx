@@ -86,7 +86,7 @@ function About() {
                                         <p className="text-sm leading-6 text-muted">Passe o mouse para ver o texto completo do card.</p>
                                     </div>
                                 </div>
-                                <div className="pointer-events-none absolute inset-4 rounded-xl bg-white p-4 opacity-0 shadow-card transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                                <div className="pointer-events-none absolute inset-x-4 bottom-4 max-h-[calc(100%-2rem)] translate-y-8 rounded-xl bg-white p-4 opacity-0 shadow-card transition duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100">
                                     <p className="text-sm leading-6 text-muted">{text}</p>
                                 </div>
                             </article>
