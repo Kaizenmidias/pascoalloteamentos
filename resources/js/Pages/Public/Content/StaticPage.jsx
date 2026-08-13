@@ -9,10 +9,10 @@ const Hero = ({ contact = false }) => (
         <img src={contact ? '/reference-assets/hero-contact.webp' : '/reference-assets/hero-home.jpg'} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="red-overlay absolute inset-0" />
         <div className="relative z-10 mx-auto w-full max-w-[80rem]">
-            <h1 className="mx-auto max-w-[80rem] text-[clamp(2rem,4.5vw,3.65rem)] font-light uppercase leading-[1.12] tracking-[-.015em]">
+            <h1 className={`mx-auto max-w-[80rem] text-[46px] font-light uppercase leading-[1.12] tracking-[-.015em] ${contact ? 'desktop:px-[70px]' : ''}`}>
                 {contact ? 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.' : 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.'}
             </h1>
-            <p className="mx-auto mt-5 max-w-[80rem] text-base font-light leading-7 text-white/90 desktop:text-lg">
+            <p className={`mx-auto mt-5 max-w-[80rem] text-base font-light leading-7 text-white/90 desktop:text-lg ${contact ? 'desktop:px-[70px]' : ''}`}>
                 {contact ? 'Nossa equipe está à disposição para esclarecer dúvidas, apresentar oportunidades e oferecer o suporte necessário para que você faça um investimento com segurança e tranquilidade.' : 'Descubra empreendimentos inovadores, feitos com cuidado e com alto padrão, que valorizam a arte, a natureza e a funcionalidade.'}
             </p>
         </div>

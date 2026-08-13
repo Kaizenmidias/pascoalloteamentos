@@ -7,26 +7,62 @@ import EntityCard from './EntityCard';
 import HeroSearch from './HeroSearch';
 
 const copy = {
-    properties: ['IMÓVEIS', 'Encontre o imóvel ideal para o seu estilo de vida', 'Explore nossa seleção de casas, apartamentos, salas comerciais, terrenos e outros imóveis. Encontre a opção perfeita para morar, investir ou expandir seus negócios.'],
-    condominiums: ['CONDOMÍNIOS', 'Conheça nossos condomínios e encontre seu novo lar', 'Explore condomínios planejados para oferecer conforto, segurança e qualidade de vida. Encontre o empreendimento ideal para você e sua família.'],
-    subdivisions: ['LOTEAMENTOS', 'Descubra os melhores loteamentos para investir e construir', 'Conheça nossos loteamentos planejados, com infraestrutura completa, localização estratégica e excelente potencial de valorização.'],
+    properties: {
+        eyebrow: 'IMÓVEIS',
+        title: 'Encontre o imóvel ideal para o seu estilo de vida',
+        description: (
+            <>
+                Explore nossa seleção de casas, apartamentos, salas comerciais,
+                <br />
+                terrenos e outros imóveis. Encontre a opção perfeita para morar, investir ou expandir seus negócios.
+            </>
+        ),
+        image: '/reference-assets/property-livorno.jpeg',
+        overlay: 'bg-black/60',
+    },
+    condominiums: {
+        eyebrow: 'CONDOMÍNIOS',
+        title: 'Conheça nossos condomínios e encontre seu novo lar',
+        description: (
+            <>
+                Explore condomínios planejados para oferecer conforto, segurança e qualidade de vida.
+                <br />
+                Encontre o empreendimento ideal para você e sua família.
+            </>
+        ),
+        image: '/reference-assets/condominium-vale.webp',
+        overlay: 'bg-black/62',
+    },
+    subdivisions: {
+        eyebrow: 'LOTEAMENTOS',
+        title: 'Descubra os melhores loteamentos para investir e construir',
+        description: (
+            <>
+                Conheça nossos loteamentos planejados, com infraestrutura completa,
+                <br />
+                localização estratégica e excelente potencial de valorização.
+            </>
+        ),
+        image: '/reference-assets/subdivision-brisa.jpg',
+        overlay: 'bg-black/58',
+    },
 };
 
 export default function EntityArchive({ entity, items, basePath, filters, cities, types, statuses }) {
-    const [eyebrow, title, description] = copy[entity];
-    const heroContentPadding = entity === 'subdivisions' ? 'desktop:px-[60px]' : 'desktop:px-[170px]';
-    const heroDescriptionPadding = entity === 'subdivisions' ? 'desktop:px-[120px]' : 'desktop:px-[170px]';
+    const { eyebrow, title, description, image, overlay } = copy[entity];
+    const heroTitlePadding = entity === 'subdivisions' ? 'desktop:px-[60px]' : 'desktop:px-0';
+
     return (
         <PublicLayout>
             <SeoHead title={eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase()} description={description} />
             <section className="relative flex min-h-[580px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
-                <img src="/reference-assets/hero-archive.webp" alt="Empreendimento residencial" className="absolute inset-0 h-full w-full object-cover" />
-                <div className="hero-overlay absolute inset-0" />
+                <img src={image} alt="Empreendimento residencial" className="absolute inset-0 h-full w-full object-cover" />
+                <div className={`absolute inset-0 ${overlay}`} />
                 <div className="relative z-10 mx-auto w-full max-w-[80rem] px-5 text-center">
                     <p className="text-base font-light uppercase desktop:text-xl">{eyebrow}</p>
-                    <div className={`mx-auto max-w-[80rem] px-0 ${heroContentPadding}`}>
-                        <h1 className="mx-auto mt-3 text-[clamp(2.125rem,5vw,3.9375rem)] font-light leading-[1.08] tracking-[-.02em]">{title}</h1>
-                        <p className={`mx-auto mt-5 text-base font-light leading-7 text-white/90 desktop:text-lg ${heroDescriptionPadding}`}>{description}</p>
+                    <div className={`mx-auto max-w-[80rem] px-0 ${heroTitlePadding}`}>
+                        <h1 className="mx-auto mt-3 text-[46px] font-light leading-[1.08] tracking-[-.02em]">{title}</h1>
+                        <p className="mx-auto mt-5 text-base font-light leading-7 text-white/90 desktop:text-lg">{description}</p>
                     </div>
                     <HeroSearch action={basePath} filters={filters} cities={cities} types={types} statuses={statuses} />
                 </div>
