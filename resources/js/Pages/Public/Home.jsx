@@ -40,10 +40,10 @@ export default function Home({ featuredItems = [], properties = [], posts = [] }
                 <Container className="relative z-10 grid items-stretch py-0 desktop:grid-cols-[9%_41%_50%] desktop:py-8">
                     <div className="hidden desktop:block" />
                     <div className="bg-white px-6 py-10 shadow-card tablet:px-8 tablet:py-12 desktop:-ml-10 desktop:self-center desktop:px-10 desktop:py-11">
-                        <div className="max-w-[24rem]">
+                        <div className="w-full">
                             <p className="eyebrow">Sobre nós</p>
                             <h2 className="section-title mt-3">Mais de 30 anos criando espaços que valorizam pessoas.</h2>
-                            <p className="mt-5 max-w-[21rem] text-base font-light leading-[1.65] text-muted desktop:text-[1.125rem]">Planejamos e desenvolvemos empreendimentos com excelência, responsabilidade e visão de futuro. Nosso compromisso vai além da construção de imóveis: criamos espaços que proporcionam bem-estar, segurança e valorização.</p>
+                            <p className="mt-5 w-full text-base font-light leading-[1.65] text-muted desktop:text-[1.125rem]">Planejamos e desenvolvemos empreendimentos com excelência, responsabilidade e visão de futuro. Nosso compromisso vai além da construção de imóveis: criamos espaços que proporcionam bem-estar, segurança e valorização.</p>
                             <Link href="/sobre-nos" className="brand-button mt-6">Conheça nossa história</Link>
                         </div>
                     </div>
