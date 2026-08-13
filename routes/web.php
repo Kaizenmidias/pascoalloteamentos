@@ -41,5 +41,6 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->midd
 
 require __DIR__.'/admin.php';
 
+Route::pattern('page', '(?!admin|blog|imoveis|condominios|loteamentos|sobre-nos|contato|login|logout|sitemap\\.xml$)[^/]+');
 Route::get('/{page}', [PageController::class, 'show'])->name('pages.show');
 Route::fallback(fn () => abort(404));
