@@ -22,14 +22,17 @@ const Hero = ({ contact = false }) => (
 const values = [
     {
         title: 'Missão',
+        image: '/reference-assets/blog-city.jpg',
         text: 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.',
     },
     {
         title: 'Visão',
+        image: '/reference-assets/about-plans.jpg',
         text: 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.',
     },
     {
         title: 'Valores',
+        image: '/reference-assets/about-meeting.jpg',
         text: 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.',
     },
 ];
@@ -77,9 +80,12 @@ function About() {
                         <img src="/reference-assets/about-purpose.webp" alt="Engenheiro em uma obra" className="mx-auto max-h-[420px] rounded-card object-cover" />
                     </div>
                     <div className="grid gap-4 tablet:grid-cols-3">
-                        {values.map(({ title, text }) => (
+                        {values.map(({ title, image, text }) => (
                             <article key={title} className="group relative min-h-[22rem] overflow-hidden rounded-card bg-surface p-6 shadow-card tablet:p-7">
-                                <div className="flex h-full flex-col justify-end">
+                                <div className="overflow-hidden rounded-xl bg-neutral-100">
+                                    <img src={image} alt={title} className="h-56 w-full object-cover transition duration-500 ease-out group-hover:scale-105" />
+                                </div>
+                                <div className="flex h-full flex-col justify-end pt-6">
                                     <span className="text-sm font-medium uppercase text-brand">{title}</span>
                                     <div className="mt-4 space-y-3">
                                         <div className="h-px w-10 bg-brand" />
