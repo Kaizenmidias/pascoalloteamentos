@@ -25,7 +25,7 @@ class DemoContentSeeder extends Seeder
     {
         $admin = User::updateOrCreate(
             ['username' => 'kaizen'],
-            ['name' => 'Kaizen', 'email' => 'kaizen@pascoalloteamentos.local', 'password' => Hash::make('Kaizen@@2026'), 'email_verified_at' => now()],
+            ['name' => 'Kaizen', 'email' => 'kaizen@pascoalloteamentos.local', 'password' => Hash::make('Kaizen@@2026'), 'role' => 'admin', 'is_active' => true, 'email_verified_at' => now()],
         );
 
         $state = State::updateOrCreate(['code' => 'PR'], ['name' => 'Paraná']);

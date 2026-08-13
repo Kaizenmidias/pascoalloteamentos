@@ -23,7 +23,7 @@ class CreateAdminUserCommand extends Command
 
         User::updateOrCreate(
             ['email' => (string) $this->argument('email')],
-            ['name' => (string) $this->option('name'), 'password' => Hash::make($password), 'email_verified_at' => now()],
+            ['name' => (string) $this->option('name'), 'password' => Hash::make($password), 'role' => 'admin', 'is_active' => true, 'email_verified_at' => now()],
         );
 
         $this->info('Usuário administrativo disponível.');
