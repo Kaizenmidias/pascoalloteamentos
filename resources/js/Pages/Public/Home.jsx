@@ -33,9 +33,22 @@ export default function Home({ featuredItems = [], properties = [], posts = [] }
                 {featuredItems.map((item) => <EntityCard key={item.href} item={item} href={item.href} compact />)}
             </SectionIntro>
 
-            <section className="grid min-h-[440px] desktop:grid-cols-[1fr_1.05fr]">
-                <div className="relative min-h-80 overflow-hidden bg-surface"><img src="/reference-assets/home-building.webp" alt="Maquete de empreendimento Pascoal" className="absolute inset-0 h-full w-full object-cover" /></div>
-                <div className="flex items-center bg-white px-[var(--gutter)] py-16 desktop:px-20"><div className="max-w-xl"><p className="eyebrow">Sobre nós</p><h2 className="section-title mt-3">Mais de 30 anos criando espaços que valorizam pessoas.</h2><p className="mt-6 text-base font-light leading-[1.65] text-muted desktop:text-[1.125rem]">Planejamos e desenvolvemos empreendimentos com excelência, responsabilidade e visão de futuro. Nosso compromisso vai além da construção de imóveis: criamos espaços que proporcionam bem-estar, segurança e valorização.</p><Link href="/sobre-nos" className="brand-button mt-7">Conheça nossa história</Link></div></div>
+            <section className="relative overflow-hidden desktop:min-h-[32rem]">
+                <div className="absolute inset-y-0 right-0 w-[52%] overflow-hidden bg-surface max-[63.999rem]:relative max-[63.999rem]:w-full max-[63.999rem]:min-h-80">
+                    <img src="/reference-assets/home-building.webp" alt="Maquete de empreendimento Pascoal" className="absolute inset-0 h-full w-full object-cover object-center" />
+                </div>
+                <Container className="relative z-10 grid items-stretch py-0 desktop:grid-cols-[9%_41%_50%] desktop:py-8">
+                    <div className="hidden desktop:block" />
+                    <div className="bg-white px-6 py-10 shadow-card tablet:px-8 tablet:py-12 desktop:-ml-10 desktop:self-center desktop:px-10 desktop:py-11">
+                        <div className="max-w-[24rem]">
+                            <p className="eyebrow">Sobre nós</p>
+                            <h2 className="section-title mt-3">Mais de 30 anos criando espaços que valorizam pessoas.</h2>
+                            <p className="mt-5 max-w-[21rem] text-base font-light leading-[1.65] text-muted desktop:text-[1.125rem]">Planejamos e desenvolvemos empreendimentos com excelência, responsabilidade e visão de futuro. Nosso compromisso vai além da construção de imóveis: criamos espaços que proporcionam bem-estar, segurança e valorização.</p>
+                            <Link href="/sobre-nos" className="brand-button mt-6">Conheça nossa história</Link>
+                        </div>
+                    </div>
+                    <div className="hidden desktop:block" />
+                </Container>
             </section>
 
             <SectionIntro eyebrow="Imóveis" title="Encontre o imóvel ideal" description="Opções selecionadas para morar ou investir, com localização privilegiada, conforto e excelente potencial de valorização." href="/imoveis">
