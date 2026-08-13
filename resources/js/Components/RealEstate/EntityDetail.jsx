@@ -29,8 +29,8 @@ export default function EntityDetail({ item, entityType, priceKey }) {
             <section className={`relative overflow-hidden text-white ${isProperty ? 'min-h-[430px]' : 'min-h-[620px]'}`}>
                 <img src={hero?.url || '/reference-assets/hero-home.jpg'} alt={hero?.alt_text || title} className="absolute inset-0 h-full w-full object-cover" />
                 <div className="hero-overlay absolute inset-0" />
-                <Container className={`relative z-10 flex min-h-[inherit] items-center pt-24 ${isProperty ? 'justify-center text-center' : ''}`}>
-                    {!isProperty && <div className="max-w-2xl"><div className="flex gap-2 text-[.625rem] font-medium uppercase"><span className="rounded-full bg-brand px-3 py-1 text-white">{item.city?.name}</span><span className="rounded-full bg-white px-3 py-1 text-ink">{item.development_status?.name}</span></div><h1 className="mt-5 text-[clamp(2.6rem,5vw,4.5rem)] font-light leading-[1.02] tracking-[-.02em]">{title}</h1><p className="mt-6 max-w-xl text-base font-light leading-7 text-white/90 desktop:text-lg">{item.excerpt}</p><a className="brand-button mt-7" href={`https://wa.me/${item.whatsapp_contact || '5545999999999'}`}>Falar no WhatsApp</a></div>}
+                <Container className={`relative z-10 flex min-h-[inherit] items-center pt-[80px] ${isProperty ? 'justify-center text-center' : ''}`}>
+                    {!isProperty && <div className="mx-auto w-full max-w-[80rem] px-5"><div className="max-w-2xl"><div className="flex gap-2 text-[.625rem] font-medium uppercase"><span className="rounded-full bg-brand px-3 py-1 text-white">{item.city?.name}</span><span className="rounded-full bg-white px-3 py-1 text-ink">{item.development_status?.name}</span></div><h1 className="mt-5 text-[clamp(2.6rem,5vw,4.5rem)] font-light leading-[1.02] tracking-[-.02em]">{title}</h1><p className="mt-6 max-w-xl text-base font-light leading-7 text-white/90 desktop:text-lg">{item.excerpt}</p><a className="brand-button mt-7" href={`https://wa.me/${item.whatsapp_contact || '5545999999999'}`}>Falar no WhatsApp</a></div></div>}
                 </Container>
             </section>
 
