@@ -64,10 +64,10 @@ class WordPressImportService
         $dump = $this->parser->parse($path, $prefix);
         $classified = $this->classifyPosts($dump);
         $targets = $entity ? [$entity] : ['properties', 'condominiums', 'subdivisions'];
-        $result = ['imported' => [], 'pending' => [], 'ignored' => []];
+        $result = ['imported' => [], 'pending' => [], 'ignored' => [], 'media' => ['imported' => 0, 'missing' => 0, 'failed' => 0, 'skipped' => 0]];
 
         $this->importClassifications($dump, $force);
-        $this->importMedia($dump);
+        $result['media'] = $this->importMedia($dump);
 
         foreach ($targets as $target) {
             $records = $classified[$target] ?? [];
@@ -558,11 +558,23 @@ class WordPressImportService
         }
     }
 
-    private function importMedia(WordPressDump $dump): void
+    private function importMedia(WordPressDump $dump): array
     {
+        $stats = ['imported' => 0, 'missing' => 0, 'failed' => 0, 'skipped' => 0];
         foreach ($dump->attachments as $attachment) {
-            $this->ensureMediaAsset($attachment, []);
+            try {
+                $media = $this->ensureMediaAsset($attachment, []);
+                if ($media) {
+                    $stats['imported']++;
+                } else {
+                    $stats['missing']++;
+                }
+            } catch (\Throwable $error) {
+                $stats['failed']++;
+            }
         }
+
+        return $stats;
     }
 
     private function importEntity(WordPressDump $dump, array $row, string $target): array
@@ -818,11 +830,19 @@ class WordPressImportService
         }
 
         $filePath = $this->findWordPressUploadPath((string) ($attachment['guid'] ?? ''), $meta, (string) ($attachment['post_date'] ?? ''));
-        if (! $filePath) {
+        if (! $filePath || ! is_file($filePath)) {
             return null;
         }
 
-        $asset = $this->media->storePath($filePath, 'wordpress', 'public', ['legacy_source' => 'wordpress', 'legacy_id' => $legacyId, 'metadata' => ['title' => $attachment['post_title'] ?? null]]);
+        try {
+            $asset = $this->media->storePath($filePath, 'wordpress', 'public', [
+                'legacy_source' => 'wordpress',
+                'legacy_id' => $legacyId,
+                'metadata' => ['title' => $attachment['post_title'] ?? null, 'source_path' => $filePath],
+            ]);
+        } catch (\Throwable $error) {
+            return null;
+        }
 
         return $asset;
     }

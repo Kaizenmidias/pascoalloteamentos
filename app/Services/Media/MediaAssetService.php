@@ -38,18 +38,22 @@ class MediaAssetService
         }
 
         $file = new File($path);
-        return DB::transaction(function () use ($file, $collection, $disk, $checksum, $attributes) {
+        $realPath = $file->getRealPath() ?: $path;
+        return DB::transaction(function () use ($file, $collection, $disk, $checksum, $attributes, $realPath) {
             $stored = Storage::disk($disk)->putFile($collection, $file);
             try {
-                $mime = mime_content_type($file->getRealPath()) ?: null;
-                [$width, $height] = is_string($mime) && str_starts_with($mime, 'image/') ? (getimagesize($file->getRealPath()) ?: [null, null]) : [null, null];
+                $detectedPath = $file->getRealPath() ?: $realPath;
+                $mime = is_file($detectedPath) ? (mime_content_type($detectedPath) ?: null) : null;
+                [$width, $height] = is_string($mime) && str_starts_with($mime, 'image/') && is_file($detectedPath)
+                    ? (getimagesize($detectedPath) ?: [null, null])
+                    : [null, null];
 
                 return MediaAsset::create(array_merge([
                     'disk' => $disk,
                     'path' => $stored,
-                    'original_name' => basename($path),
+                    'original_name' => basename($realPath),
                     'mime_type' => $mime,
-                    'size' => filesize($path) ?: null,
+                    'size' => is_file($realPath) ? (filesize($realPath) ?: null) : null,
                     'width' => $width,
                     'height' => $height,
                     'checksum' => $checksum,
