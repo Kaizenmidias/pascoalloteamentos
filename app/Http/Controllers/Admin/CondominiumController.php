@@ -13,6 +13,7 @@ use App\Models\DevelopmentStatus;
 use App\Models\Feature;
 use App\Services\Admin\RealEstateContentService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -51,6 +52,6 @@ class CondominiumController extends Controller
 
     private function options(): array
     {
-        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => BusinessType::where('is_active', true)->orderBy('sort_order')->get(), 'features' => Feature::orderBy('sort_order')->get()];
+        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::orderBy('sort_order')->get()];
     }
 }

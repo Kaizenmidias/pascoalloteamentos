@@ -6,6 +6,7 @@ use App\Services\Media\MediaAssetService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class RealEstateContentService
 {
@@ -21,6 +22,9 @@ class RealEstateContentService
             $floorPlans = Arr::pull($data, 'floor_plans');
             $stages = Arr::pull($data, 'construction_stages');
             $faqs = Arr::pull($data, 'faqs');
+            if (! Schema::hasColumn($item->getTable(), 'business_type_id')) {
+                Arr::pull($data, 'business_type_id');
+            }
             $seo = [
                 'title' => Arr::pull($data, 'seo_title'),
                 'description' => Arr::pull($data, 'seo_description'),
