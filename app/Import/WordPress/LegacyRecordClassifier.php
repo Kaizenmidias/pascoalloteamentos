@@ -52,7 +52,7 @@ class LegacyRecordClassifier
                 'matched_value' => 'diferenciais',
             ],
             'catalogo' => $this->explainCatalog($meta),
-            'revision', 'attachment', 'nav_menu_item', 'elementor_library' => [
+            'revision', 'attachment', 'nav_menu_item', 'elementor_library', 'elementor_snippet', 'jet-engine', 'jet-smart-filters', 'wpcode', 'wp_global_styles', 'custom_css', 'oembed_cache', 'wp_navigation' => [
                 'entity' => LegacyEntity::Ignore,
                 'reason' => "post_type = {$postType}",
                 'source' => 'post_type',

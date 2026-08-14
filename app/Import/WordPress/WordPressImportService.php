@@ -25,7 +25,7 @@ use Illuminate\Support\Str;
 
 class WordPressImportService
 {
-    private const EXPLICIT_IGNORE_IDS = [4279];
+    private const EXPLICIT_IGNORE_IDS = [];
 
     public function __construct(
         private readonly WordPressDumpParser $parser,
@@ -114,14 +114,7 @@ class WordPressImportService
                 'duplicate_hint' => $this->duplicateHint($post, $meta),
             ];
 
-            if (($row['explicit_ignore'] ?? false) === true) {
-                $row['importable'] = false;
-            }
-
             $row['manual_review'] = $this->needsManualReview($post, $meta, $explanation);
-            if ($row['manual_review'] === true) {
-                $row['importable'] = false;
-            }
 
             if ($entityBucket === null) {
                 continue;
@@ -147,7 +140,6 @@ class WordPressImportService
                 ];
                 if ($possibleDuplicate) {
                     $classified[$bucket][$index]['manual_review'] = true;
-                    $classified[$bucket][$index]['importable'] = false;
                 }
             }
         }
@@ -209,15 +201,15 @@ class WordPressImportService
             'subdivisions' => $subdivisions,
             'pending' => $pending,
             'importable' => [
-                'properties' => $this->mapPreviewRows(array_values(array_filter($classified['properties'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
-                'condominiums' => $this->mapPreviewRows(array_values(array_filter($classified['condominiums'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
-                'subdivisions' => $this->mapPreviewRows(array_values(array_filter($classified['subdivisions'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
+                'properties' => $this->mapPreviewRows(array_values(array_filter($classified['properties'] ?? [], fn ($row) => ($row['explicit_ignore'] ?? false) === false))),
+                'condominiums' => $this->mapPreviewRows(array_values(array_filter($classified['condominiums'] ?? [], fn ($row) => ($row['explicit_ignore'] ?? false) === false))),
+                'subdivisions' => $this->mapPreviewRows(array_values(array_filter($classified['subdivisions'] ?? [], fn ($row) => ($row['explicit_ignore'] ?? false) === false))),
             ],
             'duplicate_groups' => $this->duplicateGroups($classified, $dump),
             'ignored' => [
-                'properties' => $this->mapPreviewRows(array_values(array_filter($classified['properties'] ?? [], fn ($row) => ($row['importable'] ?? false) === false))),
-                'condominiums' => $this->mapPreviewRows(array_values(array_filter($classified['condominiums'] ?? [], fn ($row) => ($row['importable'] ?? false) === false))),
-                'subdivisions' => $this->mapPreviewRows(array_values(array_filter($classified['subdivisions'] ?? [], fn ($row) => ($row['importable'] ?? false) === false))),
+                'properties' => $this->mapPreviewRows(array_values(array_filter($classified['properties'] ?? [], fn ($row) => (($row['explicit_ignore'] ?? false) === true) || (($row['classification']['entity'] ?? null) === LegacyEntity::Ignore)))),
+                'condominiums' => $this->mapPreviewRows(array_values(array_filter($classified['condominiums'] ?? [], fn ($row) => (($row['explicit_ignore'] ?? false) === true) || (($row['classification']['entity'] ?? null) === LegacyEntity::Ignore)))),
+                'subdivisions' => $this->mapPreviewRows(array_values(array_filter($classified['subdivisions'] ?? [], fn ($row) => (($row['explicit_ignore'] ?? false) === true) || (($row['classification']['entity'] ?? null) === LegacyEntity::Ignore)))),
             ],
         ];
     }
@@ -351,11 +343,7 @@ class WordPressImportService
             return false;
         }
 
-        if ($this->needsManualReview($post, $meta, $classification)) {
-            return false;
-        }
-
-        return ($post['post_status'] ?? '') === 'publish' && in_array($classification['entity'], [
+        return in_array($classification['entity'], [
             LegacyEntity::Property,
             LegacyEntity::Condominium,
             LegacyEntity::Subdivision,
@@ -364,25 +352,7 @@ class WordPressImportService
 
     private function needsManualReview(array $post, array $meta, array $classification): bool
     {
-        if (($post['post_status'] ?? '') !== 'publish') {
-            return false;
-        }
-
-        if (($classification['entity'] ?? null) === LegacyEntity::Review) {
-            return true;
-        }
-
-        $postType = (string) ($post['post_type'] ?? '');
-        if ($postType === 'catalogo') {
-            $tipoItem = strtolower(trim((string) ($meta['tipo_item'] ?? $meta['tipo-categoria'] ?? '')));
-            return $tipoItem === '';
-        }
-
-        if ($postType === 'empreendimentos') {
-            return true;
-        }
-
-        return false;
+        return in_array((string) ($post['post_type'] ?? ''), ['empreendimentos'], true) || ($classification['entity'] ?? null) === LegacyEntity::Review;
     }
 
     private function duplicateKey(array $post, array $meta): string

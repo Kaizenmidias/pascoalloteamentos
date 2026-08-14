@@ -51,28 +51,28 @@ class WordPressImportServiceTest extends TestCase
         $report = $service->preview('/tmp/dump.sql', 'wp_');
 
         $this->assertSame(2, $report['summary']['properties']['found']);
-        $this->assertSame(1, $report['summary']['properties']['importable']);
-        $this->assertSame(1, $report['summary']['properties']['ignored']);
-        $this->assertSame(1, $report['summary']['properties']['possible_duplicates']);
+        $this->assertSame(2, $report['summary']['properties']['importable']);
+        $this->assertSame(0, $report['summary']['properties']['ignored']);
+        $this->assertSame(0, $report['summary']['properties']['possible_duplicates']);
 
         $this->assertSame(2, $report['summary']['condominiums']['found']);
         $this->assertSame(2, $report['summary']['condominiums']['importable']);
         $this->assertSame(0, $report['summary']['condominiums']['ignored']);
         $this->assertSame(2, $report['summary']['condominiums']['possible_duplicates']);
 
-        $this->assertSame(1, $report['summary']['properties']['ignored']);
-        $this->assertSame(1, $report['summary']['subdivisions']['ignored']);
+        $this->assertSame(1, $report['summary']['subdivisions']['importable']);
+        $this->assertSame(0, $report['summary']['subdivisions']['ignored']);
         $this->assertSame(2, $report['summary']['pending']['ignored']);
         $this->assertGreaterThanOrEqual(2, count($report['details']['pending']));
         $this->assertArrayHasKey('items', $report['details']['pending'][0]);
         $pendingIds = array_merge(...array_map(fn ($group) => array_column($group['items'], 'id'), $report['details']['pending']));
         $this->assertContains(2503, $pendingIds);
         $this->assertContains(3392, $pendingIds);
-        $this->assertTrue($report['details']['ignored']['subdivisions'][0]['explicit_ignore']);
-        $this->assertFalse($report['details']['ignored']['subdivisions'][0]['manual_review']);
+        $this->assertCount(1, $report['details']['importable']['subdivisions']);
+        $this->assertSame(4279, $report['details']['importable']['subdivisions'][0]['id']);
 
-        $this->assertCount(1, $report['details']['importable']['properties']);
+        $this->assertCount(2, $report['details']['importable']['properties']);
         $this->assertSame(1, $report['details']['importable']['properties'][0]['id']);
-        $this->assertCount(2, $report['details']['duplicate_groups']);
+        $this->assertCount(1, $report['details']['duplicate_groups']);
     }
 }
