@@ -3,6 +3,7 @@
 namespace App\Services\Media;
 
 use App\Models\MediaAsset;
+use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,37 @@ class MediaAssetService
                 return MediaAsset::create(['disk' => $disk, 'path' => $path, 'original_name' => $file->getClientOriginalName(), 'mime_type' => $file->getMimeType(), 'size' => $file->getSize(), 'width' => $width, 'height' => $height, 'checksum' => $checksum]);
             } catch (\Throwable $exception) {
                 Storage::disk($disk)->delete($path);
+                throw $exception;
+            }
+        });
+    }
+
+    public function storePath(string $path, string $collection = 'uploads', string $disk = 'public', array $attributes = []): MediaAsset
+    {
+        $checksum = hash_file('sha256', $path);
+        if ($existing = MediaAsset::where('checksum', $checksum)->first()) {
+            return $existing;
+        }
+
+        $file = new File($path);
+        return DB::transaction(function () use ($file, $collection, $disk, $checksum, $attributes) {
+            $stored = Storage::disk($disk)->putFile($collection, $file);
+            try {
+                $mime = mime_content_type($file->getRealPath()) ?: null;
+                [$width, $height] = is_string($mime) && str_starts_with($mime, 'image/') ? (getimagesize($file->getRealPath()) ?: [null, null]) : [null, null];
+
+                return MediaAsset::create(array_merge([
+                    'disk' => $disk,
+                    'path' => $stored,
+                    'original_name' => basename($path),
+                    'mime_type' => $mime,
+                    'size' => filesize($path) ?: null,
+                    'width' => $width,
+                    'height' => $height,
+                    'checksum' => $checksum,
+                ], $attributes));
+            } catch (\Throwable $exception) {
+                Storage::disk($disk)->delete($stored);
                 throw $exception;
             }
         });
