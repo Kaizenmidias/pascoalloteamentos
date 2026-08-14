@@ -53,6 +53,10 @@ img { display: block; max-width: 100%; }
     .brand-button { position: relative; display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--color-brand-dark); border-radius: .4375rem; background: var(--color-brand); padding: .75rem 1.75rem; color: #fff !important; font-size: .75rem; font-weight: 500; letter-spacing: .015em; text-transform: uppercase; transition: transform .2s ease, background .2s ease, border-color .2s ease; transform-origin: center; }
     .brand-button::before { content: ''; position: absolute; top: 7%; left: -25%; display: block; width: 24%; height: 86%; opacity: 0; background: #fff; box-shadow: 0 0 24px 10px rgb(255 255 255 / .7); transform: skewX(-20deg); pointer-events: none; }
     .brand-button:visited { color: #fff !important; }
+    body[data-public-page='true'] .brand-button { background: var(--color-brand-deep); border-color: #5d090c; }
+    body[data-public-page='true'][data-scrolled='true'] .brand-button { background: var(--color-brand); border-color: var(--color-brand-dark); }
+    body[data-public-page='true'] .brand-button:hover { background: var(--color-brand); border-color: var(--color-brand-dark); transform: scale(1.04); }
+    body[data-public-page='true'][data-scrolled='true'] .brand-button:hover { background: var(--color-brand); border-color: var(--color-brand-dark); }
     .brand-button:hover { background: var(--color-brand); border-color: var(--color-brand-dark); transform: scale(1.04); }
     .brand-button:hover::before { animation: sh02 .7s linear; }
     .brand-button:active { transform: scale(.99); transition: transform .1s ease-in; }

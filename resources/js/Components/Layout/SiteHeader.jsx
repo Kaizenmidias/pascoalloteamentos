@@ -24,6 +24,16 @@ export default function SiteHeader() {
     }, []);
 
     useEffect(() => {
+        const isHome = url === '/';
+        document.body.dataset.publicPage = isHome ? 'false' : 'true';
+        document.body.dataset.scrolled = scrolled ? 'true' : 'false';
+        return () => {
+            delete document.body.dataset.publicPage;
+            delete document.body.dataset.scrolled;
+        };
+    }, [url, scrolled]);
+
+    useEffect(() => {
         setOpen(false);
     }, [url]);
 
