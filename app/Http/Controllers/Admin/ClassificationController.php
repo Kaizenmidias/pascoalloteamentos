@@ -4,15 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BusinessType;
+use App\Models\City;
 use App\Models\CondominiumType;
 use App\Models\DevelopmentStatus;
 use App\Models\PropertyType;
+use App\Models\State;
 use App\Models\SubdivisionType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,6 +26,8 @@ class ClassificationController extends Controller
         'subdivision-types' => ['label' => 'Tipos de loteamento', 'model' => SubdivisionType::class],
         'development-statuses' => ['label' => 'Estágios da obra', 'model' => DevelopmentStatus::class],
         'business-types' => ['label' => 'Tipos de negócio', 'model' => BusinessType::class],
+        'states' => ['label' => 'Estados', 'model' => State::class],
+        'cities' => ['label' => 'Cidades', 'model' => City::class],
     ];
 
     public function index(): Response
@@ -32,7 +36,7 @@ class ClassificationController extends Controller
             'groups' => collect(self::GROUPS)->map(fn ($group, $slug) => [
                 'slug' => $slug,
                 'label' => $group['label'],
-                'items' => $group['model']::orderBy('sort_order')->orderBy('name')->get(),
+                'items' => $this->itemsFor($group['model']),
             ])->values(),
         ]);
     }
@@ -71,6 +75,25 @@ class ClassificationController extends Controller
         abort_unless(isset(self::GROUPS[$group]), 404);
 
         return self::GROUPS[$group];
+    }
+
+    private function itemsFor(string $modelClass)
+    {
+        $table = (new $modelClass)->getTable();
+
+        if (! Schema::hasTable($table)) {
+            return collect();
+        }
+
+        $query = $modelClass::query();
+
+        if (Schema::hasColumn($table, 'sort_order')) {
+            $query->orderBy('sort_order');
+        }
+
+        $query->orderBy('name');
+
+        return $query->get();
     }
 
     private function validateData(Request $request, string $modelClass, $record = null): array

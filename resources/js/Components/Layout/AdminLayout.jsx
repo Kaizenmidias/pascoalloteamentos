@@ -7,17 +7,6 @@ const Icon = ({ children }) => (
     </span>
 );
 
-const mainLinks = [
-    ['Início', '/admin', '⌂'],
-    ['Páginas', '/admin/pages', '¤'],
-    ['Classificações', '/admin/classifications', '≣'],
-    ['Blog', '/admin/blog/posts', '✎'],
-    ['Leads', '/admin/leads', '✉'],
-    ['Configurações', '/admin/settings', '⚙'],
-    ['Integrações', '/admin/integrations', '⌘'],
-    ['Usuários', '/admin/users', '♙'],
-];
-
 export default function AdminLayout({ title, children }) {
     const { auth, flash } = usePage().props;
     const { url } = usePage();
@@ -36,65 +25,73 @@ export default function AdminLayout({ title, children }) {
                     <div className="flex items-center gap-3">
                         <div className="grid size-10 place-items-center rounded-full border border-white/10 bg-white/5 text-sm font-medium">{initials}</div>
                         <div className="min-w-0">
-                            <div className="text-xs text-white/50">Olá,</div>
-                            <div className="truncate text-sm font-medium">{auth?.user?.name || 'Usuário'}</div>
+                            <div className="text-xs text-white/50">Hello,</div>
+                            <div className="truncate text-sm font-medium">{auth?.user?.name || 'User'}</div>
                         </div>
                     </div>
                     <img src="/reference-assets/logo.png" alt="Pascoal Loteamentos" className="mt-6 w-40" />
                 </div>
                 <nav className="flex-1 overflow-y-auto py-5 text-sm">
-                    {mainLinks.map(([label, href, icon]) => (
-                        label === 'Classificações' ? (
-                            <details key={href} open className="group">
-                                <summary className="flex cursor-pointer list-none items-center gap-3 px-6 py-3 text-white/70 transition hover:bg-white/5 hover:text-white">
-                                    <Icon>{icon}</Icon>
-                                    <span className="flex-1">{label}</span>
-                                    <span className="text-xs transition group-open:rotate-180">⌄</span>
-                                </summary>
-                                <div className="pb-2 pl-14">
-                                    <Link href="/admin/classifications" className={`block rounded-l-lg px-4 py-2.5 ${active('/admin/classifications') ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}>
-                                        Gerenciar
-                                    </Link>
-                                </div>
-                            </details>
-                        ) : (
-                            <Link key={href} href={href} className={`flex items-center gap-3 px-6 py-3 transition ${active(href) ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
-                                <Icon>{icon}</Icon>
-                                {label}
-                            </Link>
-                        )
-                    ))}
+                    <Link href="/admin" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
+                        <Icon>⌂</Icon>
+                        Dashboard
+                    </Link>
+                    <Link href="/admin/pages" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/pages') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
+                        <Icon>¤</Icon>
+                        Pages
+                    </Link>
                     <details open className="group">
                         <summary className="flex cursor-pointer list-none items-center gap-3 px-6 py-3 text-white/70 transition hover:bg-white/5 hover:text-white">
                             <Icon>⌂</Icon>
-                            <span className="flex-1">Empreendimentos</span>
+                            <span className="flex-1">Entrepreneurship</span>
                             <span className="text-xs transition group-open:rotate-180">⌄</span>
                         </summary>
                         <div className="pb-2 pl-14">
                             {[
-                                ['Condomínios', '/admin/condominiums'],
-                                ['Imóveis', '/admin/properties'],
-                                ['Loteamentos', '/admin/subdivisions'],
-                            ].map(([itemLabel, href]) => (
+                                ['Condominiums', '/admin/condominiums'],
+                                ['Properties', '/admin/properties'],
+                                ['Subdivisions', '/admin/subdivisions'],
+                                ['Classifications', '/admin/classifications'],
+                            ].map(([itemLabel, itemHref]) => (
                                 <Link
-                                    key={href}
-                                    href={href}
-                                    className={`block rounded-l-lg px-4 py-2.5 ${active(href) ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}
+                                    key={itemHref}
+                                    href={itemHref}
+                                    className={`block rounded-l-lg px-4 py-2.5 ${active(itemHref) ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}
                                 >
                                     {itemLabel}
                                 </Link>
                             ))}
                         </div>
                     </details>
+                    <Link href="/admin/blog/posts" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/blog/posts') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
+                        <Icon>✎</Icon>
+                        Blog
+                    </Link>
+                    <Link href="/admin/leads" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/leads') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
+                        <Icon>✉</Icon>
+                        Leads
+                    </Link>
+                    <Link href="/admin/settings" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/settings') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
+                        <Icon>⚙</Icon>
+                        Settings
+                    </Link>
+                    <Link href="/admin/integrations" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/integrations') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
+                        <Icon>⌘</Icon>
+                        Integrations
+                    </Link>
+                    <Link href="/admin/users" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/users') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
+                        <Icon>♙</Icon>
+                        Users
+                    </Link>
                 </nav>
                 <div className="space-y-1 border-t border-white/10 p-5 text-sm">
                     <Link href="/logout" method="post" as="button" className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-white/60 hover:bg-white/5 hover:text-white">
                         <Icon>↪</Icon>
-                        Sair
+                        Logout
                     </Link>
                     <Link href="/" className="flex items-center gap-3 rounded-lg px-2 py-2 text-white/60 hover:bg-white/5 hover:text-white">
                         <Icon>←</Icon>
-                        Voltar ao site
+                        Back to site
                     </Link>
                 </div>
             </aside>
