@@ -51,6 +51,7 @@ class WordPressImportService
             'post_types' => $dump->postTypeCounts,
             'classified' => $classified,
             'pending' => $this->pendingFromClassified($classified),
+            'details' => $this->previewDetails($classified),
         ];
     }
 
@@ -88,10 +89,14 @@ class WordPressImportService
 
         foreach ($dump->posts as $post) {
             $meta = $this->postMetaMap($dump, (int) $post['ID']);
-            $entity = $this->classifier->classify((string) ($post['post_type'] ?? ''), $meta);
-            $row = ['post' => $post, 'meta' => $meta];
+            $explanation = $this->classifier->explain((string) ($post['post_type'] ?? ''), $meta);
+            $row = [
+                'post' => $post,
+                'meta' => $meta,
+                'classification' => $explanation,
+            ];
 
-            match ($entity) {
+            match ($explanation['entity']) {
                 LegacyEntity::Property => $classified['properties'][] = $row,
                 LegacyEntity::Condominium => $classified['condominiums'][] = $row,
                 LegacyEntity::Subdivision => $classified['subdivisions'][] = $row,
@@ -106,6 +111,92 @@ class WordPressImportService
     private function pendingFromClassified(array $classified): array
     {
         return ['pending' => count($classified['pending'] ?? [])];
+    }
+
+    private function previewDetails(array $classified): array
+    {
+        return [
+            'properties' => $this->mapPreviewRows($classified['properties'] ?? []),
+            'condominiums' => $this->mapPreviewRows($classified['condominiums'] ?? []),
+            'subdivisions' => $this->mapPreviewRows($classified['subdivisions'] ?? []),
+            'pending' => $this->groupPendingRows($classified['pending'] ?? []),
+        ];
+    }
+
+    private function mapPreviewRows(array $rows): array
+    {
+        return array_map(function (array $row): array {
+            $post = $row['post'];
+            $classification = $row['classification'];
+
+            return [
+                'id' => (int) ($post['ID'] ?? 0),
+                'post_type' => (string) ($post['post_type'] ?? ''),
+                'title' => (string) ($post['post_title'] ?? ''),
+                'slug' => (string) ($post['post_name'] ?? ''),
+                'status' => (string) ($post['post_status'] ?? ''),
+                'reason' => (string) ($classification['reason'] ?? ''),
+                'source' => (string) ($classification['source'] ?? ''),
+                'matched_value' => $classification['matched_value'] ?? null,
+            ];
+        }, $rows);
+    }
+
+    private function groupPendingRows(array $rows): array
+    {
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            $post = $row['post'];
+            $classification = $row['classification'];
+            $reason = (string) ($classification['reason'] ?? 'unclassified');
+            $category = $this->pendingCategory((string) ($post['post_type'] ?? ''), $post, $row['meta'] ?? []);
+
+            $grouped[$reason]['reason'] = $reason;
+            $grouped[$reason]['category'] = $category;
+            $grouped[$reason]['items'][] = [
+                'id' => (int) ($post['ID'] ?? 0),
+                'post_type' => (string) ($post['post_type'] ?? ''),
+                'title' => (string) ($post['post_title'] ?? ''),
+                'slug' => (string) ($post['post_name'] ?? ''),
+                'status' => (string) ($post['post_status'] ?? ''),
+            ];
+        }
+
+        return array_values($grouped);
+    }
+
+    private function pendingCategory(string $postType, array $post, array $meta): string
+    {
+        return match ($postType) {
+            'revision' => 'revision',
+            'attachment' => 'attachment',
+            'nav_menu_item' => 'navigation',
+            'elementor_library' => 'template',
+            'page' => 'page',
+            'post' => 'blog',
+            'catalogo' => 'catalog',
+            default => $this->guessPendingCategory($post, $meta),
+        };
+    }
+
+    private function guessPendingCategory(array $post, array $meta): string
+    {
+        $title = strtolower((string) ($post['post_title'] ?? ''));
+        $type = strtolower((string) ($post['post_type'] ?? ''));
+        $haystack = $type.' '.$title.' '.strtolower(json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '');
+
+        if (str_contains($haystack, 'jet')) {
+            return 'jet-engine';
+        }
+        if (str_contains($haystack, 'elementor')) {
+            return 'elementor';
+        }
+        if (str_contains($haystack, 'template')) {
+            return 'template';
+        }
+
+        return 'other';
     }
 
     private function postMetaMap(WordPressDump $dump, int $postId): array
