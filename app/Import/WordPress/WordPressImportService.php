@@ -25,6 +25,8 @@ use Illuminate\Support\Str;
 
 class WordPressImportService
 {
+    private const EXPLICIT_IGNORE_IDS = [4279];
+
     public function __construct(
         private readonly WordPressDumpParser $parser,
         private readonly LegacyRecordClassifier $classifier,
@@ -105,10 +107,21 @@ class WordPressImportService
                 'meta' => $meta,
                 'classification' => $explanation,
                 'status' => $this->statusBucket((string) ($post['post_status'] ?? '')),
-                'importable' => $this->isImportable($post, $explanation),
+                'importable' => $this->isImportable($post, $meta, $explanation),
+                'manual_review' => false,
+                'explicit_ignore' => in_array((int) ($post['ID'] ?? 0), self::EXPLICIT_IGNORE_IDS, true),
                 'duplicate_key' => $this->duplicateKey($post, $meta),
                 'duplicate_hint' => $this->duplicateHint($post, $meta),
             ];
+
+            if (($row['explicit_ignore'] ?? false) === true) {
+                $row['importable'] = false;
+            }
+
+            $row['manual_review'] = $this->needsManualReview($post, $meta, $explanation);
+            if ($row['manual_review'] === true) {
+                $row['importable'] = false;
+            }
 
             if ($entityBucket === null) {
                 continue;
@@ -122,13 +135,20 @@ class WordPressImportService
             foreach ($classified[$bucket] as $index => $row) {
                 $duplicateKey = $row['duplicate_key'];
                 $count = $duplicateCounts[$bucket][$duplicateKey] ?? 0;
+                $normalizedTitle = Str::slug((string) ($row['post']['post_title'] ?? ''));
+                $normalizedSlug = $this->baseSlug((string) ($row['post']['post_name'] ?? ''));
+                $possibleDuplicate = $count > 1 || $this->possibleDuplicateByContent($row, $classified[$bucket], $index);
                 $classified[$bucket][$index]['duplicate_hint'] = [
-                    'possible_duplicate' => $count > 1,
-                    'same_title_slug' => $count > 1,
-                    'title_normalized' => Str::slug((string) ($row['post']['post_title'] ?? '')),
-                    'slug_normalized' => Str::slug((string) ($row['post']['post_name'] ?? '')),
+                    'possible_duplicate' => $possibleDuplicate,
+                    'same_title_slug' => $possibleDuplicate,
+                    'title_normalized' => $normalizedTitle,
+                    'slug_normalized' => $normalizedSlug,
                     'duplicate_count' => $count,
                 ];
+                if ($possibleDuplicate) {
+                    $classified[$bucket][$index]['manual_review'] = true;
+                    $classified[$bucket][$index]['importable'] = false;
+                }
             }
         }
 
@@ -178,17 +198,27 @@ class WordPressImportService
 
     private function previewDetails(array $classified, WordPressDump $dump): array
     {
+        $properties = $this->mapPreviewRows($classified['properties'] ?? []);
+        $condominiums = $this->mapPreviewRows($classified['condominiums'] ?? []);
+        $subdivisions = $this->mapPreviewRows($classified['subdivisions'] ?? []);
+        $pending = $this->groupPendingRows($classified['pending'] ?? []);
+
         return [
-            'properties' => $this->mapPreviewRows($classified['properties'] ?? []),
-            'condominiums' => $this->mapPreviewRows($classified['condominiums'] ?? []),
-            'subdivisions' => $this->mapPreviewRows($classified['subdivisions'] ?? []),
-            'pending' => $this->groupPendingRows($classified['pending'] ?? []),
+            'properties' => $properties,
+            'condominiums' => $condominiums,
+            'subdivisions' => $subdivisions,
+            'pending' => $pending,
             'importable' => [
                 'properties' => $this->mapPreviewRows(array_values(array_filter($classified['properties'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
                 'condominiums' => $this->mapPreviewRows(array_values(array_filter($classified['condominiums'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
                 'subdivisions' => $this->mapPreviewRows(array_values(array_filter($classified['subdivisions'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
             ],
             'duplicate_groups' => $this->duplicateGroups($classified, $dump),
+            'ignored' => [
+                'properties' => $this->mapPreviewRows(array_values(array_filter($classified['properties'] ?? [], fn ($row) => ($row['importable'] ?? false) === false))),
+                'condominiums' => $this->mapPreviewRows(array_values(array_filter($classified['condominiums'] ?? [], fn ($row) => ($row['importable'] ?? false) === false))),
+                'subdivisions' => $this->mapPreviewRows(array_values(array_filter($classified['subdivisions'] ?? [], fn ($row) => ($row['importable'] ?? false) === false))),
+            ],
         ];
     }
 
@@ -209,6 +239,10 @@ class WordPressImportService
                 'matched_value' => $classification['matched_value'] ?? null,
                 'importable' => (bool) ($row['importable'] ?? false),
                 'status_bucket' => (string) ($row['status'] ?? 'unknown'),
+                'manual_review' => (bool) ($row['manual_review'] ?? false),
+                'explicit_ignore' => (bool) ($row['explicit_ignore'] ?? false),
+                'duplicate_hint' => $row['duplicate_hint'] ?? [],
+                'meta_summary' => $this->metaSummary($row['meta'] ?? []),
             ];
         }, $rows);
     }
@@ -232,6 +266,7 @@ class WordPressImportService
                 'slug' => (string) ($post['post_name'] ?? ''),
                 'status' => (string) ($post['post_status'] ?? ''),
                 'meta' => $this->pendingMeta($row['meta'] ?? []),
+                'manual_review' => (bool) ($row['manual_review'] ?? true),
             ];
         }
 
@@ -246,7 +281,44 @@ class WordPressImportService
             '_thumbnail_id' => $meta['_thumbnail_id'] ?? null,
             '_elementor_data' => isset($meta['_elementor_data']) ? true : false,
             'jet' => $this->containsMetaKey($meta, 'jet') ? true : false,
+            'taxonomies' => $this->extractPreviewTaxonomies($meta),
         ];
+    }
+
+    private function metaSummary(array $meta): array
+    {
+        return [
+            'keys' => array_slice(array_keys($meta), 0, 15),
+            'tipo_item' => $meta['tipo_item'] ?? $meta['tipo-categoria'] ?? null,
+            '_thumbnail_id' => $meta['_thumbnail_id'] ?? null,
+            '_elementor_data' => isset($meta['_elementor_data']),
+            'jet' => $this->containsMetaKey($meta, 'jet'),
+            'serialized_keys' => $this->serializedMetaKeys($meta),
+        ];
+    }
+
+    private function serializedMetaKeys(array $meta): array
+    {
+        $keys = [];
+        foreach ($meta as $key => $value) {
+            if (is_array($value) || is_object($value)) {
+                $keys[] = $key;
+            }
+        }
+
+        return $keys;
+    }
+
+    private function extractPreviewTaxonomies(array $meta): array
+    {
+        $taxonomies = [];
+        foreach ($meta as $key => $value) {
+            if (str_contains(strtolower((string) $key), 'tax')) {
+                $taxonomies[$key] = is_scalar($value) ? (string) $value : gettype($value);
+            }
+        }
+
+        return $taxonomies;
     }
 
     private function containsMetaKey(array $meta, string $needle): bool
@@ -273,13 +345,44 @@ class WordPressImportService
         };
     }
 
-    private function isImportable(array $post, array $classification): bool
+    private function isImportable(array $post, array $meta, array $classification): bool
     {
+        if (in_array((int) ($post['ID'] ?? 0), self::EXPLICIT_IGNORE_IDS, true)) {
+            return false;
+        }
+
+        if ($this->needsManualReview($post, $meta, $classification)) {
+            return false;
+        }
+
         return ($post['post_status'] ?? '') === 'publish' && in_array($classification['entity'], [
             LegacyEntity::Property,
             LegacyEntity::Condominium,
             LegacyEntity::Subdivision,
         ], true);
+    }
+
+    private function needsManualReview(array $post, array $meta, array $classification): bool
+    {
+        if (($post['post_status'] ?? '') !== 'publish') {
+            return false;
+        }
+
+        if (($classification['entity'] ?? null) === LegacyEntity::Review) {
+            return true;
+        }
+
+        $postType = (string) ($post['post_type'] ?? '');
+        if ($postType === 'catalogo') {
+            $tipoItem = strtolower(trim((string) ($meta['tipo_item'] ?? $meta['tipo-categoria'] ?? '')));
+            return $tipoItem === '';
+        }
+
+        if ($postType === 'empreendimentos') {
+            return true;
+        }
+
+        return false;
     }
 
     private function duplicateKey(array $post, array $meta): string
@@ -312,7 +415,11 @@ class WordPressImportService
 
         foreach (['properties', 'condominiums', 'subdivisions'] as $bucket) {
             foreach ($classified[$bucket] ?? [] as $row) {
-                $key = $row['duplicate_key'];
+                $key = implode('|', [
+                    (string) ($row['post']['post_type'] ?? ''),
+                    Str::slug((string) ($row['post']['post_title'] ?? '')),
+                    $this->baseSlug((string) ($row['post']['post_name'] ?? '')),
+                ]);
                 $groups[$key]['key'] = $key;
                 $groups[$key]['items'][] = [
                     'id' => (int) ($row['post']['ID'] ?? 0),
@@ -320,11 +427,79 @@ class WordPressImportService
                     'slug' => (string) ($row['post']['post_name'] ?? ''),
                     'status' => (string) ($row['post']['post_status'] ?? ''),
                     'post_type' => (string) ($row['post']['post_type'] ?? ''),
+                    'importable' => (bool) ($row['importable'] ?? false),
                 ];
             }
         }
 
         return array_values(array_filter($groups, fn ($group) => count($group['items'] ?? []) > 1));
+    }
+
+    private function possibleDuplicateByContent(array $row, array $rows, int $index): bool
+    {
+        $post = $row['post'];
+        $meta = $row['meta'] ?? [];
+        $currentTitle = Str::slug((string) ($post['post_title'] ?? ''));
+        $currentBaseSlug = $this->baseSlug((string) ($post['post_name'] ?? ''));
+        $currentHash = $this->comparablePostHash($post, $meta);
+
+        foreach ($rows as $otherIndex => $other) {
+            if ($otherIndex === $index) {
+                continue;
+            }
+            $otherPost = $other['post'];
+            $otherMeta = $other['meta'] ?? [];
+            if (Str::slug((string) ($otherPost['post_title'] ?? '')) !== $currentTitle) {
+                continue;
+            }
+
+            $otherBaseSlug = $this->baseSlug((string) ($otherPost['post_name'] ?? ''));
+            $sameSlugBase = $otherBaseSlug !== '' && $otherBaseSlug === $currentBaseSlug;
+            $sameHash = $this->comparablePostHash($otherPost, $otherMeta) === $currentHash;
+
+            if ($sameSlugBase || $sameHash) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function baseSlug(string $slug): string
+    {
+        $slug = Str::slug($slug);
+        return preg_replace('/-\d+$/', '', $slug) ?: $slug;
+    }
+
+    private function metaComparableHash(array $meta): string
+    {
+        $filtered = [];
+        foreach ($meta as $key => $value) {
+            if (in_array($key, ['_edit_lock', '_edit_last', '_wp_old_slug', '_thumbnail_id', '_elementor_edit_mode'], true)) {
+                continue;
+            }
+            if (is_scalar($value)) {
+                $filtered[$key] = (string) $value;
+            }
+        }
+
+        ksort($filtered);
+
+        return sha1(json_encode($filtered, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '');
+    }
+
+    private function comparablePostHash(array $post, array $meta): string
+    {
+        $payload = [
+            'title' => Str::slug((string) ($post['post_title'] ?? '')),
+            'slug' => $this->baseSlug((string) ($post['post_name'] ?? '')),
+            'status' => (string) ($post['post_status'] ?? ''),
+            'date' => (string) ($post['post_date'] ?? ''),
+            'content' => sha1((string) ($post['post_content'] ?? '')),
+            'meta' => $this->metaComparableHash($meta),
+        ];
+
+        return sha1(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '');
     }
 
     private function pendingCategory(string $postType, array $post, array $meta): string

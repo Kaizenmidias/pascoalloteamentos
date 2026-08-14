@@ -4,7 +4,7 @@ use App\Import\WordPress\WordPressImportService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
-$renderRecords = function (array $rows): array {
+$renderRows = function (array $rows): array {
     return array_map(
         fn (array $row) => [
             $row['id'] ?? '',
@@ -16,6 +16,25 @@ $renderRecords = function (array $rows): array {
         ],
         $rows
     );
+};
+
+$renderPending = function (array $groups): array {
+    $rows = [];
+    foreach ($groups as $group) {
+        foreach ($group['items'] ?? [] as $item) {
+            $rows[] = [
+                $item['id'] ?? '',
+                $item['post_type'] ?? '',
+                $item['title'] ?? '',
+                $item['slug'] ?? '',
+                $item['status'] ?? '',
+                $group['category'] ?? '',
+                $group['reason'] ?? '',
+            ];
+        }
+    }
+
+    return $rows;
 };
 
 Artisan::command('wordpress:inspect', function (WordPressImportService $service) {
@@ -32,11 +51,10 @@ Artisan::command('wordpress:inspect', function (WordPressImportService $service)
     return self::SUCCESS;
 })->purpose('Inspecta o dump WordPress sem gravar dados');
 
-Artisan::command('wordpress:preview {entity?} {--details} {--type=} {--importable}', function (WordPressImportService $service) use ($renderRecords) {
-    $entity = $this->argument('entity');
+Artisan::command('wordpress:preview {entity?} {--details} {--type=} {--importable}', function (WordPressImportService $service) use ($renderRows, $renderPending) {
     $report = $service->preview(config('wordpress.sql_path'), config('wordpress.table_prefix'));
-    $details = (bool) $this->option('details');
     $type = (string) $this->option('type');
+    $details = (bool) $this->option('details');
     $importableOnly = (bool) $this->option('importable');
 
     $this->info('WordPress found');
@@ -46,6 +64,50 @@ Artisan::command('wordpress:preview {entity?} {--details} {--type=} {--importabl
     $this->line('Pending: '.$report['summary']['pending']['found']);
     $this->line('Attachments: '.$report['counts']['attachments']);
     $this->line('Taxonomies: '.$report['counts']['taxonomies']);
+
+    $view = $report['details'];
+    if ($importableOnly) {
+        $view = [
+            'properties' => $report['details']['importable']['properties'],
+            'condominiums' => $report['details']['importable']['condominiums'],
+            'subdivisions' => $report['details']['importable']['subdivisions'],
+            'pending' => [],
+            'duplicate_groups' => $report['details']['duplicate_groups'],
+            'ignored' => $report['details']['ignored'],
+        ];
+    }
+
+    if ($type === 'pending') {
+        $this->line('');
+        $this->info('Pending');
+        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'category', 'reason'], $renderPending($view['pending'] ?? []));
+
+        return self::SUCCESS;
+    }
+
+    if ($type === 'properties') {
+        $this->line('');
+        $this->info($importableOnly ? 'Importable Properties' : 'Properties');
+        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRows($view['properties'] ?? []));
+
+        return self::SUCCESS;
+    }
+
+    if ($type === 'condominiums') {
+        $this->line('');
+        $this->info($importableOnly ? 'Importable Condominiums' : 'Condominiums');
+        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRows($view['condominiums'] ?? []));
+
+        return self::SUCCESS;
+    }
+
+    if ($type === 'subdivisions') {
+        $this->line('');
+        $this->info($importableOnly ? 'Importable Subdivisions' : 'Subdivisions');
+        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRows($view['subdivisions'] ?? []));
+
+        return self::SUCCESS;
+    }
 
     $this->line('');
     $this->info('Import status summary');
@@ -59,61 +121,36 @@ Artisan::command('wordpress:preview {entity?} {--details} {--type=} {--importabl
         ]
     );
 
-    if ($entity && in_array($entity, ['property', 'condominium', 'subdivision'], true)) {
-        $this->line('Mode: dry-run for '.$entity);
-    }
-
-    $detailsBag = $report['details'];
-    if ($importableOnly) {
-        $detailsBag = [
-            'properties' => $detailsBag['importable']['properties'],
-            'condominiums' => $detailsBag['importable']['condominiums'],
-            'subdivisions' => $detailsBag['importable']['subdivisions'],
-            'pending' => [],
-            'duplicate_groups' => $detailsBag['duplicate_groups'],
-        ];
-    }
-
-    if ($type !== '' && $type !== 'pending' && isset($detailsBag[$type])) {
-        $this->line('');
-        $this->info('Details for '.$type);
-        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRecords($detailsBag[$type]));
-    }
-
-    if ($type === 'pending') {
-        $this->line('');
-        $this->info('Pending groups');
-        foreach ($detailsBag['pending'] as $group) {
-            $this->line($group['category'].' - '.$group['reason'].' ('.count($group['items']).')');
-            foreach ($group['items'] as $item) {
-                $this->line('  - '.($item['id'] ?? 'n/a').' | '.($item['title'] ?? '').' | '.($item['post_type'] ?? '').' | '.($item['status'] ?? ''));
-            }
-        }
-    }
-
     if ($details || $importableOnly) {
         $this->line('');
-        $this->info($importableOnly ? 'Importable records' : 'Properties');
-        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRecords($detailsBag['properties']));
+        $this->info($importableOnly ? 'Importable Properties' : 'Properties');
+        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRows($view['properties'] ?? []));
 
         $this->line('');
-        $this->info('Condominiums');
-        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRecords($detailsBag['condominiums']));
+        $this->info($importableOnly ? 'Importable Condominiums' : 'Condominiums');
+        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRows($view['condominiums'] ?? []));
 
         $this->line('');
-        $this->info('Subdivisions');
-        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRecords($detailsBag['subdivisions']));
+        $this->info($importableOnly ? 'Importable Subdivisions' : 'Subdivisions');
+        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRows($view['subdivisions'] ?? []));
 
         $this->line('');
-        $this->info('Pending groups');
-        foreach ($detailsBag['pending'] as $group) {
-            $this->line($group['category'].' - '.$group['reason'].' ('.count($group['items']).')');
+        $this->info('Pending');
+        $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'category', 'reason'], $renderPending($view['pending'] ?? []));
+
+        $this->line('');
+        $this->info('Duplicate groups');
+        foreach ($view['duplicate_groups'] ?? [] as $group) {
+            $this->line($group['key'].' ('.count($group['items']).')');
         }
 
-        $this->line('');
-        $this->info('Possible duplicates');
-        foreach ($detailsBag['duplicate_groups'] as $group) {
-            $this->line($group['key'].' ('.count($group['items']).')');
+        if (! empty($view['ignored'])) {
+            $this->line('');
+            $this->info('Ignored');
+            foreach ($view['ignored'] as $bucket => $rows) {
+                $this->line(strtoupper($bucket));
+                $this->table(['ID', 'post_type', 'title', 'slug', 'status', 'reason'], $renderRows($rows));
+            }
         }
     }
 
