@@ -48,7 +48,7 @@ const copy = {
     },
 };
 
-export default function EntityArchive({ entity, items, basePath, filters, cities, types, statuses }) {
+export default function EntityArchive({ entity, items, basePath, filters, cities, types, statuses, businessTypes = [] }) {
     const { eyebrow, title, description, image, overlay } = copy[entity];
     const heroTitlePadding = entity === 'subdivisions' ? 'desktop:px-[70px]' : 'desktop:px-0';
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CondominiumController;
+use App\Http\Controllers\Admin\ClassificationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CmsController;
 use App\Http\Controllers\Admin\PropertyController;
@@ -13,6 +14,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('properties', PropertyController::class)->except(['show', 'destroy']);
     Route::resource('condominiums', CondominiumController::class)->except(['show', 'destroy']);
     Route::resource('subdivisions', SubdivisionController::class)->except(['show', 'destroy']);
+    Route::get('classifications', [ClassificationController::class, 'index'])->name('classifications.index');
+    Route::post('classifications/{group}', [ClassificationController::class, 'store'])->name('classifications.store');
+    Route::put('classifications/{group}/{item}', [ClassificationController::class, 'update'])->name('classifications.update');
+    Route::delete('classifications/{group}/{item}', [ClassificationController::class, 'destroy'])->name('classifications.destroy');
     Route::get('pages', [CmsController::class, 'pages'])->name('pages.index');
     Route::get('pages/create', [CmsController::class, 'createPage'])->name('pages.create');
     Route::post('pages', [CmsController::class, 'storePage'])->name('pages.store');
