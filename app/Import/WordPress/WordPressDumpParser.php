@@ -6,41 +6,96 @@ use RuntimeException;
 
 class WordPressDumpParser
 {
+    private const READ_CHUNK_SIZE = 1048576;
+
     public function parse(string $path, string $prefix): WordPressDump
     {
         if (! is_file($path) || ! is_readable($path)) {
-            throw new RuntimeException("Dump WordPress não encontrado ou não legível: {$path}");
+            throw new RuntimeException("Dump WordPress not found or not readable: {$path}");
         }
 
         $handle = fopen($path, 'rb');
         if ($handle === false) {
-            throw new RuntimeException("Não foi possível abrir o dump WordPress: {$path}");
+            throw new RuntimeException("Unable to open WordPress dump: {$path}");
         }
 
         $dump = new WordPressDump($path, $prefix);
-        $buffer = '';
+        $statement = '';
+        $inString = false;
+        $escape = false;
 
         try {
-            while (($line = fgets($handle)) !== false) {
-                $buffer .= $line;
-                if (! str_contains($line, ';')) {
-                    continue;
+            while (! feof($handle)) {
+                $chunk = fread($handle, self::READ_CHUNK_SIZE);
+                if ($chunk === false || $chunk === '') {
+                    break;
                 }
 
-                $statement = trim($buffer);
-                $buffer = '';
-
-                if (str_starts_with($statement, 'INSERT INTO')) {
-                    $this->consumeInsert($statement, $dump);
-                } elseif (str_starts_with($statement, 'CREATE TABLE')) {
-                    $this->consumeCreate($statement, $dump, $prefix);
+                foreach ($this->splitStatements($chunk, $statement, $inString, $escape) as $sql) {
+                    $this->consumeStatement($sql, $dump, $prefix);
                 }
+            }
+
+            $tail = trim($statement);
+            if ($tail !== '') {
+                $this->consumeStatement($tail, $dump, $prefix);
             }
         } finally {
             fclose($handle);
         }
 
         return $dump;
+    }
+
+    private function consumeStatement(string $statement, WordPressDump $dump, string $prefix): void
+    {
+        if (str_starts_with($statement, 'INSERT INTO')) {
+            $this->consumeInsert($statement, $dump);
+            return;
+        }
+
+        if (str_starts_with($statement, 'CREATE TABLE')) {
+            $this->consumeCreate($statement, $dump, $prefix);
+        }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function splitStatements(string $chunk, string &$statement, bool &$inString, bool &$escape): array
+    {
+        $statements = [];
+        $length = strlen($chunk);
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $chunk[$i];
+            $statement .= $char;
+
+            if ($escape) {
+                $escape = false;
+                continue;
+            }
+
+            if ($char === '\\') {
+                $escape = true;
+                continue;
+            }
+
+            if ($char === "'") {
+                $inString = ! $inString;
+                continue;
+            }
+
+            if ($char === ';' && ! $inString) {
+                $sql = trim($statement);
+                if ($sql !== '') {
+                    $statements[] = $sql;
+                }
+                $statement = '';
+            }
+        }
+
+        return $statements;
     }
 
     private function consumeCreate(string $statement, WordPressDump $dump, string $prefix): void
