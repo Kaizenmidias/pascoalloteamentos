@@ -210,11 +210,17 @@ class WordPressImportService
     private function upsertEntity(string $target, array $post, array $meta, int $legacyId): Model
     {
         $data = $this->mapEntityData($target, $post, $meta, $legacyId);
-        $model = match ($target) {
+        $query = match ($target) {
             'properties' => Property::query(),
             'condominiums' => Condominium::query(),
             'subdivisions' => Subdivision::query(),
-        }->firstOrNew(['legacy_source' => 'wordpress', 'legacy_id' => $legacyId]);
+            default => throw new \InvalidArgumentException("Target inválido: {$target}"),
+        };
+
+        $model = $query->firstOrNew([
+            'legacy_source' => 'wordpress',
+            'legacy_id' => $legacyId,
+        ]);
 
         $model->fill($data);
         $model->save();
@@ -477,15 +483,21 @@ class WordPressImportService
         $base = Str::slug($slug);
         $candidate = $base;
         $index = 1;
-        while (match ($target) {
-            'properties' => Property::where('slug', $candidate)->exists(),
-            'condominiums' => Condominium::where('slug', $candidate)->exists(),
-            'subdivisions' => Subdivision::where('slug', $candidate)->exists(),
-        }) {
+        while ($this->slugExists($target, $candidate)) {
             $candidate = "{$base}-{$index}";
             $index++;
         }
         return $candidate;
+    }
+
+    private function slugExists(string $target, string $slug): bool
+    {
+        return match ($target) {
+            'properties' => Property::where('slug', $slug)->exists(),
+            'condominiums' => Condominium::where('slug', $slug)->exists(),
+            'subdivisions' => Subdivision::where('slug', $slug)->exists(),
+            default => false,
+        };
     }
 
     private function commercialPurpose(array $meta): string
