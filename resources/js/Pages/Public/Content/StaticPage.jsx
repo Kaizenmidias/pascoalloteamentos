@@ -9,7 +9,7 @@ const Hero = ({ contact = false }) => (
         <img src={contact ? '/reference-assets/hero-contact.webp' : '/reference-assets/hero-home.jpg'} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="red-overlay absolute inset-0" />
         <div className="relative z-10 mx-auto w-full max-w-[80rem]">
-            <h1 className={`mx-auto max-w-[80rem] text-[46px] font-light uppercase leading-[1.12] tracking-[-.015em] ${contact ? 'desktop:px-[70px]' : ''}`}>
+            <h1 className={`mx-auto max-w-[80rem] text-[46px] font-light leading-[1.12] tracking-[-.015em] ${contact ? 'desktop:px-[70px]' : ''}`}>
                 {contact ? 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.' : 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.'}
             </h1>
             <p className={`mx-auto mt-5 max-w-[80rem] text-base font-light leading-7 text-white/90 desktop:text-lg ${contact ? 'desktop:px-[70px]' : ''}`}>
@@ -143,7 +143,7 @@ function Contact() {
             </section>
             <section className="pb-[var(--section-space)]">
                 <Container>
-                    <h2 className="section-title text-center uppercase">Perguntas Frequentes</h2>
+                    <h2 className="section-title text-center">Perguntas Frequentes</h2>
                     <div className="mt-8">
                         {[
                             ['Como posso agendar uma visita?', 'Entre em contato pelo telefone, WhatsApp ou preencha o formulário desta página. Nossa equipe agendará o melhor horário para você.'],

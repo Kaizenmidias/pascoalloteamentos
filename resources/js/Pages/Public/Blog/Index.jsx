@@ -29,7 +29,7 @@ export default function Index({ posts }) {
                 <img src="/reference-assets/blog-people.webp" alt="" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="red-overlay absolute inset-0" />
                 <div className="relative z-10 mx-auto w-full max-w-[80rem]">
-                    <h1 className="mx-auto max-w-[72rem] text-[46px] font-normal uppercase leading-[1.08] tracking-[-.015em]">
+                    <h1 className="mx-auto max-w-[72rem] text-[46px] font-normal leading-[1.08] tracking-[-.015em]">
                         Conteúdos para quem deseja morar, investir e acompanhar o mercado imobiliário.
                     </h1>
                     <p className="mx-auto mt-4 max-w-[72rem] text-sm leading-6 text-white/80">
