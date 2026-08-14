@@ -12,14 +12,15 @@ const Select = ({ value, onChange, label, options = [] }) => (
     </label>
 );
 
-export default function HeroSearch({ action = '/imoveis', filters = {}, types = [], cities = [], statuses = [], compact = false }) {
-    const [values, setValues] = useState({ type: filters.type || '', city: filters.city || '', status: filters.status || '' });
+export default function HeroSearch({ action = '/imoveis', filters = {}, types = [], cities = [], statuses = [], businessTypes = [], compact = false }) {
+    const [values, setValues] = useState({ type: filters.type || '', city: filters.city || '', status: filters.status || '', business_type: filters.business_type || '' });
     const update = (key) => (event) => setValues((current) => ({ ...current, [key]: event.target.value }));
     const submit = (event) => { event.preventDefault(); router.get(action, values, { preserveState: true }); };
 
     return (
         <form onSubmit={submit} className={`glass-card mx-auto flex max-w-[66rem] flex-col overflow-hidden rounded-[10px] p-1.5 tablet:flex-row ${compact ? '' : 'mt-8'}`}>
             <Select label="Tipo de imóvel" value={values.type} onChange={update('type')} options={types} />
+            {businessTypes.length > 0 && <Select label="Tipo de negócio" value={values.business_type} onChange={update('business_type')} options={businessTypes} />}
             <Select label="Selecione uma cidade" value={values.city} onChange={update('city')} options={cities} />
             <Select label="Status da obra" value={values.status} onChange={update('status')} options={statuses} />
             <button className="brand-button m-1 min-h-12 shrink-0 font-medium tablet:min-w-48" type="submit">Aplicar filtros</button>

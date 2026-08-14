@@ -65,7 +65,7 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
                         <h1 className="mx-auto mt-3 text-[46px] font-light leading-[1.08] tracking-[-.02em]">{title}</h1>
                         <p className="mx-auto mt-5 text-base font-light leading-7 text-white/90 desktop:text-lg">{description}</p>
                     </div>
-                    <HeroSearch action={basePath} filters={filters} cities={cities} types={types} statuses={statuses} />
+                    <HeroSearch action={basePath} filters={filters} cities={cities} types={types} statuses={statuses} businessTypes={businessTypes} />
                 </div>
             </section>
             <Container className="py-[var(--section-space)]">

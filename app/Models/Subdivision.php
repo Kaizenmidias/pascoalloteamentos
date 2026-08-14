@@ -46,6 +46,11 @@ class Subdivision extends Model
         return $this->belongsTo(DevelopmentStatus::class);
     }
 
+    public function businessType(): BelongsTo
+    {
+        return $this->belongsTo(BusinessType::class);
+    }
+
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);

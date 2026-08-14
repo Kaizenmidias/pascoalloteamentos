@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreCondominiumRequest;
 use App\Http\Requests\Admin\UpdateCondominiumRequest;
+use App\Models\BusinessType;
 use App\Models\City;
 use App\Models\Condominium;
 use App\Models\CondominiumType;
@@ -50,6 +51,6 @@ class CondominiumController extends Controller
 
     private function options(): array
     {
-        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'features' => Feature::orderBy('sort_order')->get()];
+        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => BusinessType::where('is_active', true)->orderBy('sort_order')->get(), 'features' => Feature::orderBy('sort_order')->get()];
     }
 }

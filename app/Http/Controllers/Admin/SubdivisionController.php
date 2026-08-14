@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSubdivisionRequest;
 use App\Http\Requests\Admin\UpdateSubdivisionRequest;
+use App\Models\BusinessType;
 use App\Models\City;
 use App\Models\DevelopmentStatus;
 use App\Models\Feature;
@@ -50,6 +51,6 @@ class SubdivisionController extends Controller
 
     private function options(): array
     {
-        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'features' => Feature::orderBy('sort_order')->get()];
+        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => BusinessType::where('is_active', true)->orderBy('sort_order')->get(), 'features' => Feature::orderBy('sort_order')->get()];
     }
 }

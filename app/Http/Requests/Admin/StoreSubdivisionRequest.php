@@ -19,7 +19,7 @@ class StoreSubdivisionRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'], 'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('subdivisions')],
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('subdivisions')],
-            'subdivision_type_id' => ['nullable', 'exists:subdivision_types,id'], 'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'city_id' => ['nullable', 'exists:cities,id'],
+            'subdivision_type_id' => ['nullable', 'exists:subdivision_types,id'], 'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
             'excerpt' => ['nullable', 'string'], 'description' => ['nullable', 'string'], 'address' => ['nullable', 'string', 'max:255'], 'neighborhood' => ['nullable', 'string', 'max:255'], 'postal_code' => ['nullable', 'string', 'max:12'],
             'address_number' => ['nullable', 'string', 'max:30'], 'complement' => ['nullable', 'string', 'max:255'], 'whatsapp_contact' => ['nullable', 'string', 'max:30'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'], 'longitude' => ['nullable', 'numeric', 'between:-180,180'], 'regular_price' => ['nullable', 'numeric', 'min:0'], 'sale_price' => ['nullable', 'numeric', 'min:0'], 'price_on_request' => ['boolean'],

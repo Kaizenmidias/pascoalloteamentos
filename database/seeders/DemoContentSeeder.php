@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\BlogCategory;
+use App\Models\BusinessType;
 use App\Models\BlogPost;
 use App\Models\City;
 use App\Models\Condominium;
@@ -35,6 +36,9 @@ class DemoContentSeeder extends Seeder
         $apartment = PropertyType::updateOrCreate(['slug' => 'apartamento'], ['name' => 'Apartamento', 'is_active' => true]);
         $residential = CondominiumType::updateOrCreate(['slug' => 'condominio-residencial'], ['name' => 'Condomínio residencial', 'is_active' => true]);
         $land = SubdivisionType::updateOrCreate(['slug' => 'terreno'], ['name' => 'Terreno', 'is_active' => true]);
+        $sale = BusinessType::updateOrCreate(['slug' => 'venda'], ['name' => 'Venda', 'is_active' => true]);
+        $rent = BusinessType::updateOrCreate(['slug' => 'aluguel'], ['name' => 'Aluguel', 'is_active' => true]);
+        $season = BusinessType::updateOrCreate(['slug' => 'temporada'], ['name' => 'Temporada', 'is_active' => true]);
         $finished = DevelopmentStatus::updateOrCreate(['slug' => 'concluido'], ['name' => 'Concluído', 'is_active' => true]);
         $building = DevelopmentStatus::updateOrCreate(['slug' => 'em-obras'], ['name' => 'Em obras', 'is_active' => true]);
 
@@ -46,7 +50,7 @@ class DemoContentSeeder extends Seeder
 
         $condominium = Condominium::updateOrCreate(['slug' => 'condominio-vale-da-mata'], [
             'title' => 'Condomínio Vale da Mata', 'reference_code' => 'DEMO-COND-01', 'condominium_type_id' => $residential->id,
-            'development_status_id' => $building->id, 'city_id' => $toledo->id, 'excerpt' => 'Condomínio fechado com lazer, segurança e qualidade de vida.',
+            'development_status_id' => $building->id, 'business_type_id' => $sale->id, 'city_id' => $toledo->id, 'excerpt' => 'Condomínio fechado com lazer, segurança e qualidade de vida.',
             'description' => 'Um condomínio pensado para oferecer tranquilidade, conforto e uma estrutura completa para aproveitar cada momento com sua família.',
             'about_title' => 'Infraestrutura completa para viver com mais conforto e qualidade de vida', 'about_text' => 'O Condomínio Vale da Mata conta com uma estrutura completa para o dia a dia da sua família, oferecendo piscinas, academia, salão de festas, brinquedoteca, playground, quadras esportivas, quiosques com churrasqueiras e espaços de convivência.',
             'starting_price' => 680000, 'minimum_unit_area' => 160, 'latitude' => -24.7246, 'longitude' => -53.7412,
@@ -65,7 +69,7 @@ class DemoContentSeeder extends Seeder
         foreach ($properties as $index => [$slug, $title, $image, $price, $area, $bedrooms, $suites, $bathrooms, $parking, $statusName]) {
             $property = Property::updateOrCreate(['slug' => $slug], [
                 'title' => $title, 'reference_code' => 'DEMO-IMOVEL-'.($index + 1), 'property_type_id' => $apartment->id,
-                'development_status_id' => $statusName === 'Concluído' ? $finished->id : $building->id, 'city_id' => $toledo->id,
+                'development_status_id' => $statusName === 'Concluído' ? $finished->id : $building->id, 'business_type_id' => $sale->id, 'city_id' => $toledo->id,
                 'excerpt' => $area.'m² privativos', 'description' => "{$title}\nRua Dr. Mario Totta, Vila Industrial.\n{$bedrooms} dormitórios;\n{$suites} suítes;\nSala de jantar/estar;\nCozinha e sacada com churrasqueira;\n{$parking} vaga(s) de garagem.",
                 'address' => 'Rua Dr. Mario Totta', 'address_number' => (string) (638 + $index), 'neighborhood' => 'Vila Industrial',
                 'regular_price' => $index === 1 ? 980000 : $price, 'sale_price' => $price, 'usable_area' => $area, 'total_area' => $area,
@@ -85,7 +89,7 @@ class DemoContentSeeder extends Seeder
         ];
         foreach ($subdivisions as $index => [$slug, $title, $image, $cityId, $stageId, $total, $available, $min, $max]) {
             $subdivision = Subdivision::updateOrCreate(['slug' => $slug], [
-                'title' => $title, 'reference_code' => 'DEMO-LOTE-'.($index + 1), 'subdivision_type_id' => $land->id, 'development_status_id' => $stageId, 'city_id' => $cityId,
+                'title' => $title, 'reference_code' => 'DEMO-LOTE-'.($index + 1), 'subdivision_type_id' => $land->id, 'development_status_id' => $stageId, 'business_type_id' => $sale->id, 'city_id' => $cityId,
                 'excerpt' => "Lotes a partir de {$min}m²", 'description' => "O {$title} nasce em uma região estratégica, com lotes planejados e infraestrutura completa para construir, morar ou investir.",
                 'about_title' => 'Um lote perto de tudo o que você precisa', 'about_text' => "No {$title} você encontra lotes planejados e prontos para construir, em quadras bem distribuídas e com infraestrutura completa.",
                 'total_lots' => $total, 'available_lots' => $available, 'minimum_lot_area' => $min, 'maximum_lot_area' => $max, 'sale_price' => 190000 + ($index * 25000),

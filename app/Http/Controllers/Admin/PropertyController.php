@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StorePropertyRequest;
 use App\Http\Requests\Admin\UpdatePropertyRequest;
 use App\Models\City;
 use App\Models\Condominium;
+use App\Models\BusinessType;
 use App\Models\DevelopmentStatus;
 use App\Models\Feature;
 use App\Models\Property;
@@ -51,7 +52,7 @@ class PropertyController extends Controller
 
     private function options(): array
     {
-        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => PropertyType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'condominiums' => Condominium::orderBy('title')->get(['id', 'title']), 'features' => Feature::orderBy('sort_order')->get()];
+        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => PropertyType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => BusinessType::where('is_active', true)->orderBy('sort_order')->get(), 'condominiums' => Condominium::orderBy('title')->get(['id', 'title']), 'features' => Feature::orderBy('sort_order')->get()];
     }
 
     private function contentRelations(): array
