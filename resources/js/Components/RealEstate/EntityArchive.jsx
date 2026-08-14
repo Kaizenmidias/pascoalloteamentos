@@ -18,7 +18,7 @@ const copy = {
             </>
         ),
         image: '/reference-assets/property-livorno.jpeg',
-        overlay: 'bg-black/60',
+        overlay: '',
     },
     condominiums: {
         eyebrow: 'CONDOMÍNIOS',
@@ -31,7 +31,7 @@ const copy = {
             </>
         ),
         image: '/reference-assets/condominium-vale.webp',
-        overlay: 'bg-black/62',
+        overlay: '',
     },
     subdivisions: {
         eyebrow: 'LOTEAMENTOS',
@@ -44,7 +44,7 @@ const copy = {
             </>
         ),
         image: '/reference-assets/subdivision-brisa.jpg',
-        overlay: 'bg-black/58',
+        overlay: '',
     },
 };
 
@@ -58,7 +58,7 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
             <section className="relative flex min-h-[600px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
                 <img src={image} alt="Empreendimento residencial" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="red-overlay absolute inset-0" />
-                <div className={`absolute inset-0 ${overlay} bg-[#6f1116]/20`} />
+                {overlay ? <div className={`absolute inset-0 ${overlay}`} /> : null}
                 <div className="relative z-10 mx-auto w-full max-w-[80rem] px-5 text-center">
                     <p className="text-base font-light uppercase desktop:text-xl">{eyebrow}</p>
                     <div className={`mx-auto max-w-[80rem] px-0 ${heroTitlePadding}`}>
