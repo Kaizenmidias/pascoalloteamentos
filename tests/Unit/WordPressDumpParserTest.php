@@ -79,4 +79,51 @@ SQL);
 
         @unlink($path);
     }
+
+    public function test_it_uses_create_table_column_order_when_insert_has_no_column_list(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'wpdump');
+        file_put_contents($path, <<<SQL
+CREATE TABLE `wp_posts` (
+  `ID` bigint NOT NULL,
+  `post_title` text NOT NULL,
+  `post_type` varchar(20) NOT NULL
+);
+INSERT INTO `wp_posts` VALUES (1,'Teste','imoveis'),(2,'Outro','condominios');
+SQL);
+
+        $dump = (new WordPressDumpParser)->parse($path, 'wp_');
+
+        $this->assertCount(2, $dump->posts);
+        $this->assertSame('Teste', $dump->posts[0]['post_title']);
+        $this->assertSame('imoveis', $dump->posts[0]['post_type']);
+        $this->assertSame('Outro', $dump->posts[1]['post_title']);
+        $this->assertSame('condominios', $dump->posts[1]['post_type']);
+
+        @unlink($path);
+    }
+
+    public function test_it_treats_inserts_with_and_without_column_list_equally(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'wpdump');
+        file_put_contents($path, <<<SQL
+CREATE TABLE `wp_posts` (
+  `ID` bigint NOT NULL,
+  `post_title` text NOT NULL,
+  `post_type` varchar(20) NOT NULL
+);
+INSERT INTO `wp_posts` (`ID`,`post_title`,`post_type`) VALUES (1,'Teste','imoveis');
+INSERT INTO `wp_posts` VALUES (2,'Outro','condominios');
+SQL);
+
+        $dump = (new WordPressDumpParser)->parse($path, 'wp_');
+
+        $this->assertCount(2, $dump->posts);
+        $this->assertSame('Teste', $dump->posts[0]['post_title']);
+        $this->assertSame('imoveis', $dump->posts[0]['post_type']);
+        $this->assertSame('Outro', $dump->posts[1]['post_title']);
+        $this->assertSame('condominios', $dump->posts[1]['post_type']);
+
+        @unlink($path);
+    }
 }

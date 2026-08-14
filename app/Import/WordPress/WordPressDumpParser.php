@@ -104,18 +104,29 @@ class WordPressDumpParser
             $table = $matches[1];
             if (str_starts_with($table, $prefix)) {
                 $dump->tables[$table] = true;
+                $columns = $this->parseCreateColumns($statement);
+                if ($columns !== []) {
+                    $dump->columnsByTable[$table] = $columns;
+                }
             }
         }
     }
 
     private function consumeInsert(string $statement, WordPressDump $dump): void
     {
-        if (! preg_match('/INSERT INTO `?([^`\\s]+)`?\\s*\\((.*?)\\)\\s*VALUES\\s*(.+);/is', $statement, $matches)) {
+        if (! preg_match('/INSERT INTO `?([^`\\s]+)`?(?:\\s*\\((.*?)\\))?\\s*VALUES\\s*(.+);/is', $statement, $matches)) {
             return;
         }
 
         $table = $matches[1];
-        $columns = $this->parseColumns($matches[2]);
+        $columns = isset($matches[2]) && trim((string) $matches[2]) !== ''
+            ? $this->parseColumns($matches[2])
+            : ($dump->columnsByTable[$table] ?? []);
+
+        if ($columns === []) {
+            return;
+        }
+
         $rows = $this->parseRows($matches[3]);
 
         if (str_contains($table, '_posts')) {
@@ -161,6 +172,23 @@ class WordPressDumpParser
                 $dump->terms[] = $record;
             }
         }
+    }
+
+    private function parseCreateColumns(string $statement): array
+    {
+        $columns = [];
+        foreach (preg_split('/\R/', $statement) ?: [] as $line) {
+            $line = trim($line);
+            if (! str_starts_with($line, '`')) {
+                continue;
+            }
+
+            if (preg_match('/^`([^`]+)`/', $line, $matches)) {
+                $columns[] = $matches[1];
+            }
+        }
+
+        return $columns;
     }
 
     private function parseColumns(string $raw): array
