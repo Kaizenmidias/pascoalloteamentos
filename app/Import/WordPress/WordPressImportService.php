@@ -37,6 +37,7 @@ class WordPressImportService
         $dump = $this->parser->parse($path, $prefix);
 
         $classified = $this->classifyPosts($dump);
+        $summary = $this->previewSummary($classified);
 
         return [
             'dump' => ['path' => $dump->path, 'prefix' => $dump->prefix],
@@ -50,8 +51,9 @@ class WordPressImportService
             ],
             'post_types' => $dump->postTypeCounts,
             'classified' => $classified,
+            'summary' => $summary,
             'pending' => $this->pendingFromClassified($classified),
-            'details' => $this->previewDetails($classified),
+            'details' => $this->previewDetails($classified, $dump),
         ];
     }
 
@@ -86,26 +88,87 @@ class WordPressImportService
     private function classifyPosts(WordPressDump $dump): array
     {
         $classified = ['properties' => [], 'condominiums' => [], 'subdivisions' => [], 'pending' => []];
+        $duplicateCounts = [];
 
         foreach ($dump->posts as $post) {
             $meta = $this->postMetaMap($dump, (int) $post['ID']);
             $explanation = $this->classifier->explain((string) ($post['post_type'] ?? ''), $meta);
+            $entityBucket = match ($explanation['entity']) {
+                LegacyEntity::Property => 'properties',
+                LegacyEntity::Condominium => 'condominiums',
+                LegacyEntity::Subdivision => 'subdivisions',
+                LegacyEntity::Review => 'pending',
+                default => null,
+            };
             $row = [
                 'post' => $post,
                 'meta' => $meta,
                 'classification' => $explanation,
+                'status' => $this->statusBucket((string) ($post['post_status'] ?? '')),
+                'importable' => $this->isImportable($post, $explanation),
+                'duplicate_key' => $this->duplicateKey($post, $meta),
+                'duplicate_hint' => $this->duplicateHint($post, $meta),
             ];
 
-            match ($explanation['entity']) {
-                LegacyEntity::Property => $classified['properties'][] = $row,
-                LegacyEntity::Condominium => $classified['condominiums'][] = $row,
-                LegacyEntity::Subdivision => $classified['subdivisions'][] = $row,
-                LegacyEntity::Review => $classified['pending'][] = $row,
-                default => null,
-            };
+            if ($entityBucket === null) {
+                continue;
+            }
+
+            $classified[$entityBucket][] = $row;
+            $duplicateCounts[$entityBucket][$row['duplicate_key']] = ($duplicateCounts[$entityBucket][$row['duplicate_key']] ?? 0) + 1;
+        }
+
+        foreach (['properties', 'condominiums', 'subdivisions', 'pending'] as $bucket) {
+            foreach ($classified[$bucket] as $index => $row) {
+                $duplicateKey = $row['duplicate_key'];
+                $count = $duplicateCounts[$bucket][$duplicateKey] ?? 0;
+                $classified[$bucket][$index]['duplicate_hint'] = [
+                    'possible_duplicate' => $count > 1,
+                    'same_title_slug' => $count > 1,
+                    'title_normalized' => Str::slug((string) ($row['post']['post_title'] ?? '')),
+                    'slug_normalized' => Str::slug((string) ($row['post']['post_name'] ?? '')),
+                    'duplicate_count' => $count,
+                ];
+            }
         }
 
         return $classified;
+    }
+
+    private function previewSummary(array $classified): array
+    {
+        return [
+            'properties' => $this->summaryForRows($classified['properties'] ?? []),
+            'condominiums' => $this->summaryForRows($classified['condominiums'] ?? []),
+            'subdivisions' => $this->summaryForRows($classified['subdivisions'] ?? []),
+            'pending' => $this->summaryForRows($classified['pending'] ?? []),
+        ];
+    }
+
+    private function summaryForRows(array $rows): array
+    {
+        $importable = 0;
+        $ignored = 0;
+        $duplicates = 0;
+
+        foreach ($rows as $row) {
+            if (($row['duplicate_hint']['possible_duplicate'] ?? false) === true) {
+                $duplicates++;
+            }
+
+            if (($row['importable'] ?? false) === true) {
+                $importable++;
+            } else {
+                $ignored++;
+            }
+        }
+
+        return [
+            'found' => count($rows),
+            'importable' => $importable,
+            'ignored' => $ignored,
+            'possible_duplicates' => $duplicates,
+        ];
     }
 
     private function pendingFromClassified(array $classified): array
@@ -113,13 +176,19 @@ class WordPressImportService
         return ['pending' => count($classified['pending'] ?? [])];
     }
 
-    private function previewDetails(array $classified): array
+    private function previewDetails(array $classified, WordPressDump $dump): array
     {
         return [
             'properties' => $this->mapPreviewRows($classified['properties'] ?? []),
             'condominiums' => $this->mapPreviewRows($classified['condominiums'] ?? []),
             'subdivisions' => $this->mapPreviewRows($classified['subdivisions'] ?? []),
             'pending' => $this->groupPendingRows($classified['pending'] ?? []),
+            'importable' => [
+                'properties' => $this->mapPreviewRows(array_values(array_filter($classified['properties'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
+                'condominiums' => $this->mapPreviewRows(array_values(array_filter($classified['condominiums'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
+                'subdivisions' => $this->mapPreviewRows(array_values(array_filter($classified['subdivisions'] ?? [], fn ($row) => ($row['importable'] ?? false) === true))),
+            ],
+            'duplicate_groups' => $this->duplicateGroups($classified, $dump),
         ];
     }
 
@@ -138,6 +207,8 @@ class WordPressImportService
                 'reason' => (string) ($classification['reason'] ?? ''),
                 'source' => (string) ($classification['source'] ?? ''),
                 'matched_value' => $classification['matched_value'] ?? null,
+                'importable' => (bool) ($row['importable'] ?? false),
+                'status_bucket' => (string) ($row['status'] ?? 'unknown'),
             ];
         }, $rows);
     }
@@ -160,10 +231,100 @@ class WordPressImportService
                 'title' => (string) ($post['post_title'] ?? ''),
                 'slug' => (string) ($post['post_name'] ?? ''),
                 'status' => (string) ($post['post_status'] ?? ''),
+                'meta' => $this->pendingMeta($row['meta'] ?? []),
             ];
         }
 
         return array_values($grouped);
+    }
+
+    private function pendingMeta(array $meta): array
+    {
+        return [
+            'keys' => array_slice(array_keys($meta), 0, 20),
+            'tipo_item' => $meta['tipo_item'] ?? $meta['tipo-categoria'] ?? null,
+            '_thumbnail_id' => $meta['_thumbnail_id'] ?? null,
+            '_elementor_data' => isset($meta['_elementor_data']) ? true : false,
+            'jet' => $this->containsMetaKey($meta, 'jet') ? true : false,
+        ];
+    }
+
+    private function containsMetaKey(array $meta, string $needle): bool
+    {
+        foreach (array_keys($meta) as $key) {
+            if (str_contains(strtolower((string) $key), strtolower($needle))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function statusBucket(string $status): string
+    {
+        return match ($status) {
+            'publish' => 'published',
+            'draft' => 'draft',
+            'trash' => 'trash',
+            'auto-draft' => 'auto-draft',
+            'revision' => 'revision',
+            'inherit' => 'inherit',
+            default => 'other',
+        };
+    }
+
+    private function isImportable(array $post, array $classification): bool
+    {
+        return ($post['post_status'] ?? '') === 'publish' && in_array($classification['entity'], [
+            LegacyEntity::Property,
+            LegacyEntity::Condominium,
+            LegacyEntity::Subdivision,
+        ], true);
+    }
+
+    private function duplicateKey(array $post, array $meta): string
+    {
+        $title = Str::slug((string) ($post['post_title'] ?? ''));
+        $slug = Str::slug((string) ($post['post_name'] ?? ''));
+        $type = (string) ($post['post_type'] ?? '');
+        $context = Str::slug((string) ($meta['tipo_item'] ?? $meta['tipo-categoria'] ?? ''));
+
+        return implode('|', [$type, $slug ?: $title, $context]);
+    }
+
+    private function duplicateHint(array $post, array $meta): array
+    {
+        $title = Str::slug((string) ($post['post_title'] ?? ''));
+        $slug = Str::slug((string) ($post['post_name'] ?? ''));
+
+        return [
+            'possible_duplicate' => false,
+            'same_title_slug' => false,
+            'title_normalized' => $title,
+            'slug_normalized' => $slug,
+            'duplicate_count' => 1,
+        ];
+    }
+
+    private function duplicateGroups(array $classified, WordPressDump $dump): array
+    {
+        $groups = [];
+
+        foreach (['properties', 'condominiums', 'subdivisions'] as $bucket) {
+            foreach ($classified[$bucket] ?? [] as $row) {
+                $key = $row['duplicate_key'];
+                $groups[$key]['key'] = $key;
+                $groups[$key]['items'][] = [
+                    'id' => (int) ($row['post']['ID'] ?? 0),
+                    'title' => (string) ($row['post']['post_title'] ?? ''),
+                    'slug' => (string) ($row['post']['post_name'] ?? ''),
+                    'status' => (string) ($row['post']['post_status'] ?? ''),
+                    'post_type' => (string) ($row['post']['post_type'] ?? ''),
+                ];
+            }
+        }
+
+        return array_values(array_filter($groups, fn ($group) => count($group['items'] ?? []) > 1));
     }
 
     private function pendingCategory(string $postType, array $post, array $meta): string
