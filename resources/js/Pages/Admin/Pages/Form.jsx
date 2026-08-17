@@ -77,14 +77,45 @@ const formatSectionContent = (section) => {
 };
 
 const structuredContentTypes = new Set(['institucional', 'contact-data', 'social', 'contact-form']);
+const structuredSchemas = {
+    home: {
+        title: 'Home',
+        sections: ['hero', 'filter', 'numbers', 'differentials'],
+    },
+    'sobre-nos': {
+        title: 'Sobre nós',
+        sections: ['hero', 'history', 'history', 'numbers', 'content', 'institucional', 'cta'],
+    },
+    contato: {
+        title: 'Contato',
+        sections: ['hero', 'contact-data', 'contact-form', 'social'],
+    },
+    condominios: {
+        title: 'Condomínios',
+        sections: ['hero'],
+    },
+    loteamentos: {
+        title: 'Loteamentos',
+        sections: ['hero'],
+    },
+    imoveis: {
+        title: 'Imóveis',
+        sections: ['hero'],
+    },
+};
 
 export default function Form({ item }) {
     const editing = Boolean(item);
-    const isStructured = structuredTemplates.has(item?.template) || presets[item?.slug];
-    const canAddSections = !isStructured;
+    const schema = structuredSchemas[item?.slug] || null;
+    const isStructured = structuredTemplates.has(item?.template) || Boolean(schema);
+    const canAddSections = !schema;
     const initialSections = useMemo(() => {
         if (presets[item?.slug]?.length) {
-            return presets[item.slug].map((section, index) => ({ ...section, sort_order: index }));
+            return presets[item.slug].map((section, index) => ({
+                ...section,
+                sort_order: index,
+                is_active: true,
+            }));
         }
 
         if (item?.sections?.length) {
@@ -132,6 +163,168 @@ export default function Form({ item }) {
 
     const addSection = () => setData('sections', [...data.sections, createSection()]);
     const removeSection = (index) => setData('sections', data.sections.filter((_, sectionIndex) => sectionIndex !== index));
+
+    const renderStructuredFields = (section, index) => {
+        if (!schema) return null;
+
+        if (item?.slug === 'sobre-nos') {
+            const sectionType = schema.sections[index];
+
+            if (sectionType === 'hero') {
+                return (
+                    <div className="grid gap-4 tablet:grid-cols-2">
+                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                        <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                        <Field label="Texto introdutório" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                        <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                    </div>
+                );
+            }
+
+            if (sectionType === 'history' || sectionType === 'content' || sectionType === 'cta') {
+                return (
+                    <div className="grid gap-4 tablet:grid-cols-2">
+                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                        <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                        <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                        <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                        {sectionType === 'cta' && <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
+                        {sectionType === 'cta' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
+                    </div>
+                );
+            }
+
+            if (sectionType === 'numbers') {
+                return (
+                    <div className="grid gap-4 tablet:grid-cols-2">
+                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                        <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                        <Field label="Números" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                        <p className="tablet:col-span-2 text-xs text-gray-500">Use JSON com lista de itens, preservando os números atuais da página.</p>
+                    </div>
+                );
+            }
+
+            if (sectionType === 'institucional') {
+                const blocks = (() => {
+                    try {
+                        return Array.isArray(JSON.parse(section.content || '[]')) ? JSON.parse(section.content || '[]') : [];
+                    } catch {
+                        return [];
+                    }
+                })();
+
+                const setBlock = (blockIndex, key, value) => {
+                    const next = blocks.map((block, currentIndex) => (currentIndex === blockIndex ? { ...block, [key]: value } : block));
+                    updateSection(index, 'content', JSON.stringify(next, null, 2));
+                };
+
+                return (
+                    <div className="space-y-4">
+                        <div className="grid gap-4 tablet:grid-cols-2">
+                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                        </div>
+                        <div className="space-y-4">
+                            {['Missão', 'Visão', 'Valores'].map((name, blockIndex) => {
+                                const block = blocks[blockIndex] || { title: name, text: '', image: '' };
+                                return (
+                                    <div key={name} className="rounded-xl border border-gray-200 bg-white p-4">
+                                        <h3 className="text-sm font-semibold text-gray-900">{name}</h3>
+                                        <div className="mt-4 grid gap-4 tablet:grid-cols-2">
+                                            <Field label="Título" value={block.title || ''} onChange={(event) => setBlock(blockIndex, 'title', event.target.value)} />
+                                            <Field label="Imagem" value={block.image || ''} onChange={(event) => setBlock(blockIndex, 'image', event.target.value)} />
+                                            <div className="tablet:col-span-2">
+                                                <Field label="Texto" as="textarea" rows="5" value={block.text || ''} onChange={(event) => setBlock(blockIndex, 'text', event.target.value)} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            }
+
+            if (sectionType === 'contact-data') {
+                const rows = (() => {
+                    try {
+                        return Array.isArray(JSON.parse(section.content || '[]')) ? JSON.parse(section.content || '[]') : [];
+                    } catch {
+                        return [];
+                    }
+                })();
+                const setRow = (rowIndex, valueIndex, value) => {
+                    const next = rows.map((row, currentIndex) => (currentIndex === rowIndex ? row.map((entry, entryIndex) => (entryIndex === valueIndex ? value : entry)) : row));
+                    updateSection(index, 'content', JSON.stringify(next, null, 2));
+                };
+                return (
+                    <div className="space-y-4">
+                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        {rows.map((row, rowIndex) => (
+                            <div key={rowIndex} className="grid gap-4 rounded-xl border border-gray-200 bg-white p-4 tablet:grid-cols-2">
+                                <Field label="Título" value={row[0] || ''} onChange={(event) => setRow(rowIndex, 0, event.target.value)} />
+                                <Field label="Texto" as="textarea" rows="5" value={row[1] || ''} onChange={(event) => setRow(rowIndex, 1, event.target.value)} />
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+
+            if (sectionType === 'contact-form') {
+                return (
+                    <div className="grid gap-4 tablet:grid-cols-2">
+                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                        <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                        <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                        <Field label="E-mail destinatário" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />
+                        <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
+                    </div>
+                );
+            }
+
+            if (sectionType === 'social') {
+                const links = (() => {
+                    try {
+                        return Array.isArray(JSON.parse(section.content || '[]')) ? JSON.parse(section.content || '[]') : [];
+                    } catch {
+                        return [];
+                    }
+                })();
+                const setLink = (linkIndex, valueIndex, value) => {
+                    const next = links.map((row, currentIndex) => (currentIndex === linkIndex ? row.map((entry, entryIndex) => (entryIndex === valueIndex ? value : entry)) : row));
+                    updateSection(index, 'content', JSON.stringify(next, null, 2));
+                };
+                return (
+                    <div className="space-y-4">
+                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        {links.map((row, linkIndex) => (
+                            <div key={linkIndex} className="grid gap-4 rounded-xl border border-gray-200 bg-white p-4 tablet:grid-cols-2">
+                                <Field label="Nome" value={row[0] || ''} onChange={(event) => setLink(linkIndex, 0, event.target.value)} />
+                                <Field label="URL" value={row[1] || ''} onChange={(event) => setLink(linkIndex, 1, event.target.value)} />
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+        }
+
+        if (['condominios', 'loteamentos', 'imoveis'].includes(item?.slug)) {
+            return (
+                <div className="grid gap-4 tablet:grid-cols-2">
+                    <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                    <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                    <Field label="Texto introdutório" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                </div>
+            );
+        }
+
+        return null;
+    };
 
     return (
         <AdminLayout title={editing ? `Editar página: ${item.title}` : 'Nova página'}>
@@ -233,36 +426,36 @@ export default function Form({ item }) {
                                                     onChange={(event) => updateSection(index, 'type', event.target.value)}
                                                 />
                                             )}
-                                            <label className="flex items-center gap-2 text-sm text-gray-600">
-                                                <input type="checkbox" checked={section.is_active} onChange={(event) => updateSection(index, 'is_active', event.target.checked)} />
-                                                Ativa
-                                            </label>
+                                            {!schema && (
+                                                <label className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <input type="checkbox" checked={section.is_active} onChange={(event) => updateSection(index, 'is_active', event.target.checked)} />
+                                                    Ativa
+                                                </label>
+                                            )}
                                         </div>
                                         <button type="button" onClick={() => removeSection(index)} className="text-sm font-medium text-red-700">Excluir</button>
                                     </div>
 
-                                    <div className="grid gap-4 tablet:grid-cols-2">
-                                        <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                                        <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
-                                        <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
-                                        {section.type !== 'numbers' && section.type !== 'social' && section.type !== 'contact-data' && <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
-                                        {section.type === 'hero' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
-                                        {canAddSections && <Field label="Layout" value={section.layout} onChange={(event) => updateSection(index, 'layout', event.target.value)} />}
-                                        <div className="tablet:col-span-2">
-                                            <Field
-                                                label={structuredContentTypes.has(section.type) ? 'Conteúdo estruturado' : 'Texto'}
-                                                as="textarea"
-                                                rows={structuredContentTypes.has(section.type) ? '10' : '8'}
-                                                value={section.content}
-                                                onChange={(event) => updateSection(index, 'content', event.target.value)}
-                                            />
-                                            {structuredContentTypes.has(section.type) && (
-                                                <p className="mt-2 text-xs text-gray-500">
-                                                    Para estas seções, o campo aceita texto simples ou JSON válido quando houver lista de itens.
-                                                </p>
-                                            )}
+                                    {schema ? (
+                                        <div className="space-y-4">
+                                            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                                                Editor específico desta página estruturada. Só os campos reais do layout aparecem aqui.
+                                            </div>
+                                            {renderStructuredFields(section, index)}
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="grid gap-4 tablet:grid-cols-2">
+                                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                                            <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                                            <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                                            {section.type !== 'numbers' && section.type !== 'social' && section.type !== 'contact-data' && <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
+                                            {section.type === 'hero' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
+                                            <Field label="Layout" value={section.layout} onChange={(event) => updateSection(index, 'layout', event.target.value)} />
+                                            <div className="tablet:col-span-2">
+                                                <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
