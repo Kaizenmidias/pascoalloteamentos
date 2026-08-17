@@ -329,7 +329,7 @@ export default function Form({ item }) {
                                     <img src={imagePreview(section.image)} alt={section.alt || section.title || ''} className="h-52 w-full object-cover" />
                                 </div>
                                 <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
-                                <p className="text-xs text-gray-500">Cole a URL da imagem atual ou substitua por outra imagem do acervo.</p>
+                                <p className="text-xs text-gray-500">Use a imagem atual do card ou substitua pela URL de outra imagem já cadastrada.</p>
                             </div>
                         </div>
                     </div>
