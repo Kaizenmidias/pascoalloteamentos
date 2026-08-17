@@ -52,6 +52,8 @@ export default function SiteHeader() {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { url, props } = usePage();
+    const lightPages = ['/condominios', '/loteamentos', '/imoveis'];
+    const lightHeader = lightPages.some((path) => url === path || url.startsWith(`${path}/`));
     const realEstate = props.realEstate || {};
     const menuGroups = useMemo(() => ({
         condominios: realEstate.menuGroups?.condominiums || [],
@@ -80,10 +82,10 @@ export default function SiteHeader() {
     useEffect(() => { document.body.style.overflow = open ? 'hidden' : ''; return () => { document.body.style.overflow = ''; }; }, [open]);
 
     return (
-        <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? 'bg-white text-ink shadow-header' : 'bg-transparent text-white'}`}>
+        <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${lightHeader || scrolled || open ? 'bg-white text-ink shadow-header' : 'bg-transparent text-white'}`}>
             <div className="mx-auto flex h-[86px] max-w-[89.375rem] items-center justify-between px-5 desktop:px-8">
                 <Link href="/" className="relative z-10" aria-label="Pascoal Loteamentos">
-                    <img src="/reference-assets/logo.png" alt="Pascoal Loteamentos" className={`h-auto w-[145px] transition ${scrolled || open ? '' : 'brightness-0 invert'}`} />
+                    <img src="/reference-assets/logo.png" alt="Pascoal Loteamentos" className={`h-auto w-[145px] transition ${(lightHeader || scrolled || open) ? '' : 'brightness-0 invert'}`} />
                 </Link>
 
                 <nav className="hidden items-center gap-[1.4rem] desktop:flex" aria-label="Principal">

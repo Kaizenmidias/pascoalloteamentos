@@ -82,6 +82,7 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
                         action="/imoveis"
                         includeCategory
                         compact
+                        showSubmit={false}
                         categories={categories}
                         cities={realEstate.cities || []}
                         types={[...(realEstate.propertyTypes || []), ...(realEstate.condominiumTypes || []), ...(realEstate.subdivisionTypes || [])]}
@@ -94,9 +95,31 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
 
             <section className="pb-[var(--section-space)]">
                 <Container>
-                    <Carousel label="Empreendimentos em destaque">
-                        {previewItems.map((item) => <EntityCard key={item.href || item.id} item={item} href={item.href || `/imoveis/${item.slug}`} compact />)}
-                    </Carousel>
+                    {previewItems.length ? (
+                        <Carousel label="Empreendimentos em destaque">
+                            {previewItems.map((item) => <EntityCard key={item.href || item.id} item={item} href={item.href || `/imoveis/${item.slug}`} compact />)}
+                        </Carousel>
+                    ) : (
+                        <div className="rounded-card border border-line bg-white p-8 text-center text-muted">Nenhum empreendimento encontrado para os filtros selecionados.</div>
+                    )}
+                </Container>
+            </section>
+
+            <section className="pb-[var(--section-space)]">
+                <Container>
+                    <div className="text-center">
+                        <p className="eyebrow">Diferenciais</p>
+                        <h2 className="section-title mt-2">Excelência em cada detalhe.</h2>
+                        <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-muted">Projetos exclusivos pensados para unir qualidade, valorização e bem-estar em cada detalhe.</p>
+                    </div>
+                    <div className="mt-8 grid gap-2 tablet:grid-cols-2 desktop:grid-cols-3">{[
+                        ['Arquitetura autoral', 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.'],
+                        ['Localizações estratégicas', 'Empreendimentos em regiões com alto potencial de valorização.'],
+                        ['Sustentabilidade', 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.'],
+                        ['Alto padrão construtivo', 'Materiais selecionados e processos rigorosos para garantir qualidade.'],
+                        ['Equipe especializada', 'Profissionais experientes dedicados a entregar projetos com eficiência.'],
+                        ['Atendimento personalizado', 'Relacionamento próximo, transparente e focado em compreender cada cliente.'],
+                    ].map(([title, text]) => <article key={title} className="min-h-44 rounded-[7px] bg-brand p-8 text-white transition duration-300 hover:-translate-y-1 hover:bg-brand-dark hover:shadow-card"><h3 className="text-sm font-medium uppercase tracking-[.01em]">{title}</h3><p className="mt-5 text-sm font-light leading-6 text-white/80">{text}</p></article>)}</div>
                 </Container>
             </section>
 

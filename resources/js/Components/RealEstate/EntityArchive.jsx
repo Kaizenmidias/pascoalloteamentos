@@ -32,11 +32,11 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
             <SeoHead title={eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase()} description={description} />
             <section className="bg-white pt-28">
                 <Container className="space-y-6">
-                    <div className="max-w-4xl">
+                    <div className="mx-auto max-w-4xl text-center">
                         <p className="eyebrow">{eyebrow}</p>
                         <h1 className="section-title mt-3">{title}</h1>
-                        <span className="mt-3 block h-px w-16 bg-brand" />
-                        <p className="mt-5 max-w-3xl text-base font-light leading-7 text-muted">{description}</p>
+                        <span className="mx-auto mt-3 block h-px w-16 bg-brand" />
+                        <p className="mx-auto mt-5 max-w-3xl text-base font-light leading-7 text-muted">{description}</p>
                     </div>
                     <HeroSearch action={basePath} filters={filters} cities={cities} types={types} statuses={statuses} businessTypes={businessTypes} />
                 </Container>

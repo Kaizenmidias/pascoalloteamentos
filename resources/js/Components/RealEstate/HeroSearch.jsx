@@ -23,6 +23,8 @@ export default function HeroSearch({
     compact = false,
     includeCategory = false,
     onChange = null,
+    showSubmit = true,
+    onClear = null,
 }) {
     const [values, setValues] = useState({
         category: filters.category || '',
@@ -54,10 +56,11 @@ export default function HeroSearch({
 
     const submit = (event) => {
         event.preventDefault();
-        const payload = { ...values };
-        if (!includeCategory) {
-            delete payload.category;
+        if (!showSubmit) {
+            return;
         }
+        const payload = { ...values };
+        if (!includeCategory) delete payload.category;
         router.get(action, payload, { preserveState: true, preserveScroll: true });
     };
 
@@ -68,7 +71,8 @@ export default function HeroSearch({
             {businessTypes.length > 0 && <Select label="Tipo de negócio" value={values.business_type} onChange={update('business_type')} options={businessTypes} />}
             <Select label="Cidade" value={values.city} onChange={update('city')} options={cities} placeholder="Selecione uma cidade" />
             {statuses.length > 0 && <Select label="Status" value={values.status} onChange={update('status')} options={statuses} placeholder="Status do empreendimento" />}
-            <button className="brand-button m-1 min-h-12 shrink-0 font-medium tablet:min-w-48" type="submit">Aplicar filtros</button>
+            {showSubmit && <button className="brand-button m-1 min-h-12 shrink-0 font-medium tablet:min-w-48" type="submit">Aplicar filtros</button>}
+            {onClear && <button type="button" onClick={() => { const next = { category: '', type: '', city: '', status: '', business_type: '' }; setValues(next); onChange?.(next); onClear(); }} className="m-1 min-h-12 shrink-0 px-4 text-xs font-medium uppercase text-brand">Limpar filtros</button>}
         </form>
     );
 }
