@@ -6,8 +6,8 @@ function MainTab({ active, children, onClick }) {
         <button
             type="button"
             onClick={onClick}
-            className={`min-h-[5.25rem] min-w-[12.25rem] shrink-0 rounded-[8px] border px-6 py-4 text-[1.2rem] font-normal transition tablet:min-w-[12.75rem] tablet:px-8 tablet:text-[1.3rem] ${
-                active ? 'border-brand text-brand' : 'border-[#d9d9d9] text-[#7b7b7b]'
+            className={`min-h-[6.2rem] min-w-[12.8rem] shrink-0 rounded-[10px] border px-8 py-5 text-[1.35rem] font-normal transition tablet:min-w-[12.8rem] tablet:px-10 tablet:text-[1.35rem] ${
+                active ? 'border-[#1f4e5f] text-[#1f4e5f]' : 'border-[#dedede] text-[#6f8b97]'
             } bg-white`}
         >
             {children}
@@ -19,13 +19,13 @@ function OptionLine({ options = [], value, onChange, compactLabel = false }) {
     if (!options.length) return null;
 
     return (
-        <div className="flex flex-wrap gap-x-7 gap-y-3 text-[1.05rem] tablet:gap-x-10">
+        <div className="flex flex-wrap gap-x-10 gap-y-3 text-[1.1rem] tablet:gap-x-12">
             {options.map((option) => (
                 <button
                     key={option.slug}
                     type="button"
                     onClick={() => onChange(option.slug)}
-                    className={`transition ${value === option.slug ? 'font-semibold text-brand' : 'font-normal text-[#7d7d7d] hover:text-ink'}`}
+                    className={`transition ${value === option.slug ? 'font-semibold text-[#1f4e5f]' : 'font-normal text-[#7a8d96] hover:text-[#1f4e5f]'}`}
                 >
                     {compactLabel ? option.short_name || option.name : option.name}
                 </button>
@@ -127,7 +127,7 @@ export default function HeroSearch({
 
     return (
         <div className="mx-auto mt-10 max-w-[76rem]">
-            <div className="space-y-10">
+            <div className="space-y-12">
                 <div className="flex flex-nowrap gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden tablet:gap-5">
                     {tabs.map((tab) => (
                         <MainTab key={tab.key} active={activeTab === tab.key} onClick={() => setActiveTab(tab.key)}>
@@ -135,7 +135,7 @@ export default function HeroSearch({
                         </MainTab>
                     ))}
                 </div>
-                <div className="min-h-[2.5rem]">
+                <div className="min-h-[2.25rem]">
                     {activeSection && (
                         <OptionLine
                             options={activeSection.options}
@@ -145,13 +145,6 @@ export default function HeroSearch({
                         />
                     )}
                 </div>
-                {onClear && (
-                    <div className="flex justify-end">
-                        <button type="button" onClick={clear} className="text-xs font-medium uppercase tracking-[.08em] text-brand transition hover:text-brand-dark">
-                            Limpar filtros
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );
