@@ -13,25 +13,48 @@ const fallbackAbout = [
         image: '/reference-assets/about-team.webp',
     },
     {
+        type: 'numbers',
+        label: 'Nossos números',
+        title: 'Nossos números',
+        content: '20+ anos de experiência\n15+ empreendimentos entregues\n2 cidades com presença consolidada\n2 distritos atendidos',
+    },
+    {
+        type: 'purpose',
+        label: 'Nosso propósito',
+        title: 'Nosso propósito',
+        content: 'Desenvolver empreendimentos com planejamento, qualidade e visão de longo prazo, criando valor para pessoas, famílias e cidades.',
+    },
+    {
         type: 'mission',
-        label: 'Missão',
         title: 'Missão',
         content: 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.',
         image: '/reference-assets/about-engineer.webp',
     },
     {
         type: 'vision',
-        label: 'Visão',
         title: 'Visão',
         content: 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.',
         image: '/reference-assets/blog-city.jpg',
     },
     {
         type: 'values',
-        label: 'Valores',
         title: 'Valores',
         content: 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.',
         image: '/reference-assets/hero-contact.webp',
+    },
+    {
+        type: 'differential',
+        label: 'Nosso diferencial',
+        title: 'Nosso diferencial',
+        content: 'Unimos localização, planejamento, infraestrutura e experiência para entregar empreendimentos com potencial real de valorização.',
+        image: '/reference-assets/about-team.webp',
+    },
+    {
+        type: 'cta',
+        title: 'Vamos construir o próximo capítulo dessa história juntos.',
+        content: 'Conheça nossos projetos e encontre o lugar ideal para viver ou investir.',
+        button_label: 'Conheça nossos empreendimentos',
+        button_url: '/imoveis',
     },
 ];
 
@@ -66,11 +89,11 @@ function SectionRenderer({ section, kind, reverse = false }) {
         );
     }
 
-    if (type === 'history' || type === 'content') {
+    if (['history', 'content', 'purpose', 'differential'].includes(type)) {
         return (
             <section className="py-[var(--section-space)]">
                 <Container className="grid gap-10 desktop:grid-cols-2 desktop:items-center">
-                    {data.image && <img src={data.image} alt={data.title || ''} className={`mx-auto max-h-[480px] rounded-card object-cover ${reverse ? 'desktop:order-2' : 'desktop:order-1'}`} />}
+                    {data.image && <img src={data.image} alt={data.title || ''} className={`mx-auto w-full max-h-[480px] rounded-card object-cover ${reverse ? 'desktop:order-2' : 'desktop:order-1'}`} />}
                     <div className={reverse ? 'desktop:order-1' : 'desktop:order-2'}>
                         {data.label && <p className="eyebrow">{data.label}</p>}
                         {data.title && <h2 className="section-title mt-2">{data.title}</h2>}
@@ -81,30 +104,58 @@ function SectionRenderer({ section, kind, reverse = false }) {
         );
     }
 
-    if (type === 'institucional' || type === 'mission' || type === 'vision' || type === 'values') {
+    if (type === 'numbers') {
+        return (
+            <section className="bg-surface py-12">
+                <Container className="grid gap-9 text-center tablet:grid-cols-4">
+                    {(Array.isArray(data.content) ? data.content : String(data.content || '').split('\n')).filter(Boolean).map((item, index) => (
+                        <div key={`${item}-${index}`}>
+                            <strong className="text-[2rem] font-light leading-none text-ink">{typeof item === 'string' ? item.split(' ')[0] : item.title}</strong>
+                            <p className="mt-3 text-base font-medium text-ink">{typeof item === 'string' ? item.replace(/^[^\s]+\s?/, '').trim() : item.description}</p>
+                        </div>
+                    ))}
+                </Container>
+            </section>
+        );
+    }
+
+    if (type === 'institucional') {
         const blocks = type === 'institucional'
             ? (Array.isArray(data.content) ? data.content : [])
-            : [{
-                title: data.title || data.label || '',
-                text: data.content || '',
-                image: data.image || '/reference-assets/blog-city.jpg',
-                alt: data.alt || data.title || data.label || '',
-            }];
+            : [];
 
         return (
-            <section className={type === 'institucional' ? 'grid gap-4 py-[var(--section-space)] tablet:grid-cols-3' : 'py-[var(--section-space)]'}>
-                {blocks.map((block) => (
-                    <article key={block.title} className="group relative min-h-[24rem] overflow-hidden rounded-card shadow-card">
-                        <img src={block.image || '/reference-assets/blog-city.jpg'} alt={block.alt || block.title || ''} className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition duration-500 ease-out" />
-                        <div className="absolute inset-x-0 bottom-0 z-10 p-6 tablet:p-7">
-                            <span className="text-sm font-medium uppercase tracking-[0.08em] text-white">{block.title}</span>
-                            <div className="mt-3 h-px w-10 bg-brand" />
-                            <p className="mt-4 max-w-[22rem] text-sm leading-6 text-white/90">{block.text}</p>
-                        </div>
-                    </article>
-                ))}
+            <section className="py-[var(--section-space)]">
+                <Container className="max-w-[76rem]">
+                    <div className="grid gap-4 tablet:grid-cols-2 desktop:grid-cols-3">
+                        {blocks.map((block) => (
+                            <article key={block.title} className="group relative min-h-[24rem] overflow-hidden rounded-card shadow-card">
+                                <img src={block.image || '/reference-assets/blog-city.jpg'} alt={block.alt || block.title || ''} className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition duration-500 ease-out" />
+                                <div className="absolute inset-x-0 bottom-0 z-10 p-6 tablet:p-7">
+                                    <span className="text-sm font-medium uppercase tracking-[0.08em] text-white">{block.title}</span>
+                                    <div className="mt-3 h-px w-10 bg-brand" />
+                                    <p className="mt-4 max-w-[22rem] text-sm leading-6 text-white/90">{block.text}</p>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                </Container>
             </section>
+        );
+    }
+
+    if (['mission', 'vision', 'values'].includes(type)) {
+        return (
+            <article className="group relative min-h-[24rem] overflow-hidden rounded-card shadow-card">
+                <img src={data.image || '/reference-assets/blog-city.jpg'} alt={data.alt || data.title || data.label || ''} className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition duration-500 ease-out" />
+                <div className="absolute inset-x-0 bottom-0 z-10 p-6 tablet:p-7">
+                    <span className="text-sm font-medium uppercase tracking-[0.08em] text-white">{data.title || data.label || ''}</span>
+                    <div className="mt-3 h-px w-10 bg-brand" />
+                    <p className="mt-4 max-w-[22rem] text-sm leading-6 text-white/90">{data.content}</p>
+                </div>
+            </article>
         );
     }
 
@@ -189,10 +240,10 @@ function About({ page }) {
         return true;
     });
     const orderedSections = [...visibleSections].sort((left, right) => {
-        const order = { hero: 0, history: 1, numbers: 2, content: 3, mission: 4, vision: 5, values: 6, cta: 7 };
+        const order = { hero: 0, history: 1, numbers: 2, content: 3, purpose: 4, mission: 5, vision: 6, values: 7, differential: 8, cta: 9 };
         return (order[left.type] ?? 99) - (order[right.type] ?? 99);
     });
-    const aboutCards = orderedSections.filter((section) => ['mission', 'vision', 'values'].includes(section.type));
+    const cards = orderedSections.filter((section) => ['mission', 'vision', 'values'].includes(section.type));
     const mainSections = orderedSections.filter((section) => !['mission', 'vision', 'values'].includes(section.type));
 
     return (
@@ -202,15 +253,29 @@ function About({ page }) {
                     key={section.id || `${section.type}-${index}`}
                     section={section}
                     kind="about"
-                    reverse={['history', 'content'].includes(section.type) && index % 2 === 1}
+                    reverse={['history', 'content', 'purpose', 'differential'].includes(section.type) && index % 2 === 1}
                 />
             ))}
-            {aboutCards.length > 0 && (
-                <section className="py-[var(--section-space)]">
-                    <Container className="grid gap-4 tablet:grid-cols-3">
-                        {aboutCards.map((section, index) => (
-                            <SectionRenderer key={section.id || `${section.type}-${index}`} section={section} kind="about" />
+            <section className="py-[var(--section-space)]">
+                <Container className="max-w-[76rem]">
+                    <div className="grid gap-4 tablet:grid-cols-2 desktop:grid-cols-3">
+                        {(cards.length ? cards : fallbackAbout.filter((section) => ['mission', 'vision', 'values'].includes(section.type))).map((section) => (
+                            <SectionRenderer key={section.id || section.type} section={section} kind="about" />
                         ))}
+                    </div>
+                </Container>
+            </section>
+            {!mainSections.some((section) => section.type === 'differential') && (
+                <section className="py-[var(--section-space)]">
+                    <Container className="max-w-[76rem]">
+                        <div className="grid gap-10 desktop:grid-cols-2 desktop:items-center">
+                            <img src={fallbackAbout.find((section) => section.type === 'differential')?.image} alt="Nosso diferencial" className="mx-auto w-full max-h-[480px] rounded-card object-cover" />
+                            <div>
+                                <p className="eyebrow">Nosso diferencial</p>
+                                <h2 className="section-title mt-2">Nosso diferencial</h2>
+                                <p className="mt-5 text-sm leading-6 text-muted">Unimos localização, planejamento, infraestrutura e experiência para entregar empreendimentos com potencial real de valorização.</p>
+                            </div>
+                        </div>
                     </Container>
                 </section>
             )}
