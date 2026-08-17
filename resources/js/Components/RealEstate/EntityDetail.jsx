@@ -17,6 +17,8 @@ const infoFor = (item, type) => {
 
 const titleFor = (entityType) => (entityType === 'subdivision' ? 'Loteamentos' : entityType === 'condominium' ? 'Condomínios' : 'Imóveis');
 
+const listDocuments = (documents = []) => documents.filter((document) => document.media_asset?.url || document.url || document.file_url);
+
 export default function EntityDetail({ item, entityType, priceKey }) {
     const media = item.media_assets || [];
     const galleryItems = media.length ? media : [{ id: 'fallback', url: '/reference-assets/hero-home.jpg', alt_text: item.title }];
@@ -72,11 +74,52 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                                 <p className="eyebrow">Detalhes do imóvel</p>
                                 <h2 className="section-title mt-3 text-[2rem]">{item.title}</h2>
                                 <p className="mt-2 text-sm text-muted">{[item.address, item.address_number, item.neighborhood, item.city?.name].filter(Boolean).join(', ')}</p>
+                                {item.description && <p className="mt-5 whitespace-pre-line text-sm leading-7 text-muted">{item.description}</p>}
                             </section>
                             <section className="rounded-card bg-white p-7 shadow-card">
                                 <h2 className="text-xl font-normal text-ink">Descrição do Imóvel</h2>
                                 <p className="mt-5 whitespace-pre-line text-sm leading-6 text-muted">{item.description || item.excerpt}</p>
                             </section>
+                            {item.features?.length > 0 && (
+                                <section className="rounded-card bg-white p-7 shadow-card">
+                                    <p className="eyebrow">Características</p>
+                                    <h2 className="section-title mt-2">Tudo o que valoriza este imóvel</h2>
+                                    <div className="mt-6">
+                                        <FeatureGrid items={item.features} />
+                                    </div>
+                                </section>
+                            )}
+                            {item.floor_plans?.length > 0 && (
+                                <section className="rounded-card bg-white p-7 shadow-card">
+                                    <p className="eyebrow">Plantas</p>
+                                    <h2 className="section-title mt-2">Veja as plantas disponíveis</h2>
+                                    <div className="mt-6 grid gap-4 tablet:grid-cols-2">
+                                        {item.floor_plans.map((plan) => (
+                                            <article key={plan.id} className="overflow-hidden rounded-card border border-line bg-surface">
+                                                <img src={plan.media_asset?.url || '/reference-assets/blog-city.jpg'} alt={plan.title || 'Planta'} className="aspect-[16/10] w-full object-cover" />
+                                                <div className="p-4">
+                                                    <h3 className="text-sm font-medium text-ink">{plan.title || 'Planta'}</h3>
+                                                    {plan.area && <p className="mt-1 text-sm text-muted">{Number(plan.area).toLocaleString('pt-BR')} m²</p>}
+                                                </div>
+                                            </article>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+                            {item.documents?.length > 0 && (
+                                <section className="rounded-card bg-white p-7 shadow-card">
+                                    <p className="eyebrow">Documentos</p>
+                                    <h2 className="section-title mt-2">Materiais disponíveis</h2>
+                                    <div className="mt-6 grid gap-3">
+                                        {listDocuments(item.documents).map((document) => (
+                                            <a key={document.id} href={document.media_asset?.url || document.url || document.file_url} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl border border-line px-4 py-3 text-sm text-ink transition hover:border-brand">
+                                                <span>{document.title || document.name || 'Documento'}</span>
+                                                <span className="text-brand">Abrir</span>
+                                            </a>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
                             <section className="rounded-card bg-white p-7 shadow-card">
                                 <h2 className="text-xl font-normal text-ink">Condições Comerciais</h2>
                                 <div className="mt-5 grid gap-3 tablet:grid-cols-2">
@@ -117,6 +160,41 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                                 <h2 className="section-title mt-2">Projetado para superar expectativas</h2>
                                 <div className="mt-7">
                                     <FeatureGrid items={item.features} />
+                                </div>
+                            </Container>
+                        </section>
+                    )}
+                    {item.floor_plans?.length > 0 && (
+                        <section className="pb-[var(--section-space)]">
+                            <Container>
+                                <p className="eyebrow">Plantas</p>
+                                <h2 className="section-title mt-2">Planos e unidades</h2>
+                                <div className="mt-7 grid gap-5 tablet:grid-cols-2 desktop:grid-cols-3">
+                                    {item.floor_plans.map((plan) => (
+                                        <article key={plan.id} className="overflow-hidden rounded-card border border-line bg-white shadow-card">
+                                            <img src={plan.media_asset?.url || '/reference-assets/blog-city.jpg'} alt={plan.title || 'Planta'} className="aspect-[16/10] w-full object-cover" />
+                                            <div className="p-5">
+                                                <h3 className="text-base font-medium text-ink">{plan.title || 'Planta'}</h3>
+                                                {plan.area && <p className="mt-1 text-sm text-muted">{Number(plan.area).toLocaleString('pt-BR')} m²</p>}
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
+                            </Container>
+                        </section>
+                    )}
+                    {item.documents?.length > 0 && (
+                        <section className="bg-surface py-[var(--section-space)]">
+                            <Container>
+                                <p className="eyebrow">Documentos</p>
+                                <h2 className="section-title mt-3">Arquivos e materiais úteis</h2>
+                                <div className="mt-7 grid gap-3 tablet:grid-cols-2">
+                                    {listDocuments(item.documents).map((document) => (
+                                        <a key={document.id} href={document.media_asset?.url || document.url || document.file_url} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl border border-line bg-white px-4 py-4 text-sm text-ink transition hover:border-brand">
+                                            <span>{document.title || document.name || 'Documento'}</span>
+                                            <span className="text-brand">Abrir</span>
+                                        </a>
+                                    ))}
                                 </div>
                             </Container>
                         </section>
