@@ -14,6 +14,7 @@ const baseSection = (type, label) => ({
     image: '',
     button_label: '',
     button_url: '',
+    recipient_email: '',
     layout: '',
     sort_order: 0,
     is_active: true,
@@ -63,6 +64,7 @@ const createSection = (type = 'content', label = 'Conteúdo') => ({
     image: '',
     button_label: '',
     button_url: '',
+    recipient_email: '',
     layout: '',
     sort_order: 0,
     is_active: true,
@@ -128,6 +130,7 @@ export default function Form({ item }) {
                 image: section.data?.image || '',
                 button_label: section.data?.button_label || '',
                 button_url: section.data?.button_url || '',
+                recipient_email: section.data?.recipient_email || '',
                 layout: section.data?.layout || '',
                 sort_order: section.sort_order ?? index,
                 is_active: Boolean(section.is_active ?? true),
@@ -281,7 +284,7 @@ export default function Form({ item }) {
                         <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                         <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
                         <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
-                        <Field label="E-mail destinatário" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />
+                        <Field label="E-mail destinatário" value={section.recipient_email || ''} onChange={(event) => updateSection(index, 'recipient_email', event.target.value)} />
                         <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
                     </div>
                 );

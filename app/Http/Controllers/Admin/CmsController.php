@@ -368,6 +368,7 @@ class CmsController extends Controller
             'sections.*.image' => ['nullable', 'string', 'max:2048'],
             'sections.*.button_label' => ['nullable', 'string', 'max:255'],
             'sections.*.button_url' => ['nullable', 'string', 'max:255'],
+            'sections.*.recipient_email' => ['nullable', 'email', 'max:255'],
             'sections.*.layout' => ['nullable', 'string', 'max:100'],
             'sections.*.sort_order' => ['nullable', 'integer', 'min:0'],
             'sections.*.is_active' => ['nullable', 'boolean'],
@@ -401,6 +402,7 @@ class CmsController extends Controller
                     'image' => $section['image'] ?? null,
                     'button_label' => $section['button_label'] ?? null,
                     'button_url' => $section['button_url'] ?? null,
+                    'recipient_email' => $section['recipient_email'] ?? null,
                     'layout' => $section['layout'] ?? null,
                 ],
                 'sort_order' => (int) ($section['sort_order'] ?? $index),
@@ -465,7 +467,7 @@ class CmsController extends Controller
             'contato' => [
                 ['type' => 'hero', 'data' => ['label' => 'Contato', 'title' => 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.', 'subtitle' => 'Fale com nossa equipe', 'content' => 'Nossa equipe está à disposição para esclarecer dúvidas, apresentar oportunidades e oferecer o suporte necessário.', 'image' => '/reference-assets/hero-contact.webp']],
                 ['type' => 'contact-data', 'data' => ['label' => 'Dados de contato', 'content' => [['Escritório administrativo', "Av. Ministro Cirne Lima, nº 3951\nJardim Coopagro\nToledo - PR\nCEP 85904-460"], ['Telefones', "Telefone Comercial\n(45) 3252-7023\n\nPlantão de Vendas\n(45) 9 9111-9653"], ['E-mail', 'contato@pascoalloteamentos.com.br']]]],
-                ['type' => 'contact-form', 'data' => ['label' => 'Formulário', 'title' => 'Fale com Nossa Equipe', 'subtitle' => 'Estamos disponíveis para atender você.', 'content' => 'Preencha o formulário e nossa equipe entrará em contato o mais breve possível.', 'button_label' => 'Enviar mensagem']],
+                ['type' => 'contact-form', 'data' => ['label' => 'Formulário', 'title' => 'Fale com Nossa Equipe', 'subtitle' => 'Estamos disponíveis para atender você.', 'content' => 'Preencha o formulário e nossa equipe entrará em contato o mais breve possível.', 'button_label' => 'Enviar mensagem', 'recipient_email' => 'contato@pascoalloteamentos.com.br']],
                 ['type' => 'social', 'data' => ['label' => 'Redes sociais', 'content' => [['Instagram', 'https://instagram.com'], ['Facebook', 'https://facebook.com']]]],
             ],
             default => in_array($slug, ['condominios', 'loteamentos', 'imoveis'], true) ? [
