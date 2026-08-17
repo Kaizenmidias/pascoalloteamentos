@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BlogPost;
 use App\Models\Condominium;
 use App\Models\Property;
+use App\Models\SiteSetting;
 use App\Models\Subdivision;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -48,6 +49,12 @@ class HomeController extends Controller
             'condominiums' => $condominiums,
             'properties' => $properties,
             'subdivisions' => $subdivisions,
+            'homeNumbers' => SiteSetting::query()->where('key', 'home_numbers')->first()?->value ?? [
+                ['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'],
+                ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'],
+                ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presença consolidada.'],
+                ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.'],
+            ],
             'posts' => BlogPost::query()->where('status', 'published')->with(['featuredMedia', 'categories'])->latest('published_at')->limit(3)->get(),
         ]);
     }

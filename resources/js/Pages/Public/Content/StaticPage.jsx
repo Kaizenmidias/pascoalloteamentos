@@ -1,29 +1,34 @@
+import { Link } from '@inertiajs/react';
 import PublicLayout from '../../../Components/Layout/PublicLayout';
 import SeoHead from '../../../Components/SEO/SeoHead';
 import Container from '../../../Components/UI/Container';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
 
+const Hero = ({ contact = false }) => (
+    <section className="relative flex min-h-[600px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
+        <img src={contact ? '/reference-assets/hero-contact.webp' : '/reference-assets/hero-home.jpg'} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="red-overlay absolute inset-0" />
+        <div className="relative z-10 mx-auto w-full max-w-[80rem]">
+            <h1 className={`mx-auto max-w-[80rem] text-[46px] font-light leading-[1.12] tracking-[-.015em] ${contact ? 'desktop:px-[70px]' : ''}`}>
+                {contact ? 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.' : 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.'}
+            </h1>
+            <p className={`mx-auto mt-5 max-w-[80rem] text-base font-light leading-7 text-white/90 desktop:text-lg ${contact ? 'desktop:px-[70px]' : ''}`}>
+                {contact ? 'Nossa equipe está à disposição para esclarecer dúvidas, apresentar oportunidades e oferecer o suporte necessário para que você faça um investimento com segurança e tranquilidade.' : 'Descubra empreendimentos inovadores, feitos com cuidado e com alto padrão, que valorizam a arte, a natureza e a funcionalidade.'}
+            </p>
+        </div>
+    </section>
+);
+
 const values = [
-    {
-        title: 'Missão',
-        image: '/reference-assets/blog-city.jpg',
-        text: 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.',
-    },
-    {
-        title: 'Visão',
-        image: '/reference-assets/about-plans.jpg',
-        text: 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.',
-    },
-    {
-        title: 'Valores',
-        image: '/reference-assets/about-meeting.jpg',
-        text: 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.',
-    },
+    { title: 'Missão', image: '/reference-assets/blog-city.jpg', text: 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.' },
+    { title: 'Visão', image: '/reference-assets/about-plans.jpg', text: 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.' },
+    { title: 'Valores', image: '/reference-assets/about-meeting.jpg', text: 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.' },
 ];
 
 function About() {
     return (
         <>
+            <Hero />
             <section className="py-[var(--section-space)]">
                 <Container className="space-y-20">
                     <div className="grid gap-10 desktop:grid-cols-2 desktop:items-center">
@@ -91,6 +96,7 @@ function About() {
 function Contact() {
     return (
         <>
+            <Hero contact />
             <section className="py-14">
                 <Container className="grid gap-8 tablet:grid-cols-3">
                     {[
