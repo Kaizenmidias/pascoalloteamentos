@@ -6,13 +6,6 @@ import LeadForm from '../../../Components/RealEstate/LeadForm';
 
 const fallbackAbout = [
     {
-        type: 'hero',
-        label: 'Hero',
-        title: 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.',
-        content: 'Descubra empreendimentos inovadores, feitos com cuidado e com alto padrão, que valorizam a arte, a natureza e a funcionalidade.',
-        image: '/reference-assets/hero-home.jpg',
-    },
-    {
         type: 'history',
         label: 'História',
         title: 'Uma história construída com trabalho, confiança e visão de futuro.',
@@ -20,11 +13,25 @@ const fallbackAbout = [
         image: '/reference-assets/about-team.webp',
     },
     {
-        type: 'history',
-        label: 'Crescimento',
-        title: 'Crescimento que gera desenvolvimento',
-        content: 'O compromisso com a qualidade fez da Pascoal uma referência regional no desenvolvimento de loteamentos e empreendimentos imobiliários. Nossa atuação já contribuiu para a expansão urbana de diversas regiões.\n\nCada empreendimento é pensado para oferecer segurança, infraestrutura completa, excelente localização e potencial de valorização.',
+        type: 'mission',
+        label: 'Missão',
+        title: 'Missão',
+        content: 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.',
         image: '/reference-assets/about-engineer.webp',
+    },
+    {
+        type: 'vision',
+        label: 'Visão',
+        title: 'Visão',
+        content: 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.',
+        image: '/reference-assets/blog-city.jpg',
+    },
+    {
+        type: 'values',
+        label: 'Valores',
+        title: 'Valores',
+        content: 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.',
+        image: '/reference-assets/hero-contact.webp',
     },
 ];
 
@@ -83,6 +90,7 @@ function SectionRenderer({ section, kind, reverse = false }) {
                 image: data.image || '/reference-assets/blog-city.jpg',
                 alt: data.alt || data.title || data.label || '',
             }];
+
         return (
             <section className={type === 'institucional' ? 'grid gap-4 py-[var(--section-space)] tablet:grid-cols-3' : 'py-[var(--section-space)]'}>
                 {blocks.map((block) => (
@@ -174,7 +182,13 @@ function SectionRenderer({ section, kind, reverse = false }) {
 
 function About({ page }) {
     const sections = page?.sections?.length ? page.sections : fallbackAbout;
-    const orderedSections = [...sections].sort((left, right) => {
+    const visibleSections = sections.filter((section) => {
+        const title = `${section?.data?.title || section?.title || ''}`.toLowerCase();
+        if ((section.type || '') === 'hero') return false;
+        if (title.includes('crescimento que gera desenvolvimento')) return false;
+        return true;
+    });
+    const orderedSections = [...visibleSections].sort((left, right) => {
         const order = { hero: 0, history: 1, numbers: 2, content: 3, mission: 4, vision: 5, values: 6, cta: 7 };
         return (order[left.type] ?? 99) - (order[right.type] ?? 99);
     });

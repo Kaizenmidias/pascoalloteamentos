@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import PublicLayout from '../Layout/PublicLayout';
 import Container from '../UI/Container';
+import Carousel from '../UI/Carousel';
 import EmptyState from '../UI/EmptyState';
 import SeoHead from '../SEO/SeoHead';
 import EntityCard from './EntityCard';
@@ -48,7 +49,15 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
                 </Container>
             </section>
             <Container className="py-[var(--section-space)]">
-                {items.data.length ? <div className="grid gap-6 tablet:grid-cols-2 desktop:grid-cols-3">{items.data.map((item) => <EntityCard key={item.id} item={item} href={`${basePath}/${item.slug}`} />)}</div> : <EmptyState>Nenhum empreendimento encontrado com os filtros selecionados.</EmptyState>}
+                {items.data.length ? (
+                    <Carousel label="Resultados da busca">
+                        {items.data.map((item) => (
+                            <EntityCard key={item.id} item={item} href={`${basePath}/${item.slug}`} />
+                        ))}
+                    </Carousel>
+                ) : (
+                    <EmptyState>Nenhum empreendimento encontrado com os filtros selecionados.</EmptyState>
+                )}
                 {items.links?.length > 3 && <nav className="mt-10 flex justify-center gap-2">{items.links.map((link, index) => <Link key={index} href={link.url || '#'} dangerouslySetInnerHTML={{ __html: link.label }} className={`grid min-h-10 min-w-10 place-items-center rounded-md border px-3 text-sm ${link.active ? 'border-brand bg-brand text-white' : 'border-line'}`} />)}</nav>}
             </Container>
         </PublicLayout>

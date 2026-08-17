@@ -52,7 +52,7 @@ export default function SiteHeader() {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { url, props } = usePage();
-    const lightPages = ['/condominios', '/loteamentos', '/imoveis'];
+    const lightPages = ['/sobre-nos', '/condominios', '/loteamentos', '/imoveis'];
     const lightHeader = lightPages.some((path) => url === path || url.startsWith(`${path}/`));
     const realEstate = props.realEstate || {};
     const menuGroups = useMemo(() => ({

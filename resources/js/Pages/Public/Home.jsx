@@ -84,7 +84,7 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
                         action="/imoveis"
                         includeCategory
                         compact
-                        showSubmit={false}
+                        autoSubmit={false}
                         categories={categories}
                         cities={realEstate.cities || []}
                         types={[...(realEstate.propertyTypes || []), ...(realEstate.condominiumTypes || []), ...(realEstate.subdivisionTypes || [])]}
