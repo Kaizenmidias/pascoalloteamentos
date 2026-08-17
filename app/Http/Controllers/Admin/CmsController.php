@@ -98,6 +98,10 @@ class CmsController extends Controller
 
     public function destroyPage(Page $page): RedirectResponse
     {
+        if (in_array($page->slug, array_column(self::STRUCTURAL_PAGES, 'slug'), true)) {
+            return back()->with('error', 'Esta é uma página estrutural e não pode ser excluída.');
+        }
+
         $page->delete();
 
         return back()->with('success', 'Página movida para a lixeira.');

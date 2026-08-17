@@ -1,12 +1,62 @@
 import { useMemo, useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import AdminLayout from '../../../Components/Layout/AdminLayout';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import Button from '../../../Components/UI/Button';
 
-const createSection = (type = 'content') => ({
+const baseSection = (type, label) => ({
     type,
+    label,
+    title: '',
+    subtitle: '',
+    content: '',
+    image: '',
+    button_label: '',
+    button_url: '',
+    layout: '',
+    sort_order: 0,
+    is_active: true,
+});
+
+const presets = {
+    home: [
+        baseSection('hero', 'Hero / Carrossel'),
+        baseSection('filter', 'Filtro de Empreendimentos'),
+        baseSection('numbers', 'Nossos Números'),
+        baseSection('differentials', 'Diferenciais'),
+    ],
+    'sobre-nos': [
+        baseSection('hero', 'Hero'),
+        baseSection('history', 'História'),
+        baseSection('institucional', 'Missão, Visão e Valores'),
+        baseSection('cta', 'CTA'),
+    ],
+    condominios: [
+        baseSection('hero', 'Cabeçalho da Página'),
+        baseSection('filters', 'Filtros'),
+    ],
+    loteamentos: [
+        baseSection('hero', 'Cabeçalho da Página'),
+        baseSection('filters', 'Filtros'),
+    ],
+    imoveis: [
+        baseSection('hero', 'Cabeçalho da Página'),
+        baseSection('filters', 'Filtros'),
+    ],
+    contato: [
+        baseSection('hero', 'Cabeçalho da Página'),
+        baseSection('contact-data', 'Dados de Contato'),
+        baseSection('contact-form', 'Formulário'),
+        baseSection('social', 'Redes Sociais'),
+    ],
+};
+
+const structuredTemplates = new Set(['home', 'institutional', 'listing', 'contact']);
+
+const createSection = (type = 'content', label = 'Conteúdo') => ({
+    type,
+    label,
     title: '',
     subtitle: '',
     content: '',
@@ -20,23 +70,29 @@ const createSection = (type = 'content') => ({
 
 export default function Form({ item }) {
     const editing = Boolean(item);
+    const isStructured = structuredTemplates.has(item?.template) || presets[item?.slug];
     const initialSections = useMemo(() => {
-        if (!item?.sections?.length) {
-            return [createSection('hero')];
+        if (presets[item?.slug]?.length) {
+            return presets[item.slug].map((section, index) => ({ ...section, sort_order: index }));
         }
 
-        return item.sections.map((section, index) => ({
-            type: section.type || 'content',
-            title: section.data?.title || '',
-            subtitle: section.data?.subtitle || '',
-            content: section.data?.content || '',
-            image: section.data?.image || '',
-            button_label: section.data?.button_label || '',
-            button_url: section.data?.button_url || '',
-            layout: section.data?.layout || '',
-            sort_order: section.sort_order ?? index,
-            is_active: Boolean(section.is_active ?? true),
-        }));
+        if (item?.sections?.length) {
+            return item.sections.map((section, index) => ({
+                type: section.type || 'content',
+                label: section.data?.label || section.type || 'Conteúdo',
+                title: section.data?.title || '',
+                subtitle: section.data?.subtitle || '',
+                content: section.data?.content || '',
+                image: section.data?.image || '',
+                button_label: section.data?.button_label || '',
+                button_url: section.data?.button_url || '',
+                layout: section.data?.layout || '',
+                sort_order: section.sort_order ?? index,
+                is_active: Boolean(section.is_active ?? true),
+            }));
+        }
+
+        return [createSection('content', 'Conteúdo')];
     }, [item]);
 
     const { data, setData, post, processing, errors } = useForm({
@@ -50,7 +106,7 @@ export default function Form({ item }) {
         seo_description: item?.seo?.description || '',
         sections: initialSections,
     });
-    const [activeTab, setActiveTab] = useState('content');
+    const [activeTab, setActiveTab] = useState('general');
 
     const submit = (event) => {
         event.preventDefault();
@@ -67,11 +123,11 @@ export default function Form({ item }) {
     const removeSection = (index) => setData('sections', data.sections.filter((_, sectionIndex) => sectionIndex !== index));
 
     return (
-        <AdminLayout title={editing ? 'Editar página' : 'Nova página'}>
+        <AdminLayout title={editing ? `Editar página: ${item.title}` : 'Nova página'}>
             <form onSubmit={submit} className="space-y-6">
                 <div className="flex flex-wrap gap-2">
                     {[
-                        ['content', 'Conteúdo'],
+                        ['general', 'Geral'],
                         ['sections', 'Seções'],
                         ['seo', 'SEO'],
                     ].map(([key, label]) => (
@@ -86,32 +142,46 @@ export default function Form({ item }) {
                     ))}
                 </div>
 
-                {activeTab === 'content' && (
-                    <section className="grid gap-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm tablet:grid-cols-2">
-                        <Field label="Título" value={data.title} onChange={(event) => setData('title', event.target.value)} error={errors.title} />
-                        <Field label="Slug" value={data.slug} onChange={(event) => setData('slug', event.target.value)} error={errors.slug} />
-                        <SelectField
-                            label="Template"
-                            options={[
-                                { id: 'default', name: 'Padrão' },
-                                { id: 'institutional', name: 'Institucional' },
-                                { id: 'landing', name: 'Landing page' },
-                            ]}
-                            value={data.template}
-                            onChange={(event) => setData('template', event.target.value)}
-                        />
-                        <SelectField
-                            label="Status"
-                            options={[
-                                { id: 'draft', name: 'Rascunho' },
-                                { id: 'published', name: 'Publicado' },
-                                { id: 'archived', name: 'Arquivado' },
-                            ]}
-                            value={data.status}
-                            onChange={(event) => setData('status', event.target.value)}
-                        />
-                        <div className="tablet:col-span-2">
-                            <Field label="Conteúdo" as="textarea" rows="14" value={data.content} onChange={(event) => setData('content', event.target.value)} />
+                {activeTab === 'general' && (
+                    <section className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                        <div>
+                            <h2 className="text-lg font-medium text-gray-900">Dados gerais</h2>
+                            <p className="text-sm text-gray-500">Nome, slug, template e estado da página.</p>
+                        </div>
+                        <div className="grid gap-5 tablet:grid-cols-2">
+                            <Field label="Título" value={data.title} onChange={(event) => setData('title', event.target.value)} error={errors.title} />
+                            <Field label="Slug" value={data.slug} onChange={(event) => setData('slug', event.target.value)} error={errors.slug} />
+                            <SelectField
+                                label="Template"
+                                options={[
+                                    { id: 'home', name: 'Home' },
+                                    { id: 'institutional', name: 'Institucional' },
+                                    { id: 'listing', name: 'Listagem' },
+                                    { id: 'contact', name: 'Contato' },
+                                    { id: 'page', name: 'Página livre' },
+                                ]}
+                                value={data.template}
+                                onChange={(event) => setData('template', event.target.value)}
+                            />
+                            <SelectField
+                                label="Status"
+                                options={[
+                                    { id: 'draft', name: 'Rascunho' },
+                                    { id: 'published', name: 'Publicado' },
+                                    { id: 'archived', name: 'Arquivado' },
+                                ]}
+                                value={data.status}
+                                onChange={(event) => setData('status', event.target.value)}
+                            />
+                            {isStructured ? (
+                                <div className="tablet:col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                                    Esta é uma página estruturada. A edição principal acontece nas seções abaixo, não no HTML bruto.
+                                </div>
+                            ) : (
+                                <div className="tablet:col-span-2">
+                                    <Field label="Conteúdo" as="textarea" rows="14" value={data.content} onChange={(event) => setData('content', event.target.value)} />
+                                </div>
+                            )}
                         </div>
                     </section>
                 )}
@@ -121,7 +191,7 @@ export default function Form({ item }) {
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div>
                                 <h2 className="text-lg font-medium text-gray-900">Seções da página</h2>
-                                <p className="text-sm text-gray-500">Organize hero, blocos de conteúdo, CTA e imagens no layout da página.</p>
+                                <p className="text-sm text-gray-500">Cada bloco tem nome claro e controla uma parte específica do site.</p>
                             </div>
                             <Button type="button" onClick={addSection}>Adicionar seção</Button>
                         </div>
@@ -131,14 +201,21 @@ export default function Form({ item }) {
                                 <div key={`${section.type}-${index}`} className="rounded-2xl border border-gray-200 bg-gray-50 p-5">
                                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                                         <div className="flex flex-wrap items-center gap-3">
+                                            <Field label="Nome da seção" value={section.label || ''} onChange={(event) => updateSection(index, 'label', event.target.value)} />
                                             <SelectField
                                                 label={`Tipo ${index + 1}`}
                                                 options={[
                                                     { id: 'hero', name: 'Hero' },
-                                                    { id: 'content', name: 'Conteúdo' },
-                                                    { id: 'image-text', name: 'Imagem + texto' },
+                                                    { id: 'filter', name: 'Filtro' },
+                                                    { id: 'numbers', name: 'Números' },
+                                                    { id: 'differentials', name: 'Diferenciais' },
+                                                    { id: 'history', name: 'História' },
+                                                    { id: 'institucional', name: 'Institucional' },
                                                     { id: 'cta', name: 'CTA' },
-                                                    { id: 'stats', name: 'Números' },
+                                                    { id: 'contact-data', name: 'Dados de contato' },
+                                                    { id: 'contact-form', name: 'Formulário' },
+                                                    { id: 'social', name: 'Redes sociais' },
+                                                    { id: 'content', name: 'Conteúdo' },
                                                 ]}
                                                 value={section.type}
                                                 onChange={(event) => updateSection(index, 'type', event.target.value)}
@@ -148,18 +225,18 @@ export default function Form({ item }) {
                                                 Ativa
                                             </label>
                                         </div>
-                                        <button type="button" onClick={() => removeSection(index)} className="text-sm font-medium text-red-700">Remover</button>
+                                        <button type="button" onClick={() => removeSection(index)} className="text-sm font-medium text-red-700">Excluir</button>
                                     </div>
 
                                     <div className="grid gap-4 tablet:grid-cols-2">
                                         <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                                         <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
                                         <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
-                                        <Field label="Botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
-                                        <Field label="URL do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />
+                                        <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
+                                        <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />
                                         <Field label="Layout" value={section.layout} onChange={(event) => updateSection(index, 'layout', event.target.value)} />
                                         <div className="tablet:col-span-2">
-                                            <Field label="Conteúdo" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                                            <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                                         </div>
                                     </div>
                                 </div>
@@ -175,7 +252,10 @@ export default function Form({ item }) {
                     </section>
                 )}
 
-                <Button type="submit" disabled={processing}>Salvar página</Button>
+                <div className="flex flex-wrap gap-3">
+                    <Button type="submit" disabled={processing}>Salvar página</Button>
+                    {editing && isStructured && <Link href={`/admin/pages/${item.slug}/edit`} className="brand-button inline-flex">Recarregar</Link>}
+                </div>
             </form>
         </AdminLayout>
     );
