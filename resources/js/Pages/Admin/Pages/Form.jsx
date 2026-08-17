@@ -79,6 +79,7 @@ const createSection = (type = 'content', label = 'Conteúdo') => ({
     };
 
     const imagePreview = (value) => (value ? value : '/reference-assets/hero-home.jpg');
+    const sectionPreview = (section) => section.image || '/reference-assets/hero-home.jpg';
 
 const structuredContentTypes = new Set(['institucional', 'contact-data', 'social', 'contact-form']);
 const structuredSchemas = {
@@ -268,6 +269,36 @@ export default function Form({ item }) {
                 );
             }
 
+            if (sectionType === 'filter' || sectionType === 'numbers' || sectionType === 'differentials') {
+                return (
+                    <div className="space-y-4">
+                        <div className="rounded-xl border border-slate-200 bg-white p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">{prettySectionName(sectionType)}</p>
+                            <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
+                        </div>
+                        <div className="grid gap-6 tablet:grid-cols-[1fr_0.9fr]">
+                            <div className="space-y-4">
+                                <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                                <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                            </div>
+                            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                                <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                                    <div>
+                                        <p className="text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Preview</p>
+                                        <p className="text-sm text-gray-600">{section.image ? 'Imagem associada' : 'Sem imagem'}</p>
+                                    </div>
+                                    <button type="button" className="text-sm font-medium text-red-700" onClick={() => updateSection(index, 'image', '')}>Remover imagem</button>
+                                </div>
+                                <img src={sectionPreview(section)} alt={section.alt || section.title || ''} className="h-48 w-full object-cover" />
+                                <div className="p-4">
+                                    <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
             if (sectionType === 'mission' || sectionType === 'vision' || sectionType === 'values') {
                 return (
                     <div className="space-y-4">
@@ -355,13 +386,25 @@ export default function Form({ item }) {
 
             if (sectionType === 'contact-form') {
                 return (
-                    <div className="grid gap-4 tablet:grid-cols-2">
-                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                        <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                        <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
-                        <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
-                        <Field label="E-mail destinatário" value={section.recipient_email || ''} onChange={(event) => updateSection(index, 'recipient_email', event.target.value)} />
-                        <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
+                    <div className="grid gap-6 tablet:grid-cols-[1fr_0.9fr]">
+                        <div className="space-y-4">
+                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                            <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                            <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                            <Field label="E-mail destinatário" value={section.recipient_email || ''} onChange={(event) => updateSection(index, 'recipient_email', event.target.value)} />
+                            <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
+                        </div>
+                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                            <div className="border-b border-gray-100 px-4 py-3">
+                                <p className="text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Resumo do formulário</p>
+                                <p className="text-sm text-gray-600">Destinatário: {section.recipient_email || 'não definido'}</p>
+                            </div>
+                            <div className="p-4 text-sm text-gray-600">
+                                <p className="font-medium text-gray-900">{section.title || 'Fale com Nossa Equipe'}</p>
+                                <p className="mt-2 whitespace-pre-line">{section.content || 'Texto de apoio do formulário.'}</p>
+                            </div>
+                        </div>
                     </div>
                 );
             }
@@ -523,6 +566,12 @@ export default function Form({ item }) {
                                                 />
                                             )}
                                             {!schema && (
+                                                <label className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <input type="checkbox" checked={section.is_active} onChange={(event) => updateSection(index, 'is_active', event.target.checked)} />
+                                                    Ativa
+                                                </label>
+                                            )}
+                                            {schema && (
                                                 <label className="flex items-center gap-2 text-sm text-gray-600">
                                                     <input type="checkbox" checked={section.is_active} onChange={(event) => updateSection(index, 'is_active', event.target.checked)} />
                                                     Ativa
