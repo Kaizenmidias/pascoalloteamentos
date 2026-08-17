@@ -34,7 +34,7 @@ export default function Carousel({ children, label = 'Destaques', className = ''
                 <button type="button" onClick={() => move(1)} disabled={position.end} aria-label="Próximo item" className="grid size-10 place-items-center rounded-[7px] bg-brand text-lg text-white transition hover:bg-brand-dark disabled:cursor-default disabled:bg-line disabled:text-muted">&#8594;</button>
             </div>
             <div ref={track} onScroll={updatePosition} className="-mx-1 flex snap-x snap-mandatory gap-5 overflow-x-auto px-1 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {items.map((child, index) => <div key={child.key ?? index} className="w-[84%] shrink-0 snap-start tablet:w-[48%] desktop:w-[calc((100%-1.25rem)/2.18)]">{child}</div>)}
+                {items.map((child, index) => <div key={child.key ?? index} className="w-[88%] shrink-0 snap-start tablet:w-[48%] desktop:w-[calc((100%-2.5rem)/3)]">{child}</div>)}
             </div>
         </div>
     );
