@@ -88,7 +88,7 @@ const structuredSchemas = {
     'sobre-nos': {
         title: 'Sobre nós',
         description: 'Organize a apresentação institucional da empresa com blocos reais da página.',
-        sections: ['hero', 'history', 'history', 'numbers', 'content', 'institucional', 'cta'],
+        sections: ['hero', 'history', 'history', 'numbers', 'content', 'mission', 'vision', 'values', 'content'],
     },
     contato: {
         title: 'Contato',
@@ -127,7 +127,22 @@ export default function Form({ item }) {
         }
 
         if (item?.sections?.length) {
-            return item.sections.map((section, index) => ({
+            return item.sections.flatMap((section, index) => {
+                if (item?.slug === 'sobre-nos' && section.type === 'institucional' && Array.isArray(section.data?.content)) {
+                    return section.data.content.slice(0, 3).map((block, blockIndex) => ({
+                        type: ['mission', 'vision', 'values'][blockIndex],
+                        label: block.title || ['Missão', 'Visão', 'Valores'][blockIndex],
+                        title: block.title || ['Missão', 'Visão', 'Valores'][blockIndex].toUpperCase(),
+                        content: block.text || '',
+                        image: block.image || '',
+                        recipient_email: '',
+                        layout: '',
+                        sort_order: (section.sort_order ?? index) + (blockIndex * 0.01),
+                        is_active: Boolean(section.is_active ?? true),
+                    }));
+                }
+
+                return [{
                 type: section.type || 'content',
                 label: section.data?.label || section.type || 'Conteúdo',
                 title: section.data?.title || '',
@@ -140,7 +155,8 @@ export default function Form({ item }) {
                 layout: section.data?.layout || '',
                 sort_order: section.sort_order ?? index,
                 is_active: Boolean(section.is_active ?? true),
-            }));
+                }];
+            }).flat();
         }
 
         return [createSection('content', 'Conteúdo')];
@@ -181,7 +197,9 @@ export default function Form({ item }) {
         differentials: 'Seção / Diferenciais',
         history: 'Seção / História',
         content: 'Seção / Conteúdo',
-        institucional: 'Seção / Missão, Visão e Valores',
+        mission: 'Seção / Missão',
+        vision: 'Seção / Visão',
+        values: 'Seção / Valores',
         cta: 'Seção / CTA',
         'contact-data': 'Seção / Dados de contato',
         'contact-form': 'Seção / Formulário',
@@ -196,7 +214,9 @@ export default function Form({ item }) {
         differentials: 'Cards com os principais diferenciais.',
         history: 'Conteúdo editorial com imagem e texto.',
         content: 'Conteúdo complementar da página.',
-        institucional: 'Três cards com imagem, título e texto.',
+        mission: 'Card da missão da empresa.',
+        vision: 'Card da visão da empresa.',
+        values: 'Card dos valores da empresa.',
         cta: 'Chamada para ação com botão.',
         'contact-data': 'Informações de endereço, telefone e e-mail.',
         'contact-form': 'Texto do formulário e e-mail de destino.',
@@ -227,7 +247,7 @@ export default function Form({ item }) {
                 );
             }
 
-            if (sectionType === 'history' || sectionType === 'content' || sectionType === 'cta') {
+            if (sectionType === 'history' || sectionType === 'content' || sectionType === 'cta' || sectionType === 'mission' || sectionType === 'vision' || sectionType === 'values') {
                 return (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -237,7 +257,6 @@ export default function Form({ item }) {
                         <div className="grid gap-4 tablet:grid-cols-2">
                             <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
                             <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                            <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
                             <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                             <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
                             {sectionType === 'cta' && <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
@@ -260,51 +279,6 @@ export default function Form({ item }) {
                             <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
                             <Field label="Números" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                             <p className="tablet:col-span-2 text-xs text-gray-500">Use JSON com lista de itens, preservando os números atuais da página.</p>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (sectionType === 'institucional') {
-                const blocks = (() => {
-                    try {
-                        return Array.isArray(JSON.parse(section.content || '[]')) ? JSON.parse(section.content || '[]') : [];
-                    } catch {
-                        return [];
-                    }
-                })();
-
-                const setBlock = (blockIndex, key, value) => {
-                    const next = blocks.map((block, currentIndex) => (currentIndex === blockIndex ? { ...block, [key]: value } : block));
-                    updateSection(index, 'content', JSON.stringify(next, null, 2));
-                };
-
-                return (
-                    <div className="space-y-4">
-                        <div className="rounded-xl border border-slate-200 bg-white p-4">
-                            <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">{prettySectionName(sectionType)}</p>
-                            <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
-                        </div>
-                        <div className="grid gap-4 tablet:grid-cols-2">
-                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                        </div>
-                        <div className="space-y-4">
-                            {['Missão', 'Visão', 'Valores'].map((name, blockIndex) => {
-                                const block = blocks[blockIndex] || { title: name, text: '', image: '' };
-                                return (
-                                    <div key={name} className="rounded-xl border border-gray-200 bg-white p-4">
-                                        <h3 className="text-sm font-semibold text-gray-900">{name}</h3>
-                                        <div className="mt-4 grid gap-4 tablet:grid-cols-2">
-                                            <Field label="Título" value={block.title || ''} onChange={(event) => setBlock(blockIndex, 'title', event.target.value)} />
-                                            <Field label="Imagem" value={block.image || ''} onChange={(event) => setBlock(blockIndex, 'image', event.target.value)} />
-                                            <div className="tablet:col-span-2">
-                                                <Field label="Texto" as="textarea" rows="5" value={block.text || ''} onChange={(event) => setBlock(blockIndex, 'text', event.target.value)} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
                         </div>
                     </div>
                 );
@@ -478,9 +452,9 @@ export default function Form({ item }) {
                         <div className="space-y-5">
                             {data.sections.map((section, index) => (
                                 <div key={`${section.type}-${index}`} className="rounded-2xl border border-gray-200 bg-gray-50 p-5">
-                                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                                        <div className="flex flex-wrap items-center gap-3">
-                                            <Field label="Nome da seção" value={section.label || ''} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex flex-wrap items-center gap-3">
+                                <Field label="Nome da seção" value={section.label || ''} onChange={(event) => updateSection(index, 'label', event.target.value)} />
                                             {canAddSections && (
                                                 <SelectField
                                                     label={`Tipo ${index + 1}`}
@@ -508,7 +482,7 @@ export default function Form({ item }) {
                                                 </label>
                                             )}
                                         </div>
-                                        <button type="button" onClick={() => removeSection(index)} className="text-sm font-medium text-red-700">Excluir</button>
+                                        {!schema && <button type="button" onClick={() => removeSection(index)} className="text-sm font-medium text-red-700">Excluir</button>}
                                     </div>
 
                                     {schema ? (

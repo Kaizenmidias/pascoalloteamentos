@@ -74,13 +74,20 @@ function SectionRenderer({ section, kind }) {
         );
     }
 
-    if (type === 'institucional') {
-        const blocks = Array.isArray(data.content) ? data.content : [];
+    if (type === 'institucional' || type === 'mission' || type === 'vision' || type === 'values') {
+        const blocks = type === 'institucional'
+            ? (Array.isArray(data.content) ? data.content : [])
+            : [{
+                title: data.title || data.label || '',
+                text: data.content || '',
+                image: data.image || '/reference-assets/blog-city.jpg',
+                alt: data.alt || data.title || data.label || '',
+            }];
         return (
-            <section className="grid gap-4 py-[var(--section-space)] tablet:grid-cols-3">
+            <section className={type === 'institucional' ? 'grid gap-4 py-[var(--section-space)] tablet:grid-cols-3' : 'py-[var(--section-space)]'}>
                 {blocks.map((block) => (
                     <article key={block.title} className="group relative min-h-[24rem] overflow-hidden rounded-card shadow-card">
-                        <img src={block.image || '/reference-assets/blog-city.jpg'} alt={block.title || ''} className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105" />
+                        <img src={block.image || '/reference-assets/blog-city.jpg'} alt={block.alt || block.title || ''} className="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition duration-500 ease-out" />
                         <div className="absolute inset-x-0 bottom-0 z-10 p-6 tablet:p-7">
                             <span className="text-sm font-medium uppercase tracking-[0.08em] text-white">{block.title}</span>
