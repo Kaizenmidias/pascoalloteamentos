@@ -19,6 +19,26 @@ const titleFor = (entityType) => (entityType === 'subdivision' ? 'Loteamentos' :
 
 const listDocuments = (documents = []) => documents.filter((document) => document.media_asset?.url || document.url || document.file_url);
 
+const introTitleFor = (entityType, item) => {
+    if (entityType === 'property') return 'Detalhes do imóvel';
+    if (entityType === 'condominium') return item.about_title || 'Apresentação do condomínio';
+    return item.about_title || 'Apresentação do loteamento';
+};
+
+const featureTitleFor = (entityType) => {
+    if (entityType === 'property') return 'Características que valorizam o imóvel';
+    if (entityType === 'condominium') return 'Infraestrutura e diferenciais do condomínio';
+    return 'Infraestrutura e diferenciais do loteamento';
+};
+
+const plansTitleFor = (entityType) => {
+    if (entityType === 'property') return 'Plantas e tipologias';
+    if (entityType === 'condominium') return 'Plantas do condomínio';
+    return 'Plantas e quadras';
+};
+
+const progressTitleFor = (entityType) => (entityType === 'condominium' ? 'Acompanhe o andamento do condomínio' : 'Acompanhe nosso projeto em andamento');
+
 export default function EntityDetail({ item, entityType, priceKey }) {
     const media = item.media_assets || [];
     const galleryItems = media.length ? media : [{ id: 'fallback', url: '/reference-assets/hero-home.jpg', alt_text: item.title }];
@@ -74,6 +94,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                                 <p className="eyebrow">Detalhes do imóvel</p>
                                 <h2 className="section-title mt-3 text-[2rem]">{item.title}</h2>
                                 <p className="mt-2 text-sm text-muted">{[item.address, item.address_number, item.neighborhood, item.city?.name].filter(Boolean).join(', ')}</p>
+                                {item.excerpt && <p className="mt-4 text-sm leading-6 text-muted">{item.excerpt}</p>}
                                 {item.description && <p className="mt-5 whitespace-pre-line text-sm leading-7 text-muted">{item.description}</p>}
                             </section>
                             <section className="rounded-card bg-white p-7 shadow-card">
@@ -83,7 +104,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                             {item.features?.length > 0 && (
                                 <section className="rounded-card bg-white p-7 shadow-card">
                                     <p className="eyebrow">Características</p>
-                                    <h2 className="section-title mt-2">Tudo o que valoriza este imóvel</h2>
+                                    <h2 className="section-title mt-2">{featureTitleFor(entityType)}</h2>
                                     <div className="mt-6">
                                         <FeatureGrid items={item.features} />
                                     </div>
@@ -92,7 +113,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                             {item.floor_plans?.length > 0 && (
                                 <section className="rounded-card bg-white p-7 shadow-card">
                                     <p className="eyebrow">Plantas</p>
-                                    <h2 className="section-title mt-2">Veja as plantas disponíveis</h2>
+                                    <h2 className="section-title mt-2">{plansTitleFor(entityType)}</h2>
                                     <div className="mt-6 grid gap-4 tablet:grid-cols-2">
                                         {item.floor_plans.map((plan) => (
                                             <article key={plan.id} className="overflow-hidden rounded-card border border-line bg-surface">
@@ -147,7 +168,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                         <Container className="grid gap-12 desktop:grid-cols-2 desktop:items-center">
                             <div>
                                 <p className="eyebrow">Sobre o empreendimento</p>
-                                <h2 className="section-title mt-3">{item.about_title || 'Infraestrutura completa para viver com mais conforto e qualidade de vida'}</h2>
+                                <h2 className="section-title mt-3">{introTitleFor(entityType, item)}</h2>
                                 <p className="mt-6 whitespace-pre-line text-base font-light leading-[1.7] text-muted desktop:text-lg">{item.about_text || item.description}</p>
                             </div>
                             <img src={media[1]?.url || galleryItems[0]?.url} alt="" className="aspect-[16/10] w-full rounded-card object-cover" />
@@ -157,7 +178,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                         <section className="pb-[var(--section-space)]">
                             <Container>
                                 <p className="eyebrow">Diferenciais</p>
-                                <h2 className="section-title mt-2">Projetado para superar expectativas</h2>
+                                <h2 className="section-title mt-2">{featureTitleFor(entityType)}</h2>
                                 <div className="mt-7">
                                     <FeatureGrid items={item.features} />
                                 </div>
@@ -168,7 +189,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                         <section className="pb-[var(--section-space)]">
                             <Container>
                                 <p className="eyebrow">Plantas</p>
-                                <h2 className="section-title mt-2">Planos e unidades</h2>
+                                <h2 className="section-title mt-2">{plansTitleFor(entityType)}</h2>
                                 <div className="mt-7 grid gap-5 tablet:grid-cols-2 desktop:grid-cols-3">
                                     {item.floor_plans.map((plan) => (
                                         <article key={plan.id} className="overflow-hidden rounded-card border border-line bg-white shadow-card">
@@ -223,7 +244,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                         <section className="bg-surface py-[var(--section-space)]">
                             <Container>
                                 <p className="eyebrow">Andamento da obra</p>
-                                <h2 className="section-title mt-2">Acompanhe nosso projeto em andamento</h2>
+                                <h2 className="section-title mt-2">{progressTitleFor(entityType)}</h2>
                                 <div className="mt-8 rounded-card bg-white p-7 shadow-card">
                                     <ConstructionProgress items={item.construction_stages} />
                                 </div>
