@@ -49,6 +49,8 @@ class HomeController extends Controller
             'condominiums' => $condominiums,
             'properties' => $properties,
             'subdivisions' => $subdivisions,
+            'homeHero' => SiteSetting::query()->where('key', 'home_hero')->first()?->value,
+            'homeDifferentials' => SiteSetting::query()->where('key', 'home_differentials')->first()?->value,
             'homeNumbers' => SiteSetting::query()->where('key', 'home_numbers')->first()?->value ?? [
                 ['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'],
                 ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'],

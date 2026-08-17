@@ -28,6 +28,7 @@ export default function AdminLayout({ title, children }) {
                 <nav className="flex-1 overflow-y-auto py-5 text-sm">
                     <Link href="/admin" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⌂</Icon>Início</Link>
                     <Link href="/admin/pages" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/pages') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>¤</Icon>Páginas</Link>
+                    <Link href="/admin/cms/home" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/cms/home') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⌂</Icon>Home CMS</Link>
                     <Link href="/admin/cms/home-numbers" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/cms/home-numbers') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>☷</Icon>Números da Home</Link>
                     <details open className="group">
                         <summary className="flex cursor-pointer list-none items-center gap-3 px-6 py-3 text-white/70 transition hover:bg-white/5 hover:text-white">

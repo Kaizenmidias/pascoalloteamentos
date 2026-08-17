@@ -26,6 +26,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::delete('pages/{page}', [CmsController::class, 'destroyPage'])->name('pages.destroy');
     Route::get('cms/home-numbers', [CmsController::class, 'homeNumbers'])->name('cms.home-numbers');
     Route::put('cms/home-numbers', [CmsController::class, 'updateHomeNumbers'])->name('cms.home-numbers.update');
+    Route::get('cms/home', [CmsController::class, 'home'])->name('cms.home');
+    Route::put('cms/home', [CmsController::class, 'updateHome'])->name('cms.home.update');
     Route::prefix('blog')->name('blog.')->group(function () {
         Route::get('posts', [CmsController::class, 'posts'])->name('posts.index');
         Route::get('posts/create', [CmsController::class, 'createPost'])->name('posts.create');

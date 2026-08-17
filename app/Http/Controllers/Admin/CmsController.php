@@ -150,6 +150,80 @@ class CmsController extends Controller
         return Inertia::render('Admin/Cms/HomeNumbers', ['numbers' => $numbers]);
     }
 
+    public function home(): Response
+    {
+        $settings = SiteSetting::query()
+            ->whereIn('key', ['home_hero', 'home_differentials'])
+            ->get()
+            ->keyBy('key')
+            ->map(fn (SiteSetting $setting) => $setting->value);
+
+        return Inertia::render('Admin/Cms/Home', [
+            'homeHero' => $settings['home_hero'] ?? [
+                'title' => 'Encontre o lugar onde sua próxima história começa.',
+                'description' => 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
+                'slides' => [
+                    ['image' => '/reference-assets/hero-home.jpg', 'title' => '', 'excerpt' => ''],
+                ],
+            ],
+            'homeDifferentials' => $settings['home_differentials'] ?? [
+                [
+                    'title' => 'Arquitetura autoral',
+                    'text' => 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.',
+                ],
+                [
+                    'title' => 'Localizações estratégicas',
+                    'text' => 'Empreendimentos em regiões com alto potencial de valorização.',
+                ],
+                [
+                    'title' => 'Sustentabilidade',
+                    'text' => 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.',
+                ],
+                [
+                    'title' => 'Alto padrão construtivo',
+                    'text' => 'Materiais selecionados e processos rigorosos para garantir qualidade.',
+                ],
+                [
+                    'title' => 'Equipe especializada',
+                    'text' => 'Profissionais experientes dedicados a entregar projetos com eficiência.',
+                ],
+                [
+                    'title' => 'Atendimento personalizado',
+                    'text' => 'Relacionamento próximo, transparente e focado em compreender cada cliente.',
+                ],
+            ],
+        ]);
+    }
+
+    public function updateHome(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'home_hero.title' => ['required', 'string', 'max:255'],
+            'home_hero.description' => ['required', 'string', 'max:1000'],
+            'home_hero.slides' => ['required', 'array', 'min:1'],
+            'home_hero.slides.*.image' => ['required', 'string', 'max:2048'],
+            'home_hero.slides.*.title' => ['nullable', 'string', 'max:255'],
+            'home_hero.slides.*.excerpt' => ['nullable', 'string', 'max:1000'],
+            'home_differentials' => ['required', 'array', 'min:1'],
+            'home_differentials.*.title' => ['required', 'string', 'max:255'],
+            'home_differentials.*.text' => ['required', 'string', 'max:1000'],
+        ]);
+
+        SiteSetting::updateOrCreate(['key' => 'home_hero'], [
+            'group' => 'home',
+            'value' => $data['home_hero'],
+            'is_public' => true,
+        ]);
+
+        SiteSetting::updateOrCreate(['key' => 'home_differentials'], [
+            'group' => 'home',
+            'value' => $data['home_differentials'],
+            'is_public' => true,
+        ]);
+
+        return back()->with('success', 'Home atualizada.');
+    }
+
     public function updateHomeNumbers(Request $request): RedirectResponse
     {
         $data = $request->validate([
