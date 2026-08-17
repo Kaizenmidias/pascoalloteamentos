@@ -1,25 +1,51 @@
 import Field from '../Forms/Field';
 
 const blankPlan = { name: '', description: '', area: '', bedrooms: '', suites: '', bathrooms: '', parking_spaces: '' };
-const blankStage = { name: '', code: '', progress_percent: 0, reference_date: '', description: '' };
+const blankStage = { name: '', code: '', progress_percent: 0, reference_date: '', description: '', is_public: true };
 const blankFaq = { question: '', answer: '' };
 
-function Repeater({ title, rows, onChange, blank, render }) {
+function Repeater({ title, rows, onChange, blank, render, reorder = false, summary = null, addLabel = 'Adicionar' }) {
     const update = (index, key, value) => onChange(rows.map((row, rowIndex) => rowIndex === index ? { ...row, [key]: value } : row));
-    return <section className="rounded-xl border border-line bg-white p-6 shadow-sm"><div className="mb-5 flex items-center justify-between"><div><h2 className="text-lg font-medium text-ink">{title}</h2><p className="mt-1 text-sm text-muted">Os itens são exibidos no site na ordem abaixo.</p></div><button type="button" onClick={() => onChange([...rows, { ...blank }])} className="rounded-lg border border-brand px-4 py-2 text-xs font-medium uppercase text-brand hover:bg-brand hover:text-white">Adicionar</button></div><div className="space-y-4">{rows.map((row, index) => <div key={index} className="rounded-xl bg-surface p-4"><div className="mb-3 flex justify-between text-xs font-medium uppercase text-muted"><span>Item {index + 1}</span><button type="button" onClick={() => onChange(rows.filter((_, rowIndex) => rowIndex !== index))} className="text-red-700">Remover</button></div>{render(row, index, update)}</div>)}</div></section>;
+    const move = (index, direction) => {
+        const destination = index + direction;
+        if (destination < 0 || destination >= rows.length) return;
+        const next = [...rows];
+        [next[index], next[destination]] = [next[destination], next[index]];
+        onChange(next);
+    };
+
+    return <section className="rounded-xl border border-line bg-white p-6 shadow-sm">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+            <div><h2 className="text-lg font-medium text-ink">{title}</h2><p className="mt-1 text-sm text-muted">Os itens são exibidos no site na ordem abaixo.</p>{summary}</div>
+            <button type="button" onClick={() => onChange([...rows, { ...blank }])} className="rounded-lg border border-brand px-4 py-2 text-xs font-medium uppercase text-brand hover:bg-brand hover:text-white">{addLabel}</button>
+        </div>
+        <div className="space-y-4">{rows.map((row, index) => <div key={row.id || index} className="rounded-xl bg-surface p-4">
+            <div className="mb-3 flex items-center justify-between gap-3 text-xs font-medium uppercase text-muted">
+                <span>Item {index + 1}</span>
+                <div className="flex items-center gap-3">
+                    {reorder && <><button type="button" disabled={index === 0} onClick={() => move(index, -1)} className="disabled:opacity-30">Subir</button><button type="button" disabled={index === rows.length - 1} onClick={() => move(index, 1)} className="disabled:opacity-30">Descer</button></>}
+                    <button type="button" onClick={() => onChange(rows.filter((_, rowIndex) => rowIndex !== index))} className="text-red-700">Remover</button>
+                </div>
+            </div>
+            {render(row, index, update)}
+        </div>)}</div>
+    </section>;
 }
 
 export default function ContentManager({ data, setData, item, showPlans = true, showStages = true }) {
     const media = item?.media_assets || [];
     const removed = data.remove_media_ids || [];
     const visibleMedia = media.filter((asset) => !removed.includes(asset.id));
+    const stages = data.construction_stages || [];
+    const activeStages = stages.filter((stage) => stage.is_public !== false);
+    const overall = activeStages.length ? Math.round(activeStages.reduce((total, stage) => total + Math.max(0, Math.min(100, Number(stage.progress_percent) || 0)), 0) / activeStages.length) : null;
 
     return <>
         <section className="rounded-xl border border-line bg-white p-6 shadow-sm"><h2 className="text-lg font-medium text-ink">Galeria e imagem de capa</h2><p className="mt-1 text-sm text-muted">Formatos JPG, PNG ou WebP. A imagem marcada como capa aparece nos cards e no hero.</p><input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={(event) => setData('gallery_images', Array.from(event.target.files || []))} className="mt-5 block w-full rounded-lg border border-line bg-surface p-3 text-sm" />{visibleMedia.length > 0 && <div className="mt-5 grid gap-4 tablet:grid-cols-3 desktop:grid-cols-4">{visibleMedia.map((asset) => <article key={asset.id} className="overflow-hidden rounded-xl border border-line"><img src={asset.url} alt={asset.alt_text || ''} className="aspect-[4/3] w-full object-cover" /><div className="space-y-2 p-3 text-xs"><label className="flex items-center gap-2"><input type="radio" name="featured_media_id" checked={String(data.featured_media_id || '') === String(asset.id)} onChange={() => setData('featured_media_id', asset.id)} /> Capa</label><button type="button" className="text-red-700" onClick={() => setData('remove_media_ids', [...removed, asset.id])}>Remover da galeria</button></div></article>)}</div>}</section>
 
         {showPlans && <Repeater title="Plantas" rows={data.floor_plans || []} onChange={(rows) => setData('floor_plans', rows)} blank={blankPlan} render={(row, index, update) => <div className="grid gap-4 tablet:grid-cols-2 desktop:grid-cols-4"><Field label="Nome" value={row.name} onChange={(e) => update(index, 'name', e.target.value)} /><Field label="Área (m²)" type="number" min="0" step="0.01" value={row.area || ''} onChange={(e) => update(index, 'area', e.target.value)} /><Field label="Quartos" type="number" min="0" value={row.bedrooms || ''} onChange={(e) => update(index, 'bedrooms', e.target.value)} /><Field label="Suítes" type="number" min="0" value={row.suites || ''} onChange={(e) => update(index, 'suites', e.target.value)} /><Field label="Banheiros" type="number" min="0" value={row.bathrooms || ''} onChange={(e) => update(index, 'bathrooms', e.target.value)} /><Field label="Vagas" type="number" min="0" value={row.parking_spaces || ''} onChange={(e) => update(index, 'parking_spaces', e.target.value)} /><Field label="Descrição" as="textarea" value={row.description || ''} onChange={(e) => update(index, 'description', e.target.value)} /></div>} />}
 
-        {showStages && <Repeater title="Andamento da obra" rows={data.construction_stages || []} onChange={(rows) => setData('construction_stages', rows)} blank={blankStage} render={(row, index, update) => <div className="grid gap-4 tablet:grid-cols-2 desktop:grid-cols-4"><Field label="Etapa" value={row.name} onChange={(e) => update(index, 'name', e.target.value)} /><Field label="Código" value={row.code || ''} onChange={(e) => update(index, 'code', e.target.value)} /><Field label="Progresso (%)" type="number" min="0" max="100" value={row.progress_percent} onChange={(e) => update(index, 'progress_percent', e.target.value)} /><Field label="Data de referência" type="date" value={row.reference_date || ''} onChange={(e) => update(index, 'reference_date', e.target.value)} /><Field label="Descrição" as="textarea" value={row.description || ''} onChange={(e) => update(index, 'description', e.target.value)} /></div>} />}
+        {showStages && <Repeater title="Andamento da obra" rows={stages} onChange={(rows) => setData('construction_stages', rows)} blank={blankStage} reorder summary={<p className="mt-2 text-sm font-medium text-brand">Conclusão geral automática: {overall === null ? 'sem etapas ativas' : `${overall}%`}</p>} render={(row, index, update) => <div className="grid gap-4 tablet:grid-cols-2 desktop:grid-cols-4"><Field label="Etapa" value={row.name} onChange={(e) => update(index, 'name', e.target.value)} /><Field label="Código" value={row.code || ''} onChange={(e) => update(index, 'code', e.target.value)} /><Field label="Progresso (%)" type="number" min="0" max="100" value={row.progress_percent} onChange={(e) => update(index, 'progress_percent', e.target.value)} /><Field label="Data de referência" type="date" value={row.reference_date || ''} onChange={(e) => update(index, 'reference_date', e.target.value)} /><Field label="Descrição" as="textarea" value={row.description || ''} onChange={(e) => update(index, 'description', e.target.value)} /><label className="flex items-center gap-2 text-sm text-ink"><input type="checkbox" checked={row.is_public !== false} onChange={(e) => update(index, 'is_public', e.target.checked)} /> Exibir no site</label></div>} />}
 
         <Repeater title="Perguntas frequentes" rows={data.faqs || []} onChange={(rows) => setData('faqs', rows)} blank={blankFaq} render={(row, index, update) => <div className="grid gap-4 tablet:grid-cols-2"><Field label="Pergunta" value={row.question} onChange={(e) => update(index, 'question', e.target.value)} /><Field label="Resposta" as="textarea" value={row.answer} onChange={(e) => update(index, 'answer', e.target.value)} /></div>} />
 

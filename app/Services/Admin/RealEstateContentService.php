@@ -48,7 +48,11 @@ class RealEstateContentService
             if (is_array($stages)) {
                 $item->constructionStages()->delete();
                 foreach (array_values($stages) as $index => $row) {
-                    $item->constructionStages()->create([...$row, 'sort_order' => $index, 'is_public' => true]);
+                    $item->constructionStages()->create([
+                        ...Arr::only($row, ['name', 'code', 'progress_percent', 'reference_date', 'description']),
+                        'sort_order' => $index,
+                        'is_public' => $row['is_public'] ?? true,
+                    ]);
                 }
             }
             if (is_array($faqs)) {

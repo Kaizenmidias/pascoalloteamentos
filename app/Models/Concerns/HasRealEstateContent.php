@@ -30,6 +30,19 @@ trait HasRealEstateContent
         return $this->morphMany(ConstructionStage::class, 'owner')->orderBy('sort_order');
     }
 
+    public function constructionProgressPercentage(): ?int
+    {
+        $stages = $this->relationLoaded('constructionStages')
+            ? $this->constructionStages
+            : $this->constructionStages()->where('is_public', true)->get();
+
+        $publicStages = $stages->where('is_public', true);
+
+        return $publicStages->isEmpty()
+            ? null
+            : (int) round($publicStages->avg('progress_percent'));
+    }
+
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'owner')->orderBy('sort_order');

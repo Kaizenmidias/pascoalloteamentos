@@ -24,6 +24,7 @@ trait HasRealEstateContentRules
             'construction_stages.*.name' => ['required', 'string', 'max:255'],
             'construction_stages.*.code' => ['nullable', 'string', 'max:60'],
             'construction_stages.*.progress_percent' => ['required', 'integer', 'between:0,100'],
+            'construction_stages.*.is_public' => ['nullable', 'boolean'],
             'construction_stages.*.reference_date' => ['nullable', 'date'],
             'construction_stages.*.description' => ['nullable', 'string'],
             'faqs' => ['nullable', 'array', 'max:30'],

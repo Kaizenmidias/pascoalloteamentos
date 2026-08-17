@@ -1,1 +1,26 @@
-export default function ConstructionProgress({items=[],overall}){if(!items.length&&overall==null)return null;const rows=items.length?items:[{id:'overall',name:'Andamento geral',progress_percent:overall}];return <div className="space-y-4">{rows.map(item=><div key={item.id}><div className="mb-1 flex justify-between text-sm font-bold"><span>{item.name}</span><span>{item.progress_percent}%</span></div><div className="h-2 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-brand" style={{width:`${Math.max(0,Math.min(100,item.progress_percent))}%`}}/></div></div>)}</div>}
+import OverallProgressBar from './OverallProgressBar';
+
+const clamp = (value) => Math.max(0, Math.min(100, Number(value) || 0));
+
+export default function ConstructionProgress({ items = [] }) {
+    const publicItems = items.filter((item) => item.is_public !== false);
+    if (!publicItems.length) return null;
+
+    const overall = publicItems.reduce((total, item) => total + clamp(item.progress_percent), 0) / publicItems.length;
+
+    return (
+        <div>
+            <div className="grid gap-x-10 gap-y-9 tablet:grid-cols-2 desktop:grid-cols-3">
+                {publicItems.map((item) => {
+                    const percentage = clamp(item.progress_percent);
+                    return <div key={item.id || item.name}>
+                        <div className="mb-2 flex items-end justify-between gap-3 text-sm font-medium text-ink"><span>{item.name}</span><span className="text-xs text-brand">{Math.round(percentage)}%</span></div>
+                        <div className="h-3 overflow-hidden rounded-full bg-[#ead7d8]"><div className="h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${percentage}%` }} /></div>
+                        <div className="mt-2 flex justify-between text-[.6rem] text-muted"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+                    </div>;
+                })}
+            </div>
+            <div className="mt-12 border-t border-line pt-7"><OverallProgressBar value={overall} /></div>
+        </div>
+    );
+}

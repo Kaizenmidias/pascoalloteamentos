@@ -11,7 +11,7 @@ class ConstructionStage extends Model
 
     protected function casts(): array
     {
-        return ['reference_date' => 'date'];
+        return ['reference_date' => 'date', 'is_public' => 'boolean', 'progress_percent' => 'integer'];
     }
 
     public function owner(): MorphTo

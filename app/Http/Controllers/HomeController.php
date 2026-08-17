@@ -44,8 +44,15 @@ class HomeController extends Controller
             ...$fallbackProperties->map(fn (Property $item) => [...$item->toArray(), 'href' => "/imoveis/{$item->slug}"]),
         ])->take(6)->values();
 
+        $homeEntities = collect()
+            ->concat($this->homeEntities(Condominium::class, 'condominiums', '/condominios/', 'condominiumType'))
+            ->concat($this->homeEntities(Subdivision::class, 'subdivisions', '/loteamentos/', 'subdivisionType'))
+            ->concat($this->homeEntities(Property::class, 'properties', '/imoveis/', 'propertyType'))
+            ->values();
+
         return Inertia::render('Public/Home', [
             'featuredItems' => $featuredItems,
+            'homeEntities' => $homeEntities,
             'condominiums' => $condominiums,
             'properties' => $properties,
             'subdivisions' => $subdivisions,
@@ -59,5 +66,25 @@ class HomeController extends Controller
             ],
             'posts' => BlogPost::query()->where('status', 'published')->with(['featuredMedia', 'categories'])->latest('published_at')->limit(3)->get(),
         ]);
+    }
+
+    private function homeEntities(string $model, string $category, string $path, string $typeRelation)
+    {
+        $relations = ['city.state', $typeRelation, 'developmentStatus', 'mediaAssets'];
+        if ($category !== 'properties') {
+            $relations[] = 'constructionStages';
+        }
+
+        return $model::query()
+            ->published()
+            ->with($relations)
+            ->latest('published_at')
+            ->get()
+            ->map(fn ($item) => [
+                ...$item->toArray(),
+                'category' => $category,
+                'href' => $path.$item->slug,
+                'overall_progress' => $category === 'properties' ? null : $item->constructionProgressPercentage(),
+            ]);
     }
 }

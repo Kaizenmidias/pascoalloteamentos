@@ -1,11 +1,11 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import PublicLayout from '../../Components/Layout/PublicLayout';
 import SeoHead from '../../Components/SEO/SeoHead';
 import Container from '../../Components/UI/Container';
 import Carousel from '../../Components/UI/Carousel';
 import EntityCard from '../../Components/RealEstate/EntityCard';
-import HeroSearch from '../../Components/RealEstate/HeroSearch';
+import HomeEntityFilter from '../../Components/RealEstate/HomeEntityFilter';
 
 const defaultHero = {
     title: 'Encontre o lugar onde sua próxima história começa.',
@@ -42,10 +42,8 @@ function HomeHero({ slides = [], hero = {} }) {
     );
 }
 
-export default function Home({ featuredItems = [], properties = [], posts = [], homeNumbers = [], homeHero = null, homeDifferentials = [] }) {
-    const { props } = usePage();
-    const realEstate = props.realEstate || {};
-    const [filters, setFilters] = useState({ category: '', city: '', type: '', status: '', business_type: '' });
+export default function Home({ featuredItems = [], homeEntities = [], posts = [], homeNumbers = [], homeHero = null, homeDifferentials = [] }) {
+    const [filters, setFilters] = useState({ category: 'condominiums', city: '', enterprise: '' });
     const safeDifferentials = Array.isArray(homeDifferentials) ? homeDifferentials : [];
     const safeNumbers = Array.isArray(homeNumbers) ? homeNumbers : [];
 
@@ -56,15 +54,11 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
     ];
 
     const previewItems = useMemo(() => {
-        let items = [...featuredItems, ...properties];
-        if (filters.category === 'condominiums') items = items.filter((item) => String(item.href || '').includes('/condominios'));
-        if (filters.category === 'subdivisions') items = items.filter((item) => String(item.href || '').includes('/loteamentos'));
-        if (filters.category === 'properties') items = items.filter((item) => String(item.href || '').includes('/imoveis'));
+        let items = homeEntities.filter((item) => !filters.category || item.category === filters.category);
         if (filters.city) items = items.filter((item) => item.city?.slug === filters.city);
-        if (filters.type) items = items.filter((item) => item.property_type?.slug === filters.type || item.condominium_type?.slug === filters.type || item.subdivision_type?.slug === filters.type);
-        if (filters.status) items = items.filter((item) => item.development_status?.slug === filters.status);
-        return items.slice(0, 8);
-    }, [featuredItems, filters, properties]);
+        if (filters.enterprise) items = items.filter((item) => item.slug === filters.enterprise);
+        return items;
+    }, [filters, homeEntities]);
 
     const numbers = safeNumbers.length ? safeNumbers : [
         { value: '20+', title: 'Anos de experiência', description: 'de atuação no mercado.' },
@@ -80,16 +74,9 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
 
             <section className="py-8">
                 <Container>
-                    <HeroSearch
-                        action="/imoveis"
-                        includeCategory
-                        compact
-                        autoSubmit={false}
+                    <HomeEntityFilter
                         categories={categories}
-                        cities={realEstate.cities || []}
-                        types={[...(realEstate.propertyTypes || []), ...(realEstate.condominiumTypes || []), ...(realEstate.subdivisionTypes || [])]}
-                        statuses={realEstate.statuses || []}
-                        businessTypes={realEstate.businessTypes || []}
+                        items={homeEntities}
                         onChange={setFilters}
                     />
                 </Container>
@@ -99,7 +86,7 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
                 <Container>
                     {previewItems.length ? (
                         <Carousel label="Empreendimentos em destaque">
-                            {previewItems.map((item) => <EntityCard key={item.href || item.id} item={item} href={item.href || `/imoveis/${item.slug}`} compact />)}
+                            {previewItems.map((item) => <EntityCard key={`${item.category}-${item.id}`} item={item} href={item.href} />)}
                         </Carousel>
                     ) : (
                         <div className="rounded-card border border-line bg-white p-8 text-center text-muted">Nenhum empreendimento encontrado para os filtros selecionados.</div>

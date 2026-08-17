@@ -37,7 +37,7 @@ const plansTitleFor = (entityType) => {
     return 'Plantas e quadras';
 };
 
-const progressTitleFor = (entityType) => (entityType === 'condominium' ? 'Acompanhe o andamento do condomínio' : 'Acompanhe nosso projeto em andamento');
+const progressTitleFor = () => 'Acompanhe nosso projeto em andamento';
 
 export default function EntityDetail({ item, entityType, priceKey }) {
     const media = item.media_assets || [];
@@ -240,12 +240,12 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                             <Map latitude={item.latitude == null ? null : Number(item.latitude)} longitude={item.longitude == null ? null : Number(item.longitude)} />
                         </Container>
                     </section>
-                    {item.construction_stages?.length > 0 && (
+                    {!isProperty && item.construction_stages?.some((stage) => stage.is_public !== false) && (
                         <section className="bg-surface py-[var(--section-space)]">
                             <Container>
                                 <p className="eyebrow">Andamento da obra</p>
                                 <h2 className="section-title mt-2">{progressTitleFor(entityType)}</h2>
-                                <div className="mt-8 rounded-card bg-white p-7 shadow-card">
+                                <div className="mt-8 rounded-[18px] border border-line bg-white p-6 shadow-card tablet:p-8">
                                     <ConstructionProgress items={item.construction_stages} />
                                 </div>
                             </Container>

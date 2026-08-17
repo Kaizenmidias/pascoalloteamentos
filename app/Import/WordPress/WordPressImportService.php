@@ -768,7 +768,44 @@ class WordPressImportService
             }
         }
 
+        if (($model instanceof Condominium || $model instanceof Subdivision) && ! $model->constructionStages()->exists()) {
+            foreach ($this->constructionStagesFromMeta($meta) as $index => $stage) {
+                $model->constructionStages()->create([...$stage, 'sort_order' => $index, 'is_public' => true]);
+            }
+        }
+
         $this->syncSeo($model, $meta);
+    }
+
+    private function constructionStagesFromMeta(array $meta): array
+    {
+        $stages = [];
+
+        foreach ($meta as $key => $value) {
+            if (! is_string($key) || ! str_contains(Str::lower($key), 'andamento_do_projeto') || ! is_scalar($value)) {
+                continue;
+            }
+
+            $numeric = preg_replace('/[^0-9,.]/', '', (string) $value);
+            if ($numeric === '' || ! is_numeric(str_replace(',', '.', $numeric))) {
+                continue;
+            }
+
+            $percentage = (int) round((float) str_replace(',', '.', $numeric));
+            if ($percentage < 0 || $percentage > 100) {
+                continue;
+            }
+
+            $name = preg_replace('/_?andamento_do_projeto.*$/i', '', $key);
+            $name = Str::of((string) $name)->replace('_', ' ')->squish()->title()->toString();
+            if ($name === '') {
+                continue;
+            }
+
+            $stages[] = ['name' => $name, 'code' => $key, 'progress_percent' => $percentage];
+        }
+
+        return $stages;
     }
 
     private function syncSeo(Model $model, array $meta): void
