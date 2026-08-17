@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import PublicLayout from '../../Components/Layout/PublicLayout';
 import SeoHead from '../../Components/SEO/SeoHead';
@@ -9,7 +10,12 @@ import HeroSearch from '../../Components/RealEstate/HeroSearch';
 const SectionIntro = ({ eyebrow, title, description, href, carousel = false, children }) => (
     <section className="py-[var(--section-space)]">
         <Container className="grid gap-10 desktop:grid-cols-[41%_59%] desktop:items-center desktop:gap-14">
-            <div><p className="eyebrow">{eyebrow}</p><h2 className="section-title mt-3">{title}</h2><p className="mt-5 text-[1rem] font-light leading-[1.65] text-muted desktop:text-[1.125rem]">{description}</p><Link href={href} className="brand-button mt-6">Veja todos</Link></div>
+            <div>
+                <p className="eyebrow">{eyebrow}</p>
+                <h2 className="section-title mt-3">{title}</h2>
+                <p className="mt-5 text-[1rem] font-light leading-[1.65] text-muted desktop:text-[1.125rem]">{description}</p>
+                <Link href={href} className="brand-button mt-6">Veja todos</Link>
+            </div>
             {carousel ? <Carousel label={title}>{children}</Carousel> : <div className="grid gap-5 tablet:grid-cols-3">{children}</div>}
         </Container>
     </section>
@@ -17,34 +23,70 @@ const SectionIntro = ({ eyebrow, title, description, href, carousel = false, chi
 
 export default function Home({ featuredItems = [], properties = [], posts = [] }) {
     const { props } = usePage();
-    const realEstate = props.realEstate || {};
-    const heroSlides = featuredItems.slice(0, 3);
-    const slideItems = heroSlides.length ? heroSlides : [{ title: 'Pascoal Loteamentos', href: '/sobre-nos' }];
+    const realEstate = props.realEstate || [];
+    const slideItems = featuredItems.length ? featuredItems.slice(0, 3) : [{ title: 'Pascoal Loteamentos', excerpt: 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.', media_assets: [] }];
+    const [activeSlide, setActiveSlide] = useState(0);
+
+    useEffect(() => {
+        const timer = window.setInterval(() => {
+            setActiveSlide((current) => (current + 1) % slideItems.length);
+        }, 6000);
+
+        return () => window.clearInterval(timer);
+    }, [slideItems.length]);
+
+    const activeItem = slideItems[activeSlide];
 
     return (
         <PublicLayout>
             <SeoHead title="Pascoal Loteamentos" description="Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor." />
             <section className="relative overflow-hidden bg-ink text-white">
-                <Carousel label="Destaques da home" className="py-0">
+                <div className="relative min-h-[75svh]">
                     {slideItems.map((item, index) => (
-                        <div key={item.id || index} className="relative min-h-[75svh] overflow-hidden rounded-none">
-                            <img src={item.media_assets?.[0]?.url || '/reference-assets/hero-home.jpg'} alt={item.title || 'Empreendimento'} className="absolute inset-0 h-full w-full object-cover" />
-                            <div className="hero-overlay absolute inset-0" />
-                            <div className="relative z-10 mx-auto flex min-h-[75svh] max-w-[80rem] items-center px-5 pt-20 text-center">
-                                <div className="mx-auto max-w-[980px]">
-                                    <h1 className="mx-auto max-w-[1000px] text-[2.125rem] font-light leading-[1.08] tracking-[-.02em] tablet:text-[3rem] desktop:text-[3.9375rem]">{item.title || 'Encontre o lugar onde sua próxima história começa.'}</h1>
-                                    <p className="mx-auto mt-5 max-w-[760px] text-[1.125rem] font-light leading-[1.45] text-white/90 desktop:text-[1.4375rem]">{item.excerpt || 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.'}</p>
-                                    {index === 0 && <div className="mt-8"><HeroSearch action="/imoveis" includeCategory categories={[{ name: 'Condomínios de Lotes', slug: 'condominiums' }, { name: 'Loteamentos', slug: 'subdivisions' }, { name: 'Imóveis', slug: 'properties' }]} cities={realEstate.cities || []} types={[...(realEstate.propertyTypes || []), ...(realEstate.condominiumTypes || []), ...(realEstate.subdivisionTypes || [])]} statuses={realEstate.statuses || []} businessTypes={realEstate.businessTypes || []} /></div>}
-                                </div>
-                            </div>
-                        </div>
+                        <img
+                            key={item.id || index}
+                            src={item.media_assets?.[0]?.url || '/reference-assets/hero-home.jpg'}
+                            alt={item.title || 'Empreendimento'}
+                            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${index === activeSlide ? 'opacity-100' : 'opacity-0'}`}
+                        />
                     ))}
-                </Carousel>
+                    <div className="hero-overlay absolute inset-0" />
+                    <div className="relative z-10 mx-auto flex min-h-[75svh] max-w-[80rem] items-center px-5 pt-20 text-center">
+                        <div className="mx-auto max-w-[980px]">
+                            <h1 className="mx-auto max-w-[1000px] text-[2.125rem] font-light leading-[1.08] tracking-[-.02em] tablet:text-[3rem] desktop:text-[3.9375rem]">{activeItem.title || 'Encontre o lugar onde sua próxima história começa.'}</h1>
+                            <p className="mx-auto mt-5 max-w-[760px] text-[1.125rem] font-light leading-[1.45] text-white/90 desktop:text-[1.4375rem]">{activeItem.excerpt || 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.'}</p>
+                        </div>
+                    </div>
+                    <div className="absolute inset-x-0 bottom-6 z-20 flex justify-center gap-2">
+                        {slideItems.map((_, index) => (
+                            <button
+                                key={index}
+                                type="button"
+                                aria-label={`Ir para slide ${index + 1}`}
+                                onClick={() => setActiveSlide(index)}
+                                className={`h-2.5 rounded-full transition-all ${index === activeSlide ? 'w-8 bg-white' : 'w-2.5 bg-white/50'}`}
+                            />
+                        ))}
+                    </div>
+                </div>
             </section>
 
             <section className="py-8">
                 <Container>
-                    <HeroSearch action="/imoveis" includeCategory compact categories={[{ name: 'Condomínios de Lotes', slug: 'condominiums' }, { name: 'Loteamentos', slug: 'subdivisions' }, { name: 'Imóveis', slug: 'properties' }]} cities={realEstate.cities || []} types={[...(realEstate.propertyTypes || []), ...(realEstate.condominiumTypes || []), ...(realEstate.subdivisionTypes || [])]} statuses={realEstate.statuses || []} businessTypes={realEstate.businessTypes || []} />
+                    <HeroSearch
+                        action="/imoveis"
+                        includeCategory
+                        compact
+                        categories={[
+                            { name: 'Condomínios de Lotes', slug: 'condominiums' },
+                            { name: 'Loteamentos', slug: 'subdivisions' },
+                            { name: 'Imóveis', slug: 'properties' },
+                        ]}
+                        cities={realEstate.cities || []}
+                        types={[...(realEstate.propertyTypes || []), ...(realEstate.condominiumTypes || []), ...(realEstate.subdivisionTypes || [])]}
+                        statuses={realEstate.statuses || []}
+                        businessTypes={realEstate.businessTypes || []}
+                    />
                 </Container>
             </section>
 

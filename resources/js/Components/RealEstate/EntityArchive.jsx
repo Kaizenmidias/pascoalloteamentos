@@ -11,31 +11,41 @@ const copy = {
         eyebrow: 'IMÓVEIS',
         title: 'Encontre o imóvel ideal para o seu estilo de vida',
         description: 'Explore nossa seleção de casas, apartamentos, salas comerciais e terrenos.',
+        image: '/reference-assets/property-livorno.jpeg',
     },
     condominiums: {
         eyebrow: 'CONDOMÍNIOS',
         title: 'Conheça nossos condomínios e encontre seu novo lar',
         description: 'Explore condomínios planejados para oferecer conforto, segurança e qualidade de vida.',
+        image: '/reference-assets/condominium-vale.webp',
     },
     subdivisions: {
         eyebrow: 'LOTEAMENTOS',
         title: 'Descubra os melhores loteamentos para investir e construir',
         description: 'Conheça nossos loteamentos planejados, com infraestrutura completa e excelente potencial de valorização.',
+        image: '/reference-assets/subdivision-brisa.jpg',
     },
 };
 
 export default function EntityArchive({ entity, items, basePath, filters, cities, types, statuses, businessTypes = [] }) {
-    const { eyebrow, title, description } = copy[entity];
+    const { eyebrow, title, description, image } = copy[entity];
+
     return (
         <PublicLayout>
             <SeoHead title={eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase()} description={description} />
-            <section className="bg-surface py-10 pt-28">
-                <Container className="space-y-8">
-                    <div className="max-w-4xl">
-                        <p className="eyebrow">{eyebrow}</p>
-                        <h1 className="section-title mt-3">{title}</h1>
-                        <p className="mt-5 max-w-3xl text-base font-light leading-7 text-muted">{description}</p>
+            <section className="relative flex min-h-[600px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
+                <img src={image} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+                <div className="red-overlay absolute inset-0" />
+                <div className="relative z-10 mx-auto w-full max-w-[80rem]">
+                    <p className="text-base font-light uppercase desktop:text-xl">{eyebrow}</p>
+                    <div className="mx-auto max-w-[80rem] px-0">
+                        <h1 className="mx-auto mt-3 text-[46px] font-light leading-[1.08] tracking-[-.02em]">{title}</h1>
+                        <p className="mx-auto mt-5 text-base font-light leading-7 text-white/90 desktop:text-lg">{description}</p>
                     </div>
+                </div>
+            </section>
+            <section className="py-8">
+                <Container>
                     <HeroSearch action={basePath} filters={filters} cities={cities} types={types} statuses={statuses} businessTypes={businessTypes} />
                 </Container>
             </section>
