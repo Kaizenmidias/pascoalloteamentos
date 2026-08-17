@@ -68,6 +68,14 @@ const createSection = (type = 'content', label = 'Conteúdo') => ({
     is_active: true,
 });
 
+const formatSectionContent = (section) => {
+    if (Array.isArray(section?.data?.content)) {
+        return JSON.stringify(section.data.content, null, 2);
+    }
+
+    return section?.data?.content || '';
+};
+
 export default function Form({ item }) {
     const editing = Boolean(item);
     const isStructured = structuredTemplates.has(item?.template) || presets[item?.slug];
@@ -83,7 +91,7 @@ export default function Form({ item }) {
                 label: section.data?.label || section.type || 'Conteúdo',
                 title: section.data?.title || '',
                 subtitle: section.data?.subtitle || '',
-                content: section.data?.content || '',
+                content: formatSectionContent(section),
                 image: section.data?.image || '',
                 button_label: section.data?.button_label || '',
                 button_url: section.data?.button_url || '',

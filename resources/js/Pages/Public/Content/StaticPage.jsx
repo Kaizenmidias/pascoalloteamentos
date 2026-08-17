@@ -130,6 +130,25 @@ function SectionRenderer({ section, kind }) {
         );
     }
 
+    if (type === 'social') {
+        const links = Array.isArray(data.content) ? data.content : [];
+        return (
+            <section className="pb-[var(--section-space)]">
+                <Container>
+                    {data.label && <p className="eyebrow">{data.label}</p>}
+                    {data.title && <h2 className="section-title mt-2">{data.title}</h2>}
+                    <div className="mt-8 flex flex-wrap gap-4">
+                        {links.map(([label, href]) => (
+                            <a key={label} href={href} target="_blank" rel="noreferrer" className="brand-button inline-flex">
+                                {label}
+                            </a>
+                        ))}
+                    </div>
+                </Container>
+            </section>
+        );
+    }
+
     if (type === 'cta') {
         return (
             <section className="bg-surface py-16 text-center">
