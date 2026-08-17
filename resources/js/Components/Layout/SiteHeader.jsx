@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-const links = [
+const primaryLinks = [
     ['Home', '/'],
     ['Sobre nós', '/sobre-nos'],
     ['Condomínios', '/condominios'],
@@ -11,10 +11,53 @@ const links = [
     ['Contato', '/contato'],
 ];
 
+function DropdownGroup({ label, href, items = [] }) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+            <Link href={href} className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand">
+                {label}
+                <span className="text-[10px]">▾</span>
+            </Link>
+            {open && items.length > 0 && (
+                <div className="absolute left-0 top-full z-20 mt-3 w-72 overflow-hidden rounded-2xl border border-line bg-white p-2 text-ink shadow-header">
+                    {items.map((item) => <Link key={item.slug} href={`/${href.replace('/', '')}/${item.slug}`} className="block rounded-xl px-4 py-3 text-sm font-light transition hover:bg-surface">{item.title}</Link>)}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function MobileGroup({ label, href, items = [] }) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <div className="border-b border-line py-4">
+            <button type="button" className="flex w-full items-center justify-between text-lg font-light uppercase" onClick={() => setOpen(!open)}>
+                <span>{label}</span>
+                <span className={`text-xs transition ${open ? 'rotate-180' : ''}`}>▾</span>
+            </button>
+            {open && (
+                <div className="mt-3 space-y-2 pl-2">
+                    <Link href={href} className="block rounded-lg bg-surface px-4 py-3 text-sm uppercase tracking-wide">Ver todos</Link>
+                    {items.map((item) => <Link key={item.slug} href={`/${href.replace('/', '')}/${item.slug}`} className="block rounded-lg px-4 py-3 text-sm font-light">{item.title}</Link>)}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function SiteHeader() {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const { url } = usePage();
+    const { url, props } = usePage();
+    const realEstate = props.realEstate || {};
+    const menuGroups = useMemo(() => ({
+        condominios: realEstate.menuGroups?.condominiums || [],
+        loteamentos: realEstate.menuGroups?.subdivisions || [],
+        imoveis: realEstate.menuGroups?.properties || [],
+    }), [realEstate.menuGroups]);
 
     useEffect(() => {
         const update = () => setScrolled(window.scrollY > 36);
@@ -33,14 +76,8 @@ export default function SiteHeader() {
         };
     }, [url, scrolled]);
 
-    useEffect(() => {
-        setOpen(false);
-    }, [url]);
-
-    useEffect(() => {
-        document.body.style.overflow = open ? 'hidden' : '';
-        return () => { document.body.style.overflow = ''; };
-    }, [open]);
+    useEffect(() => setOpen(false), [url]);
+    useEffect(() => { document.body.style.overflow = open ? 'hidden' : ''; return () => { document.body.style.overflow = ''; }; }, [open]);
 
     return (
         <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? 'bg-white text-ink shadow-header' : 'bg-transparent text-white'}`}>
@@ -49,11 +86,12 @@ export default function SiteHeader() {
                     <img src="/reference-assets/logo.png" alt="Pascoal Loteamentos" className={`h-auto w-[145px] transition ${scrolled || open ? '' : 'brightness-0 invert'}`} />
                 </Link>
 
-                <nav className="hidden items-center gap-[1.95rem] desktop:flex" aria-label="Principal">
-                    {links.map(([label, href]) => (
-                        <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${url === href ? 'text-brand' : ''}`}>{label}</Link>
-                    ))}
-                    <Link href="/imoveis" className="brand-button min-w-48">Empreendimentos <span className="ml-2">⌕</span></Link>
+                <nav className="hidden items-center gap-[1.4rem] desktop:flex" aria-label="Principal">
+                    {primaryLinks.slice(0, 2).map(([label, href]) => <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${url === href ? 'text-brand' : ''}`}>{label}</Link>)}
+                    <DropdownGroup label="Condomínios" href="/condominios" items={menuGroups.condominios} />
+                    <DropdownGroup label="Loteamentos" href="/loteamentos" items={menuGroups.loteamentos} />
+                    <DropdownGroup label="Imóveis" href="/imoveis" items={menuGroups.imoveis} />
+                    {primaryLinks.slice(5).map(([label, href]) => <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${url === href ? 'text-brand' : ''}`}>{label}</Link>)}
                 </nav>
 
                 <button type="button" className="relative z-10 grid h-11 w-11 place-items-center rounded-full desktop:hidden" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-menu">
@@ -68,8 +106,11 @@ export default function SiteHeader() {
 
             {open && (
                 <nav id="mobile-menu" className="fixed inset-0 top-[86px] overflow-y-auto bg-white px-6 py-8 text-ink desktop:hidden" aria-label="Menu móvel">
-                    {links.map(([label, href]) => <Link key={href} href={href} className="block border-b border-line py-4 text-lg font-light uppercase">{label}</Link>)}
-                    <Link href="/imoveis" className="brand-button mt-7 w-full">Empreendimentos</Link>
+                    {primaryLinks.slice(0, 2).map(([label, href]) => <Link key={href} href={href} className="block border-b border-line py-4 text-lg font-light uppercase">{label}</Link>)}
+                    <MobileGroup label="Condomínios" href="/condominios" items={menuGroups.condominios} />
+                    <MobileGroup label="Loteamentos" href="/loteamentos" items={menuGroups.loteamentos} />
+                    <MobileGroup label="Imóveis" href="/imoveis" items={menuGroups.imoveis} />
+                    {primaryLinks.slice(5).map(([label, href]) => <Link key={href} href={href} className="block border-b border-line py-4 text-lg font-light uppercase">{label}</Link>)}
                 </nav>
             )}
         </header>

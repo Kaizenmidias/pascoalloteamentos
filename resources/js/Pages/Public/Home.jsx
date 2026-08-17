@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import PublicLayout from '../../Components/Layout/PublicLayout';
 import SeoHead from '../../Components/SEO/SeoHead';
 import Container from '../../Components/UI/Container';
@@ -16,17 +16,36 @@ const SectionIntro = ({ eyebrow, title, description, href, carousel = false, chi
 );
 
 export default function Home({ featuredItems = [], properties = [], posts = [] }) {
+    const { props } = usePage();
+    const realEstate = props.realEstate || {};
+    const heroSlides = featuredItems.slice(0, 3);
+    const slideItems = heroSlides.length ? heroSlides : [{ title: 'Pascoal Loteamentos', href: '/sobre-nos' }];
+
     return (
         <PublicLayout>
             <SeoHead title="Pascoal Loteamentos" description="Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor." />
-            <section className="relative flex min-h-[797px] items-center justify-center overflow-hidden px-5 pt-20 text-center text-white desktop:min-h-[100svh]">
-                <img src="/reference-assets/hero-home.jpg" alt="Vista aérea de empreendimentos em Toledo" className="absolute inset-0 h-full w-full object-cover" />
-                <div className="hero-overlay absolute inset-0" />
-                <div className="relative z-10 w-full">
-                    <h1 className="mx-auto max-w-[1000px] text-[2.125rem] font-light leading-[1.08] tracking-[-.02em] tablet:text-[3rem] desktop:text-[3.9375rem]">Encontre o lugar onde sua próxima história começa.</h1>
-                    <p className="mx-auto mt-5 max-w-[760px] text-[1.125rem] font-light leading-[1.45] text-white/90 desktop:text-[1.4375rem]">Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.</p>
-                    <HeroSearch types={[{ name: 'Imóveis', slug: 'apartamento' }, { name: 'Condomínios', slug: 'condominio' }, { name: 'Loteamentos', slug: 'terreno' }]} cities={[{ name: 'Toledo', slug: 'toledo' }, { name: 'Palotina', slug: 'palotina' }]} statuses={[{ name: 'Concluído', slug: 'concluido' }, { name: 'Em obras', slug: 'em-obras' }]} />
-                </div>
+            <section className="relative overflow-hidden bg-ink text-white">
+                <Carousel label="Destaques da home" className="py-0">
+                    {slideItems.map((item, index) => (
+                        <div key={item.id || index} className="relative min-h-[75svh] overflow-hidden rounded-none">
+                            <img src={item.media_assets?.[0]?.url || '/reference-assets/hero-home.jpg'} alt={item.title || 'Empreendimento'} className="absolute inset-0 h-full w-full object-cover" />
+                            <div className="hero-overlay absolute inset-0" />
+                            <div className="relative z-10 mx-auto flex min-h-[75svh] max-w-[80rem] items-center px-5 pt-20 text-center">
+                                <div className="mx-auto max-w-[980px]">
+                                    <h1 className="mx-auto max-w-[1000px] text-[2.125rem] font-light leading-[1.08] tracking-[-.02em] tablet:text-[3rem] desktop:text-[3.9375rem]">{item.title || 'Encontre o lugar onde sua próxima história começa.'}</h1>
+                                    <p className="mx-auto mt-5 max-w-[760px] text-[1.125rem] font-light leading-[1.45] text-white/90 desktop:text-[1.4375rem]">{item.excerpt || 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.'}</p>
+                                    {index === 0 && <div className="mt-8"><HeroSearch action="/imoveis" includeCategory categories={[{ name: 'Condomínios de Lotes', slug: 'condominiums' }, { name: 'Loteamentos', slug: 'subdivisions' }, { name: 'Imóveis', slug: 'properties' }]} cities={realEstate.cities || []} types={[...(realEstate.propertyTypes || []), ...(realEstate.condominiumTypes || []), ...(realEstate.subdivisionTypes || [])]} statuses={realEstate.statuses || []} businessTypes={realEstate.businessTypes || []} /></div>}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </Carousel>
+            </section>
+
+            <section className="py-8">
+                <Container>
+                    <HeroSearch action="/imoveis" includeCategory compact categories={[{ name: 'Condomínios de Lotes', slug: 'condominiums' }, { name: 'Loteamentos', slug: 'subdivisions' }, { name: 'Imóveis', slug: 'properties' }]} cities={realEstate.cities || []} types={[...(realEstate.propertyTypes || []), ...(realEstate.condominiumTypes || []), ...(realEstate.subdivisionTypes || [])]} statuses={realEstate.statuses || []} businessTypes={realEstate.businessTypes || []} />
+                </Container>
             </section>
 
             <SectionIntro eyebrow="Destaques" title="Projetos que inspiram" description="Projetos que unem localização estratégica, design e qualidade para transformar vidas." href="/condominios" carousel>
@@ -74,5 +93,3 @@ export default function Home({ featuredItems = [], properties = [], posts = [] }
         </PublicLayout>
     );
 }
-
-
