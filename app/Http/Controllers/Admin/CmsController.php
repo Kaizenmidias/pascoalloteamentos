@@ -385,7 +385,7 @@ class CmsController extends Controller
         $page->sections()->delete();
         foreach (array_values($sections) as $index => $section) {
             $content = $section['content'] ?? null;
-            if (in_array($section['type'] ?? 'content', ['institucional', 'contact-data', 'social'], true) && is_string($content)) {
+            if (in_array($section['type'] ?? 'content', ['institucional', 'contact-data', 'social', 'contact-form'], true) && is_string($content)) {
                 $decoded = json_decode($content, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                     $content = $decoded;

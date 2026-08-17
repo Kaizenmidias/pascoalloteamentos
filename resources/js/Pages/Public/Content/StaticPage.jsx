@@ -110,6 +110,7 @@ function SectionRenderer({ section, kind }) {
     }
 
     if (type === 'contact-form') {
+        const blocks = Array.isArray(data.content_blocks) ? data.content_blocks : (Array.isArray(data.content) ? data.content : []);
         return (
             <section className="py-[var(--section-space)]">
                 <Container className="grid gap-12 desktop:grid-cols-[1fr_1.1fr] desktop:items-start">
@@ -119,7 +120,7 @@ function SectionRenderer({ section, kind }) {
                         {data.subtitle && <h3 className="mt-8 text-xs font-bold uppercase text-ink">{data.subtitle}</h3>}
                         <span className="my-3 block h-px w-20 bg-brand" />
                         <div className="grid gap-5 text-sm text-muted tablet:grid-cols-2">
-                            {(Array.isArray(data.content_blocks) ? data.content_blocks : []).map((row) => (
+                            {blocks.map((row) => (
                                 <p key={row.title}>{row.title}<br />{row.text}</p>
                             ))}
                         </div>

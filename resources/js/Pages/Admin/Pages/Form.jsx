@@ -76,6 +76,8 @@ const formatSectionContent = (section) => {
     return section?.data?.content || '';
 };
 
+const structuredContentTypes = new Set(['institucional', 'contact-data', 'social', 'contact-form']);
+
 export default function Form({ item }) {
     const editing = Boolean(item);
     const isStructured = structuredTemplates.has(item?.template) || presets[item?.slug];
@@ -247,7 +249,18 @@ export default function Form({ item }) {
                                         {section.type === 'hero' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
                                         {canAddSections && <Field label="Layout" value={section.layout} onChange={(event) => updateSection(index, 'layout', event.target.value)} />}
                                         <div className="tablet:col-span-2">
-                                            <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                                            <Field
+                                                label={structuredContentTypes.has(section.type) ? 'Conteúdo estruturado' : 'Texto'}
+                                                as="textarea"
+                                                rows={structuredContentTypes.has(section.type) ? '10' : '8'}
+                                                value={section.content}
+                                                onChange={(event) => updateSection(index, 'content', event.target.value)}
+                                            />
+                                            {structuredContentTypes.has(section.type) && (
+                                                <p className="mt-2 text-xs text-gray-500">
+                                                    Para estas seções, o campo aceita texto simples ou JSON válido quando houver lista de itens.
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
