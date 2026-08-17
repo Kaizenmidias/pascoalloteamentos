@@ -29,7 +29,7 @@ export default function HomeNumbers({ numbers = [] }) {
 
     const submit = (e) => {
         e.preventDefault();
-        put('/admin/cms/home-numbers', { preserveScroll: true });
+        put('/admin/pages/home-numbers', { preserveScroll: true });
     };
 
     return (

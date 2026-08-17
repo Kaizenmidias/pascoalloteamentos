@@ -1,21 +1,28 @@
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '../../../Components/Layout/AdminLayout';
 import AdminTable from '../../../Components/Admin/AdminTable';
 
+const cmsPages = [
+    { title: 'Home', href: '/admin/pages/home', text: 'Hero, filtros, números e diferenciais.' },
+    { title: 'Sobre nós', href: '/admin/pages/create', text: 'Conteúdo institucional, missão, visão e valores.' },
+    { title: 'Condomínios', href: '/admin/pages/create', text: 'Texto editorial e SEO da listagem pública.' },
+    { title: 'Loteamentos', href: '/admin/pages/create', text: 'Texto editorial e SEO da listagem pública.' },
+    { title: 'Imóveis', href: '/admin/pages/create', text: 'Título, texto introdutório e SEO da listagem pública.' },
+    { title: 'Contato', href: '/admin/pages/create', text: 'Dados de contato, horários e formulários.' },
+];
+
 export default function Index({ items }) {
+    const { url } = usePage();
+
     return (
         <AdminLayout title="Páginas">
-            <div className="mb-6 grid gap-4 tablet:grid-cols-3">
-                {[
-                    ['Home', '/admin/pages/create', 'Estruture a home com seções, hero, números e diferenciais.'],
-                    ['Sobre nós', '/admin/pages/create', 'Organize história, imagens, CTA e blocos institucionais.'],
-                    ['Contato / Institucionais', '/admin/pages/create', 'Centralize os conteúdos de apoio e páginas fixas.'],
-                ].map(([title, href, text]) => (
-                    <div key={title} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                        <h2 className="text-sm font-semibold uppercase text-gray-900">{title}</h2>
-                        <p className="mt-2 text-sm leading-6 text-gray-500">{text}</p>
-                        <Link href={href} className="mt-4 inline-flex text-sm font-medium text-brand">Nova página</Link>
-                    </div>
+            <div className="mb-6 grid gap-4 tablet:grid-cols-2 desktop:grid-cols-3">
+                {cmsPages.map((page) => (
+                    <Link key={page.title} href={page.href} className={`rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-card ${url === page.href ? 'border-brand' : 'border-gray-200'}`}>
+                        <h2 className="text-sm font-semibold uppercase text-gray-900">{page.title}</h2>
+                        <p className="mt-2 text-sm leading-6 text-gray-500">{page.text}</p>
+                        <span className="mt-4 inline-flex text-sm font-medium text-brand">Abrir CMS</span>
+                    </Link>
                 ))}
             </div>
 

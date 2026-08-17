@@ -34,7 +34,7 @@ export default function Home({ homeHero = {}, homeDifferentials = [] }) {
 
     const submit = (event) => {
         event.preventDefault();
-        put('/admin/cms/home', { preserveScroll: true });
+        put('/admin/pages/home', { preserveScroll: true });
     };
 
     const updateHero = (key, value) => setData('home_hero', { ...data.home_hero, [key]: value });
@@ -120,7 +120,7 @@ export default function Home({ homeHero = {}, homeDifferentials = [] }) {
                             <h2 className="text-lg font-medium text-gray-900">Números da Home</h2>
                             <p className="text-sm text-gray-500">Use a tela específica para manter os números organizados.</p>
                         </div>
-                        <Link href="/admin/cms/home-numbers" className="brand-button inline-flex">Abrir números da Home</Link>
+                        <Link href="/admin/pages/home-numbers" className="brand-button inline-flex">Abrir números da Home</Link>
                     </section>
                 )}
 
