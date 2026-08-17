@@ -38,7 +38,7 @@ const fallbackContact = [
     },
 ];
 
-function SectionRenderer({ section, kind }) {
+function SectionRenderer({ section, kind, reverse = false }) {
     if (!section) return null;
     const type = section.type || 'content';
     const data = section.data || section;
@@ -63,8 +63,8 @@ function SectionRenderer({ section, kind }) {
         return (
             <section className="py-[var(--section-space)]">
                 <Container className="grid gap-10 desktop:grid-cols-2 desktop:items-center">
-                    {data.image && <img src={data.image} alt={data.title || ''} className="mx-auto max-h-[480px] rounded-card object-cover" />}
-                    <div>
+                    {data.image && <img src={data.image} alt={data.title || ''} className={`mx-auto max-h-[480px] rounded-card object-cover ${reverse ? 'desktop:order-2' : 'desktop:order-1'}`} />}
+                    <div className={reverse ? 'desktop:order-1' : 'desktop:order-2'}>
                         {data.label && <p className="eyebrow">{data.label}</p>}
                         {data.title && <h2 className="section-title mt-2">{data.title}</h2>}
                         {data.content && <p className="mt-5 whitespace-pre-line text-sm leading-6 text-muted">{data.content}</p>}
@@ -174,10 +174,32 @@ function SectionRenderer({ section, kind }) {
 
 function About({ page }) {
     const sections = page?.sections?.length ? page.sections : fallbackAbout;
+    const orderedSections = [...sections].sort((left, right) => {
+        const order = { hero: 0, history: 1, numbers: 2, content: 3, mission: 4, vision: 5, values: 6, cta: 7 };
+        return (order[left.type] ?? 99) - (order[right.type] ?? 99);
+    });
+    const aboutCards = orderedSections.filter((section) => ['mission', 'vision', 'values'].includes(section.type));
+    const mainSections = orderedSections.filter((section) => !['mission', 'vision', 'values'].includes(section.type));
 
     return (
         <>
-            {sections.map((section, index) => <SectionRenderer key={section.id || `${section.type}-${index}`} section={section} kind="about" />)}
+            {mainSections.map((section, index) => (
+                <SectionRenderer
+                    key={section.id || `${section.type}-${index}`}
+                    section={section}
+                    kind="about"
+                    reverse={['history', 'content'].includes(section.type) && index % 2 === 1}
+                />
+            ))}
+            {aboutCards.length > 0 && (
+                <section className="py-[var(--section-space)]">
+                    <Container className="grid gap-4 tablet:grid-cols-3">
+                        {aboutCards.map((section, index) => (
+                            <SectionRenderer key={section.id || `${section.type}-${index}`} section={section} kind="about" />
+                        ))}
+                    </Container>
+                </section>
+            )}
             <section className="bg-surface py-16 text-center">
                 <Container>
                     <h2 className="mx-auto max-w-2xl text-3xl font-normal text-brand">Vamos construir o próximo capítulo dessa história juntos.</h2>

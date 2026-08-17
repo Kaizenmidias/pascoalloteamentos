@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -23,12 +23,12 @@ class CmsController extends Controller
 
     private const STRUCTURAL_PAGES = [
         ['title' => 'Home', 'slug' => 'home', 'template' => 'home', 'status' => 'published', 'path' => '/admin/pages/home', 'locked' => true],
-        ['title' => 'Sobre nós', 'slug' => 'sobre-nos', 'template' => 'institutional', 'status' => 'published', 'path' => '/admin/pages/sobre-nos/edit', 'locked' => true],
-        ['title' => 'Condomínios', 'slug' => 'condominios', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/condominios/edit', 'locked' => true],
+        ['title' => 'Sobre nÃ³s', 'slug' => 'sobre-nos', 'template' => 'institutional', 'status' => 'published', 'path' => '/admin/pages/sobre-nos/edit', 'locked' => true],
+        ['title' => 'CondomÃ­nios', 'slug' => 'condominios', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/condominios/edit', 'locked' => true],
         ['title' => 'Loteamentos', 'slug' => 'loteamentos', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/loteamentos/edit', 'locked' => true],
-        ['title' => 'Imóveis', 'slug' => 'imoveis', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/imoveis/edit', 'locked' => true],
+        ['title' => 'ImÃ³veis', 'slug' => 'imoveis', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/imoveis/edit', 'locked' => true],
         ['title' => 'Contato', 'slug' => 'contato', 'template' => 'contact', 'status' => 'published', 'path' => '/admin/pages/contato/edit', 'locked' => true],
-        ['title' => 'Política de Privacidade', 'slug' => 'politica-de-privacidade', 'template' => 'page', 'status' => 'published', 'path' => '/admin/pages/politica-de-privacidade/edit', 'locked' => false],
+        ['title' => 'PolÃ­tica de Privacidade', 'slug' => 'politica-de-privacidade', 'template' => 'page', 'status' => 'published', 'path' => '/admin/pages/politica-de-privacidade/edit', 'locked' => false],
     ];
 
     public function pages(): Response
@@ -110,25 +110,25 @@ class CmsController extends Controller
         $page = new Page();
         $this->savePage($request, $page);
 
-        return redirect()->route('admin.pages.edit', $page)->with('success', 'Página criada.');
+        return redirect()->route('admin.pages.edit', $page)->with('success', 'PÃ¡gina criada.');
     }
 
     public function updatePage(Request $request, Page $page): RedirectResponse
     {
         $this->savePage($request, $page);
 
-        return back()->with('success', 'Página atualizada.');
+        return back()->with('success', 'PÃ¡gina atualizada.');
     }
 
     public function destroyPage(Page $page): RedirectResponse
     {
         if (in_array($page->slug, array_column(self::STRUCTURAL_PAGES, 'slug'), true)) {
-            return back()->with('error', 'Esta é uma página estrutural e não pode ser excluída.');
+            return back()->with('error', 'Esta Ã© uma pÃ¡gina estrutural e nÃ£o pode ser excluÃ­da.');
         }
 
         $page->delete();
 
-        return back()->with('success', 'Página movida para a lixeira.');
+        return back()->with('success', 'PÃ¡gina movida para a lixeira.');
     }
 
     public function posts(): Response
@@ -213,7 +213,7 @@ class CmsController extends Controller
             SiteSetting::updateOrCreate(['key' => $key], ['group' => 'general', 'value' => $value, 'is_public' => true]);
         }
 
-        return back()->with('success', 'Configurações salvas.');
+        return back()->with('success', 'ConfiguraÃ§Ãµes salvas.');
     }
 
     public function homeNumbers(): Response
@@ -233,8 +233,8 @@ class CmsController extends Controller
 
         return Inertia::render('Admin/Cms/Home', [
             'homeHero' => $settings['home_hero'] ?? [
-                'title' => 'Encontre o lugar onde sua próxima história começa.',
-                'description' => 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
+                'title' => 'Encontre o lugar onde sua prÃ³xima histÃ³ria comeÃ§a.',
+                'description' => 'Empreendimentos de alto padrÃ£o, condomÃ­nios e loteamentos planejados para viver melhor.',
                 'slides' => [
                     ['image' => '/reference-assets/hero-home.jpg', 'title' => '', 'excerpt' => ''],
                 ],
@@ -242,27 +242,27 @@ class CmsController extends Controller
             'homeDifferentials' => $settings['home_differentials'] ?? [
                 [
                     'title' => 'Arquitetura autoral',
-                    'text' => 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.',
+                    'text' => 'Projetos exclusivos desenvolvidos para unir estÃ©tica, funcionalidade e conforto.',
                 ],
                 [
-                    'title' => 'Localizações estratégicas',
-                    'text' => 'Empreendimentos em regiões com alto potencial de valorização.',
+                    'title' => 'LocalizaÃ§Ãµes estratÃ©gicas',
+                    'text' => 'Empreendimentos em regiÃµes com alto potencial de valorizaÃ§Ã£o.',
                 ],
                 [
                     'title' => 'Sustentabilidade',
-                    'text' => 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.',
+                    'text' => 'PrÃ¡ticas conscientes e soluÃ§Ãµes inteligentes para reduzir impactos ambientais.',
                 ],
                 [
-                    'title' => 'Alto padrão construtivo',
+                    'title' => 'Alto padrÃ£o construtivo',
                     'text' => 'Materiais selecionados e processos rigorosos para garantir qualidade.',
                 ],
                 [
                     'title' => 'Equipe especializada',
-                    'text' => 'Profissionais experientes dedicados a entregar projetos com eficiência.',
+                    'text' => 'Profissionais experientes dedicados a entregar projetos com eficiÃªncia.',
                 ],
                 [
                     'title' => 'Atendimento personalizado',
-                    'text' => 'Relacionamento próximo, transparente e focado em compreender cada cliente.',
+                    'text' => 'Relacionamento prÃ³ximo, transparente e focado em compreender cada cliente.',
                 ],
             ],
         ]);
@@ -324,7 +324,7 @@ class CmsController extends Controller
             'is_public' => true,
         ]);
 
-        return back()->with('success', 'Números da Home atualizados.');
+        return back()->with('success', 'NÃºmeros da Home atualizados.');
     }
 
     public function integrations(): Response
@@ -347,7 +347,7 @@ class CmsController extends Controller
             SiteSetting::updateOrCreate(['key' => $key], ['group' => 'integrations', 'value' => $value, 'is_public' => false]);
         }
 
-        return back()->with('success', 'Integrações atualizadas.');
+        return back()->with('success', 'IntegraÃ§Ãµes atualizadas.');
     }
 
     private function savePage(Request $request, Page $page): void
@@ -451,28 +451,31 @@ class CmsController extends Controller
     {
         return match ($slug) {
             'home' => [
-                ['type' => 'hero', 'data' => ['label' => 'Início', 'title' => 'Encontre o lugar onde sua próxima história começa.', 'subtitle' => 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.', 'image' => '/reference-assets/hero-home.jpg']],
-                ['type' => 'filter', 'data' => ['label' => 'Filtro de Empreendimentos', 'title' => 'Encontre o empreendimento ideal', 'subtitle' => 'Use os filtros abaixo para refinar a busca.', 'content' => 'Cidades, tipos e status já vêm da base de empreendimentos.']],
-                ['type' => 'numbers', 'data' => ['label' => 'Nossos Números', 'title' => 'Resultados que contam a nossa história', 'subtitle' => 'Indicadores institucionais da Pascoal.', 'content' => [['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'], ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'], ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presença consolidada.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.']]]],
-                ['type' => 'differentials', 'data' => ['label' => 'Diferenciais', 'title' => 'Excelência em cada detalhe.', 'subtitle' => 'Projetos exclusivos pensados para unir qualidade, valorização e bem-estar em cada detalhe.', 'content' => [['title' => 'Arquitetura autoral', 'text' => 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Localizações estratégicas', 'text' => 'Empreendimentos em regiões com alto potencial de valorização.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Sustentabilidade', 'text' => 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.', 'image' => '/reference-assets/blog-city.jpg']]]],
+                ['type' => 'hero', 'data' => ['label' => 'InÃ­cio', 'title' => 'Encontre o lugar onde sua prÃ³xima histÃ³ria comeÃ§a.', 'subtitle' => 'Empreendimentos de alto padrÃ£o, condomÃ­nios e loteamentos planejados para viver melhor.', 'image' => '/reference-assets/hero-home.jpg']],
+                ['type' => 'filter', 'data' => ['label' => 'Filtro de Empreendimentos', 'title' => 'Encontre o empreendimento ideal', 'subtitle' => 'Use os filtros abaixo para refinar a busca.', 'content' => 'Cidades, tipos e status jÃ¡ vÃªm da base de empreendimentos.']],
+                ['type' => 'numbers', 'data' => ['label' => 'Nossos NÃºmeros', 'title' => 'Resultados que contam a nossa histÃ³ria', 'subtitle' => 'Indicadores institucionais da Pascoal.', 'content' => [['value' => '20+', 'title' => 'Anos de experiÃªncia', 'description' => 'de atuaÃ§Ã£o no mercado.'], ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelÃªncia.'], ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presenÃ§a consolidada.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.']]]],
+                ['type' => 'differentials', 'data' => ['label' => 'Diferenciais', 'title' => 'ExcelÃªncia em cada detalhe.', 'subtitle' => 'Projetos exclusivos pensados para unir qualidade, valorizaÃ§Ã£o e bem-estar em cada detalhe.', 'content' => [['title' => 'Arquitetura autoral', 'text' => 'Projetos exclusivos desenvolvidos para unir estÃ©tica, funcionalidade e conforto.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'LocalizaÃ§Ãµes estratÃ©gicas', 'text' => 'Empreendimentos em regiÃµes com alto potencial de valorizaÃ§Ã£o.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Sustentabilidade', 'text' => 'PrÃ¡ticas conscientes e soluÃ§Ãµes inteligentes para reduzir impactos ambientais.', 'image' => '/reference-assets/blog-city.jpg']]]],
             ],
             'sobre-nos' => [
-                ['type' => 'hero', 'data' => ['label' => 'Sobre nós', 'title' => 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.', 'subtitle' => 'Pascoal Loteamentos', 'image' => '/reference-assets/hero-home.jpg']],
-                ['type' => 'history', 'data' => ['label' => 'Uma história', 'title' => 'Uma história construída com trabalho, confiança e visão de futuro.', 'content' => "A Pascoal Loteamentos nasceu em 2002, idealizada pelos irmãos Edson Pascoal e Hudson Paes Pascoal, com o propósito de desenvolver empreendimentos que transformam vidas e contribuem para o crescimento das cidades.\n\nAo longo de mais de 20 anos de atuação, a empresa consolidou sua presença na região, conquistando a confiança de clientes, investidores e parceiros por meio de um trabalho pautado na transparência, credibilidade e excelência.", 'image' => '/reference-assets/about-team.webp']],
-                ['type' => 'history', 'data' => ['label' => 'Crescimento', 'title' => 'Crescimento que gera desenvolvimento', 'content' => "O compromisso com a qualidade fez da Pascoal uma referência regional no desenvolvimento de loteamentos e empreendimentos imobiliários. Nossa atuação já contribuiu para a expansão urbana de diversas regiões.\n\nCada empreendimento é pensado para oferecer segurança, infraestrutura completa, excelente localização e potencial de valorização.", 'image' => '/reference-assets/about-engineer.webp']],
-                ['type' => 'numbers', 'data' => ['label' => 'Nossos números', 'title' => 'Resultados que reforçam nossa trajetória', 'content' => [['value' => '+20', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'], ['value' => '2', 'title' => 'Cidades', 'description' => 'com empreendimentos desenvolvidos.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos.']]]],
-                ['type' => 'content', 'data' => ['label' => 'Nosso propósito', 'title' => 'Nosso Propósito', 'content' => "Mais do que desenvolver loteamentos, construímos oportunidades. Sabemos que adquirir um terreno ou investir em um empreendimento é uma das decisões mais importantes da vida de uma família.\n\nPor isso, cada projeto nasce com planejamento, responsabilidade e uma visão de longo prazo.", 'image' => '/reference-assets/about-purpose.webp']],
-                ['type' => 'institucional', 'data' => ['label' => 'Missão, visão e valores', 'title' => 'Missão, visão e valores', 'content' => [['title' => 'Missão', 'text' => 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Visão', 'text' => 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.', 'image' => '/reference-assets/about-plans.jpg'], ['title' => 'Valores', 'text' => 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.', 'image' => '/reference-assets/about-meeting.jpg']]]],
+                ['type' => 'hero', 'data' => ['label' => 'Sobre nÃ³s', 'title' => 'Construindo cidades, realizando sonhos e deixando um legado para as prÃ³ximas geraÃ§Ãµes.', 'subtitle' => 'Pascoal Loteamentos', 'image' => '/reference-assets/hero-home.jpg']],
+                ['type' => 'history', 'data' => ['label' => 'Uma histÃ³ria', 'title' => 'Uma histÃ³ria construÃ­da com trabalho, confianÃ§a e visÃ£o de futuro.', 'content' => "A Pascoal Loteamentos nasceu em 2002, idealizada pelos irmÃ£os Edson Pascoal e Hudson Paes Pascoal, com o propÃ³sito de desenvolver empreendimentos que transformam vidas e contribuem para o crescimento das cidades.\n\nAo longo de mais de 20 anos de atuaÃ§Ã£o, a empresa consolidou sua presenÃ§a na regiÃ£o, conquistando a confianÃ§a de clientes, investidores e parceiros por meio de um trabalho pautado na transparÃªncia, credibilidade e excelÃªncia.", 'image' => '/reference-assets/about-team.webp']],
+                ['type' => 'history', 'data' => ['label' => 'Crescimento', 'title' => 'Crescimento que gera desenvolvimento', 'content' => "O compromisso com a qualidade fez da Pascoal uma referÃªncia regional no desenvolvimento de loteamentos e empreendimentos imobiliÃ¡rios. Nossa atuaÃ§Ã£o jÃ¡ contribuiu para a expansÃ£o urbana de diversas regiÃµes.\n\nCada empreendimento Ã© pensado para oferecer seguranÃ§a, infraestrutura completa, excelente localizaÃ§Ã£o e potencial de valorizaÃ§Ã£o.", 'image' => '/reference-assets/about-engineer.webp']],
+                ['type' => 'numbers', 'data' => ['label' => 'Nossos nÃºmeros', 'title' => 'Resultados que reforÃ§am nossa trajetÃ³ria', 'content' => [['value' => '+20', 'title' => 'Anos de experiÃªncia', 'description' => 'de atuaÃ§Ã£o no mercado.'], ['value' => '2', 'title' => 'Cidades', 'description' => 'com empreendimentos desenvolvidos.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos.']]]],
+                ['type' => 'content', 'data' => ['label' => 'Nosso propÃ³sito', 'title' => 'Nosso PropÃ³sito', 'content' => "Mais do que desenvolver loteamentos, construÃ­mos oportunidades. Sabemos que adquirir um terreno ou investir em um empreendimento Ã© uma das decisÃµes mais importantes da vida de uma famÃ­lia.\\n\\nPor isso, cada projeto nasce com planejamento, responsabilidade e uma visÃ£o de longo prazo.", 'image' => '/reference-assets/about-purpose.webp']],
+                ['type' => 'mission', 'data' => ['label' => 'MissÃ£o', 'title' => 'MissÃ£o', 'content' => 'Desenvolver empreendimentos planejados com qualidade, seguranÃ§a e infraestrutura completa, proporcionando valorizaÃ§Ã£o, bem-estar e qualidade de vida aos nossos clientes.', 'image' => '/reference-assets/blog-city.jpg']],
+                ['type' => 'vision', 'data' => ['label' => 'VisÃ£o', 'title' => 'VisÃ£o', 'content' => 'Ser referÃªncia em loteamentos e empreendimentos imobiliÃ¡rios no Oeste do ParanÃ¡, reconhecida pela excelÃªncia, credibilidade e desenvolvimento sustentÃ¡vel.', 'image' => '/reference-assets/about-plans.jpg']],
+                ['type' => 'values', 'data' => ['label' => 'Valores', 'title' => 'Valores', 'content' => 'Nossos valores se refletem no compromisso com a qualidade, no respeito Ã s pessoas, na transparÃªncia das relaÃ§Ãµes e na responsabilidade em cada empreendimento que desenvolvemos.', 'image' => '/reference-assets/about-meeting.jpg']],
+                ['type' => 'content', 'data' => ['label' => 'Nosso diferencial', 'title' => 'Nosso Diferencial', 'content' => "Mais do que entregar lotes, entregamos projetos que valorizam a cidade e criam conexÃ£o com as pessoas.\\n\\nCada detalhe Ã© pensado para unir localizaÃ§Ã£o, infraestrutura, seguranÃ§a e qualidade de vida.", 'image' => '/reference-assets/about-differential.webp']],
             ],
             'contato' => [
-                ['type' => 'hero', 'data' => ['label' => 'Contato', 'title' => 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.', 'subtitle' => 'Fale com nossa equipe', 'content' => 'Nossa equipe está à disposição para esclarecer dúvidas, apresentar oportunidades e oferecer o suporte necessário.', 'image' => '/reference-assets/hero-contact.webp']],
-                ['type' => 'contact-data', 'data' => ['label' => 'Dados de contato', 'content' => [['Escritório administrativo', "Av. Ministro Cirne Lima, nº 3951\nJardim Coopagro\nToledo - PR\nCEP 85904-460"], ['Telefones', "Telefone Comercial\n(45) 3252-7023\n\nPlantão de Vendas\n(45) 9 9111-9653"], ['E-mail', 'contato@pascoalloteamentos.com.br']]]],
-                ['type' => 'contact-form', 'data' => ['label' => 'Formulário', 'title' => 'Fale com Nossa Equipe', 'subtitle' => 'Estamos disponíveis para atender você.', 'content' => 'Preencha o formulário e nossa equipe entrará em contato o mais breve possível.', 'button_label' => 'Enviar mensagem', 'recipient_email' => 'contato@pascoalloteamentos.com.br']],
+                ['type' => 'hero', 'data' => ['label' => 'Contato', 'title' => 'Estamos prontos para ajudar vocÃª a encontrar o empreendimento ideal.', 'subtitle' => 'Fale com nossa equipe', 'content' => 'Nossa equipe estÃ¡ Ã  disposiÃ§Ã£o para esclarecer dÃºvidas, apresentar oportunidades e oferecer o suporte necessÃ¡rio.', 'image' => '/reference-assets/hero-contact.webp']],
+                ['type' => 'contact-data', 'data' => ['label' => 'Dados de contato', 'content' => [['EscritÃ³rio administrativo', "Av. Ministro Cirne Lima, nÂº 3951\nJardim Coopagro\nToledo - PR\nCEP 85904-460"], ['Telefones', "Telefone Comercial\n(45) 3252-7023\n\nPlantÃ£o de Vendas\n(45) 9 9111-9653"], ['E-mail', 'contato@pascoalloteamentos.com.br']]]],
+                ['type' => 'contact-form', 'data' => ['label' => 'FormulÃ¡rio', 'title' => 'Fale com Nossa Equipe', 'subtitle' => 'Estamos disponÃ­veis para atender vocÃª.', 'content' => 'Preencha o formulÃ¡rio e nossa equipe entrarÃ¡ em contato o mais breve possÃ­vel.', 'button_label' => 'Enviar mensagem', 'recipient_email' => 'contato@pascoalloteamentos.com.br']],
                 ['type' => 'social', 'data' => ['label' => 'Redes sociais', 'content' => [['Instagram', 'https://instagram.com'], ['Facebook', 'https://facebook.com']]]],
             ],
             default => in_array($slug, ['condominios', 'loteamentos', 'imoveis'], true) ? [
-                ['type' => 'hero', 'data' => ['label' => ucfirst(str_replace('-', ' ', $slug)), 'title' => 'Conteúdo da listagem', 'subtitle' => 'Texto introdutório da página.', 'content' => 'Use esta área para editar o cabeçalho e o texto de apresentação.', 'image' => '/reference-assets/hero-home.jpg']],
-                ['type' => 'filter', 'data' => ['label' => 'Filtro', 'title' => 'Filtrar empreendimentos', 'subtitle' => 'Ajuste apenas textos auxiliares e mensagens.', 'content' => 'As opções de filtro continuam vindo da base de dados.']],
+                ['type' => 'hero', 'data' => ['label' => ucfirst(str_replace('-', ' ', $slug)), 'title' => 'ConteÃºdo da listagem', 'subtitle' => 'Texto introdutÃ³rio da pÃ¡gina.', 'content' => 'Use esta Ã¡rea para editar o cabeÃ§alho e o texto de apresentaÃ§Ã£o.', 'image' => '/reference-assets/hero-home.jpg']],
+                ['type' => 'filter', 'data' => ['label' => 'Filtro', 'title' => 'Filtrar empreendimentos', 'subtitle' => 'Ajuste apenas textos auxiliares e mensagens.', 'content' => 'As opÃ§Ãµes de filtro continuam vindo da base de dados.']],
             ] : [],
         };
     }
