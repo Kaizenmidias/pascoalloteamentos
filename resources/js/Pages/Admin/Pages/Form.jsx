@@ -70,13 +70,15 @@ const createSection = (type = 'content', label = 'Conteúdo') => ({
     is_active: true,
 });
 
-const formatSectionContent = (section) => {
-    if (Array.isArray(section?.data?.content)) {
-        return JSON.stringify(section.data.content, null, 2);
-    }
+    const formatSectionContent = (section) => {
+        if (Array.isArray(section?.data?.content)) {
+            return JSON.stringify(section.data.content, null, 2);
+        }
 
-    return section?.data?.content || '';
-};
+        return section?.data?.content || '';
+    };
+
+    const imagePreview = (value) => (value ? value : '/reference-assets/hero-home.jpg');
 
 const structuredContentTypes = new Set(['institucional', 'contact-data', 'social', 'contact-form']);
 const structuredSchemas = {
@@ -128,7 +130,7 @@ export default function Form({ item }) {
 
         if (item?.sections?.length) {
             return item.sections.flatMap((section, index) => {
-                if (item?.slug === 'sobre-nos' && section.type === 'institucional' && Array.isArray(section.data?.content)) {
+                if (item?.slug === 'sobre-nos' && (section.type === 'institucional' || section.type === 'mission' || section.type === 'vision' || section.type === 'values') && Array.isArray(section.data?.content)) {
                     return section.data.content.slice(0, 3).map((block, blockIndex) => ({
                         type: ['mission', 'vision', 'values'][blockIndex],
                         label: block.title || ['Missão', 'Visão', 'Valores'][blockIndex],
@@ -247,7 +249,7 @@ export default function Form({ item }) {
                 );
             }
 
-            if (sectionType === 'history' || sectionType === 'content' || sectionType === 'cta' || sectionType === 'mission' || sectionType === 'vision' || sectionType === 'values') {
+            if (sectionType === 'history' || sectionType === 'content' || sectionType === 'cta') {
                 return (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -261,6 +263,44 @@ export default function Form({ item }) {
                             <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
                             {sectionType === 'cta' && <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
                             {sectionType === 'cta' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
+                        </div>
+                    </div>
+                );
+            }
+
+            if (sectionType === 'mission' || sectionType === 'vision' || sectionType === 'values') {
+                return (
+                    <div className="space-y-4">
+                        <div className="rounded-xl border border-slate-200 bg-white p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">{prettySectionName(sectionType)}</p>
+                            <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
+                        </div>
+                        <div className="grid gap-6 tablet:grid-cols-[1.1fr_0.9fr]">
+                            <div className="space-y-4">
+                                <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                                <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                                <Field label="Alt da imagem" value={section.alt || ''} onChange={(event) => updateSection(index, 'alt', event.target.value)} />
+                                <div className="flex items-center gap-3">
+                                    <label className="flex items-center gap-2 text-sm text-gray-600">
+                                        <input type="checkbox" checked={section.is_active} onChange={(event) => updateSection(index, 'is_active', event.target.checked)} />
+                                        Ativa
+                                    </label>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                                    <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                                        <div>
+                                            <p className="text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Imagem atual</p>
+                                            <p className="text-sm text-gray-600">{section.image ? 'Preview carregado' : 'Sem imagem definida'}</p>
+                                        </div>
+                                        <button type="button" className="text-sm font-medium text-red-700" onClick={() => updateSection(index, 'image', '')}>Remover imagem</button>
+                                    </div>
+                                    <img src={imagePreview(section.image)} alt={section.alt || section.title || ''} className="h-52 w-full object-cover" />
+                                </div>
+                                <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                                <p className="text-xs text-gray-500">Cole a URL da imagem atual ou substitua por outra imagem do acervo.</p>
+                            </div>
                         </div>
                     </div>
                 );
@@ -452,9 +492,16 @@ export default function Form({ item }) {
                         <div className="space-y-5">
                             {data.sections.map((section, index) => (
                                 <div key={`${section.type}-${index}`} className="rounded-2xl border border-gray-200 bg-gray-50 p-5">
-                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                            <div className="flex flex-wrap items-center gap-3">
-                                <Field label="Nome da seção" value={section.label || ''} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            {schema ? (
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-900">{prettySectionName(section.type)}</p>
+                                                    <p className="text-xs text-gray-500">{sectionDescription(section.type)}</p>
+                                                </div>
+                                            ) : (
+                                                <Field label="Nome da seção" value={section.label || ''} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                                            )}
                                             {canAddSections && (
                                                 <SelectField
                                                     label={`Tipo ${index + 1}`}
