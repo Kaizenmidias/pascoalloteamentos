@@ -71,6 +71,7 @@ const createSection = (type = 'content', label = 'Conteúdo') => ({
 export default function Form({ item }) {
     const editing = Boolean(item);
     const isStructured = structuredTemplates.has(item?.template) || presets[item?.slug];
+    const canAddSections = !isStructured;
     const initialSections = useMemo(() => {
         if (presets[item?.slug]?.length) {
             return presets[item.slug].map((section, index) => ({ ...section, sort_order: index }));
@@ -193,7 +194,7 @@ export default function Form({ item }) {
                                 <h2 className="text-lg font-medium text-gray-900">Seções da página</h2>
                                 <p className="text-sm text-gray-500">Cada bloco tem nome claro e controla uma parte específica do site.</p>
                             </div>
-                            <Button type="button" onClick={addSection}>Adicionar seção</Button>
+                            {canAddSections && <Button type="button" onClick={addSection}>Adicionar seção</Button>}
                         </div>
 
                         <div className="space-y-5">
@@ -202,24 +203,26 @@ export default function Form({ item }) {
                                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                                         <div className="flex flex-wrap items-center gap-3">
                                             <Field label="Nome da seção" value={section.label || ''} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                                            <SelectField
-                                                label={`Tipo ${index + 1}`}
-                                                options={[
-                                                    { id: 'hero', name: 'Hero' },
-                                                    { id: 'filter', name: 'Filtro' },
-                                                    { id: 'numbers', name: 'Números' },
-                                                    { id: 'differentials', name: 'Diferenciais' },
-                                                    { id: 'history', name: 'História' },
-                                                    { id: 'institucional', name: 'Institucional' },
-                                                    { id: 'cta', name: 'CTA' },
-                                                    { id: 'contact-data', name: 'Dados de contato' },
-                                                    { id: 'contact-form', name: 'Formulário' },
-                                                    { id: 'social', name: 'Redes sociais' },
-                                                    { id: 'content', name: 'Conteúdo' },
-                                                ]}
-                                                value={section.type}
-                                                onChange={(event) => updateSection(index, 'type', event.target.value)}
-                                            />
+                                            {canAddSections && (
+                                                <SelectField
+                                                    label={`Tipo ${index + 1}`}
+                                                    options={[
+                                                        { id: 'hero', name: 'Hero' },
+                                                        { id: 'filter', name: 'Filtro' },
+                                                        { id: 'numbers', name: 'Números' },
+                                                        { id: 'differentials', name: 'Diferenciais' },
+                                                        { id: 'history', name: 'História' },
+                                                        { id: 'institucional', name: 'Institucional' },
+                                                        { id: 'cta', name: 'CTA' },
+                                                        { id: 'contact-data', name: 'Dados de contato' },
+                                                        { id: 'contact-form', name: 'Formulário' },
+                                                        { id: 'social', name: 'Redes sociais' },
+                                                        { id: 'content', name: 'Conteúdo' },
+                                                    ]}
+                                                    value={section.type}
+                                                    onChange={(event) => updateSection(index, 'type', event.target.value)}
+                                                />
+                                            )}
                                             <label className="flex items-center gap-2 text-sm text-gray-600">
                                                 <input type="checkbox" checked={section.is_active} onChange={(event) => updateSection(index, 'is_active', event.target.checked)} />
                                                 Ativa
@@ -232,9 +235,9 @@ export default function Form({ item }) {
                                         <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                                         <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
                                         <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
-                                        <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
-                                        <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />
-                                        <Field label="Layout" value={section.layout} onChange={(event) => updateSection(index, 'layout', event.target.value)} />
+                                        {section.type !== 'numbers' && section.type !== 'social' && section.type !== 'contact-data' && <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
+                                        {section.type === 'hero' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
+                                        {canAddSections && <Field label="Layout" value={section.layout} onChange={(event) => updateSection(index, 'layout', event.target.value)} />}
                                         <div className="tablet:col-span-2">
                                             <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                                         </div>

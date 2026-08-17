@@ -46,6 +46,8 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
     const { props } = usePage();
     const realEstate = props.realEstate || {};
     const [filters, setFilters] = useState({ category: '', city: '', type: '', status: '', business_type: '' });
+    const safeDifferentials = Array.isArray(homeDifferentials) ? homeDifferentials : [];
+    const safeNumbers = Array.isArray(homeNumbers) ? homeNumbers : [];
 
     const categories = [
         { name: 'Condomínios de Lotes', slug: 'condominiums' },
@@ -64,7 +66,7 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
         return items.slice(0, 8);
     }, [featuredItems, filters, properties]);
 
-    const numbers = homeNumbers.length ? homeNumbers : [
+    const numbers = safeNumbers.length ? safeNumbers : [
         { value: '20+', title: 'Anos de experiência', description: 'de atuação no mercado.' },
         { value: '15+', title: 'Empreendimentos', description: 'entregues com excelência.' },
         { value: '2+', title: 'Cidades', description: 'com presença consolidada.' },
@@ -74,7 +76,7 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
     return (
         <PublicLayout>
             <SeoHead title="Pascoal Loteamentos" description="Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor." />
-            <HomeHero slides={homeHero?.slides || featuredItems} hero={homeHero || defaultHero} />
+            <HomeHero slides={Array.isArray(homeHero?.slides) && homeHero.slides.length ? homeHero.slides : featuredItems} hero={homeHero || defaultHero} />
 
             <section className="py-8">
                 <Container>
@@ -112,7 +114,7 @@ export default function Home({ featuredItems = [], properties = [], posts = [], 
                         <h2 className="section-title mt-2">Excelência em cada detalhe.</h2>
                         <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-muted">Projetos exclusivos pensados para unir qualidade, valorização e bem-estar em cada detalhe.</p>
                     </div>
-                    <div className="mt-8 grid gap-2 tablet:grid-cols-2 desktop:grid-cols-3">{(homeDifferentials.length ? homeDifferentials : [
+                    <div className="mt-8 grid gap-2 tablet:grid-cols-2 desktop:grid-cols-3">{(safeDifferentials.length ? safeDifferentials : [
                         ['Arquitetura autoral', 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.'],
                         ['Localizações estratégicas', 'Empreendimentos em regiões com alto potencial de valorização.'],
                         ['Sustentabilidade', 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.'],

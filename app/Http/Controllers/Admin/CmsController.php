@@ -34,10 +34,21 @@ class CmsController extends Controller
     public function pages(): Response
     {
         foreach (self::STRUCTURAL_PAGES as $page) {
-            Page::firstOrCreate(
+            $model = Page::firstOrCreate(
                 ['slug' => $page['slug']],
                 ['title' => $page['title'], 'template' => $page['template'], 'status' => $page['status'], 'published_at' => now()],
             );
+
+            if ($model->sections()->doesntExist()) {
+                foreach ($this->defaultSectionsFor($page['slug']) as $index => $section) {
+                    $model->sections()->create([
+                        'type' => $section['type'],
+                        'data' => $section['data'],
+                        'sort_order' => $index,
+                        'is_active' => true,
+                    ]);
+                }
+            }
         }
 
         $items = Page::withCount('sections')->latest()->get()->keyBy('slug');
@@ -78,6 +89,19 @@ class CmsController extends Controller
 
     public function editPage(Page $page): Response
     {
+        if ($page->sections()->doesntExist()) {
+            foreach ($this->defaultSectionsFor($page->slug) as $index => $section) {
+                $page->sections()->create([
+                    'type' => $section['type'],
+                    'data' => $section['data'],
+                    'sort_order' => $index,
+                    'is_active' => true,
+                ]);
+            }
+
+            $page->load(['seo', 'sections']);
+        }
+
         return Inertia::render('Admin/Pages/Form', ['item' => $page->load(['seo', 'sections'])]);
     }
 
@@ -411,5 +435,35 @@ class CmsController extends Controller
         $post->fill($data)->save();
         $post->categories()->sync($categories);
         $post->seo()->updateOrCreate([], $seo);
+    }
+
+    private function defaultSectionsFor(string $slug): array
+    {
+        return match ($slug) {
+            'home' => [
+                ['type' => 'hero', 'data' => ['label' => 'Início', 'title' => 'Encontre o lugar onde sua próxima história começa.', 'subtitle' => 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.', 'image' => '/reference-assets/hero-home.jpg']],
+                ['type' => 'filter', 'data' => ['label' => 'Filtro de Empreendimentos', 'title' => 'Encontre o empreendimento ideal', 'subtitle' => 'Use os filtros abaixo para refinar a busca.', 'content' => 'Cidades, tipos e status já vêm da base de empreendimentos.']],
+                ['type' => 'numbers', 'data' => ['label' => 'Nossos Números', 'title' => 'Resultados que contam a nossa história', 'subtitle' => 'Indicadores institucionais da Pascoal.', 'content' => [['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'], ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'], ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presença consolidada.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.']]]],
+                ['type' => 'differentials', 'data' => ['label' => 'Diferenciais', 'title' => 'Excelência em cada detalhe.', 'subtitle' => 'Projetos exclusivos pensados para unir qualidade, valorização e bem-estar em cada detalhe.', 'content' => [['title' => 'Arquitetura autoral', 'text' => 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Localizações estratégicas', 'text' => 'Empreendimentos em regiões com alto potencial de valorização.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Sustentabilidade', 'text' => 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.', 'image' => '/reference-assets/blog-city.jpg']]]],
+            ],
+            'sobre-nos' => [
+                ['type' => 'hero', 'data' => ['label' => 'Sobre nós', 'title' => 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.', 'subtitle' => 'Pascoal Loteamentos', 'image' => '/reference-assets/hero-home.jpg']],
+                ['type' => 'history', 'data' => ['label' => 'Uma história', 'title' => 'Uma história construída com trabalho, confiança e visão de futuro.', 'content' => "A Pascoal Loteamentos nasceu em 2002, idealizada pelos irmãos Edson Pascoal e Hudson Paes Pascoal, com o propósito de desenvolver empreendimentos que transformam vidas e contribuem para o crescimento das cidades.\n\nAo longo de mais de 20 anos de atuação, a empresa consolidou sua presença na região, conquistando a confiança de clientes, investidores e parceiros por meio de um trabalho pautado na transparência, credibilidade e excelência.", 'image' => '/reference-assets/about-team.webp']],
+                ['type' => 'history', 'data' => ['label' => 'Crescimento', 'title' => 'Crescimento que gera desenvolvimento', 'content' => "O compromisso com a qualidade fez da Pascoal uma referência regional no desenvolvimento de loteamentos e empreendimentos imobiliários. Nossa atuação já contribuiu para a expansão urbana de diversas regiões.\n\nCada empreendimento é pensado para oferecer segurança, infraestrutura completa, excelente localização e potencial de valorização.", 'image' => '/reference-assets/about-engineer.webp']],
+                ['type' => 'numbers', 'data' => ['label' => 'Nossos números', 'title' => 'Resultados que reforçam nossa trajetória', 'content' => [['value' => '+20', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'], ['value' => '2', 'title' => 'Cidades', 'description' => 'com empreendimentos desenvolvidos.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos.']]]],
+                ['type' => 'content', 'data' => ['label' => 'Nosso propósito', 'title' => 'Nosso Propósito', 'content' => "Mais do que desenvolver loteamentos, construímos oportunidades. Sabemos que adquirir um terreno ou investir em um empreendimento é uma das decisões mais importantes da vida de uma família.\n\nPor isso, cada projeto nasce com planejamento, responsabilidade e uma visão de longo prazo.", 'image' => '/reference-assets/about-purpose.webp']],
+                ['type' => 'institucional', 'data' => ['label' => 'Missão, visão e valores', 'title' => 'Missão, visão e valores', 'content' => [['title' => 'Missão', 'text' => 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Visão', 'text' => 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.', 'image' => '/reference-assets/about-plans.jpg'], ['title' => 'Valores', 'text' => 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.', 'image' => '/reference-assets/about-meeting.jpg']]]],
+            ],
+            'contato' => [
+                ['type' => 'hero', 'data' => ['label' => 'Contato', 'title' => 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.', 'subtitle' => 'Fale com nossa equipe', 'content' => 'Nossa equipe está à disposição para esclarecer dúvidas, apresentar oportunidades e oferecer o suporte necessário.', 'image' => '/reference-assets/hero-contact.webp']],
+                ['type' => 'contact-data', 'data' => ['label' => 'Dados de contato', 'content' => [['Escritório administrativo', "Av. Ministro Cirne Lima, nº 3951\nJardim Coopagro\nToledo - PR\nCEP 85904-460"], ['Telefones', "Telefone Comercial\n(45) 3252-7023\n\nPlantão de Vendas\n(45) 9 9111-9653"], ['E-mail', 'contato@pascoalloteamentos.com.br']]]],
+                ['type' => 'contact-form', 'data' => ['label' => 'Formulário', 'title' => 'Fale com Nossa Equipe', 'subtitle' => 'Estamos disponíveis para atender você.', 'content' => 'Preencha o formulário e nossa equipe entrará em contato o mais breve possível.', 'button_label' => 'Enviar mensagem']],
+                ['type' => 'social', 'data' => ['label' => 'Redes sociais', 'content' => [['Instagram', 'https://instagram.com'], ['Facebook', 'https://facebook.com']]]],
+            ],
+            default => in_array($slug, ['condominios', 'loteamentos', 'imoveis'], true) ? [
+                ['type' => 'hero', 'data' => ['label' => ucfirst(str_replace('-', ' ', $slug)), 'title' => 'Conteúdo da listagem', 'subtitle' => 'Texto introdutório da página.', 'content' => 'Use esta área para editar o cabeçalho e o texto de apresentação.', 'image' => '/reference-assets/hero-home.jpg']],
+                ['type' => 'filter', 'data' => ['label' => 'Filtro', 'title' => 'Filtrar empreendimentos', 'subtitle' => 'Ajuste apenas textos auxiliares e mensagens.', 'content' => 'As opções de filtro continuam vindo da base de dados.']],
+            ] : [],
+        };
     }
 }
