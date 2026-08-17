@@ -81,7 +81,6 @@ const createSection = (type = 'content', label = 'Conteúdo') => ({
     const imagePreview = (value) => (value ? value : '/reference-assets/hero-home.jpg');
     const sectionPreview = (section) => section.image || '/reference-assets/hero-home.jpg';
 
-const structuredContentTypes = new Set(['institucional', 'contact-data', 'social', 'contact-form']);
 const structuredSchemas = {
     home: {
         title: 'Home',
@@ -608,9 +607,7 @@ export default function Form({ item }) {
                                             <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                                             <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
                                             <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
-                                            {section.type !== 'numbers' && section.type !== 'social' && section.type !== 'contact-data' && <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
                                             {section.type === 'hero' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
-                                            <Field label="Layout" value={section.layout} onChange={(event) => updateSection(index, 'layout', event.target.value)} />
                                             <div className="tablet:col-span-2">
                                                 <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                                             </div>
