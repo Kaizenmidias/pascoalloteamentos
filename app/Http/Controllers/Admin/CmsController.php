@@ -21,9 +21,54 @@ class CmsController extends Controller
 {
     public function __construct(private readonly MediaAssetService $media) {}
 
+    private const STRUCTURAL_PAGES = [
+        ['title' => 'Home', 'slug' => 'home', 'template' => 'home', 'status' => 'published', 'path' => '/admin/pages/home', 'locked' => true],
+        ['title' => 'Sobre nós', 'slug' => 'sobre-nos', 'template' => 'institutional', 'status' => 'published', 'path' => '/admin/pages/sobre-nos/edit', 'locked' => true],
+        ['title' => 'Condomínios', 'slug' => 'condominios', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/condominios/edit', 'locked' => true],
+        ['title' => 'Loteamentos', 'slug' => 'loteamentos', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/loteamentos/edit', 'locked' => true],
+        ['title' => 'Imóveis', 'slug' => 'imoveis', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/imoveis/edit', 'locked' => true],
+        ['title' => 'Contato', 'slug' => 'contato', 'template' => 'contact', 'status' => 'published', 'path' => '/admin/pages/contato/edit', 'locked' => true],
+        ['title' => 'Política de Privacidade', 'slug' => 'politica-de-privacidade', 'template' => 'page', 'status' => 'published', 'path' => '/admin/pages/politica-de-privacidade/edit', 'locked' => false],
+    ];
+
     public function pages(): Response
     {
-        return Inertia::render('Admin/Pages/Index', ['items' => Page::withCount('sections')->latest()->paginate(20)]);
+        foreach (self::STRUCTURAL_PAGES as $page) {
+            Page::firstOrCreate(
+                ['slug' => $page['slug']],
+                ['title' => $page['title'], 'template' => $page['template'], 'status' => $page['status'], 'published_at' => now()],
+            );
+        }
+
+        $items = Page::withCount('sections')->latest()->get()->keyBy('slug');
+
+        $pages = collect(self::STRUCTURAL_PAGES)->map(function (array $page) use ($items) {
+            $item = $items->get($page['slug']);
+
+            return [
+                'id' => $item?->id ?? $page['slug'],
+                'title' => $item?->title ?? $page['title'],
+                'slug' => $item?->slug ?? $page['slug'],
+                'template' => $item?->template ?? $page['template'],
+                'status' => $item?->status ?? $page['status'],
+                'sections_count' => $item?->sections_count ?? 0,
+                'locked' => $page['locked'],
+                'edit_url' => $item ? "/admin/pages/{$item->slug}/edit" : $page['path'],
+            ];
+        })->values();
+
+        $custom = $items->reject(fn (Page $page) => in_array($page->slug, array_column(self::STRUCTURAL_PAGES, 'slug'), true))->values()->map(fn (Page $page) => [
+            'id' => $page->id,
+            'title' => $page->title,
+            'slug' => $page->slug,
+            'template' => $page->template,
+            'status' => $page->status,
+            'sections_count' => $page->sections_count ?? 0,
+            'locked' => false,
+            'edit_url' => "/admin/pages/{$page->slug}/edit",
+        ]);
+
+        return Inertia::render('Admin/Pages/Index', ['items' => $pages->concat($custom)->values()]);
     }
 
     public function createPage(): Response
