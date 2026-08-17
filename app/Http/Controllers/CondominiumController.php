@@ -7,6 +7,7 @@ use App\Models\BusinessType;
 use App\Models\Condominium;
 use App\Models\CondominiumType;
 use App\Models\DevelopmentStatus;
+use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -25,6 +26,7 @@ class CondominiumController extends Controller
             'types' => CondominiumType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
             'statuses' => DevelopmentStatus::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
             'businessTypes' => Schema::hasTable('business_types') ? BusinessType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']) : collect(),
+            'pageCms' => Page::query()->where('slug', 'condominios')->with(['seo', 'sections'])->first(),
         ]);
     }
 

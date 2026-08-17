@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\City;
 use App\Models\BusinessType;
 use App\Models\DevelopmentStatus;
+use App\Models\Page;
 use App\Models\Subdivision;
 use App\Models\SubdivisionType;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class SubdivisionController extends Controller
             'types' => SubdivisionType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
             'statuses' => DevelopmentStatus::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
             'businessTypes' => Schema::hasTable('business_types') ? BusinessType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']) : collect(),
+            'pageCms' => Page::query()->where('slug', 'loteamentos')->with(['seo', 'sections'])->first(),
         ]);
     }
 

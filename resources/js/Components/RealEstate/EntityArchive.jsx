@@ -24,12 +24,18 @@ const copy = {
     },
 };
 
-export default function EntityArchive({ entity, items, basePath, filters, cities, types, statuses, businessTypes = [] }) {
-    const { eyebrow, title, description } = copy[entity];
+export default function EntityArchive({ entity, items, basePath, filters, cities, types, statuses, businessTypes = [], pageCms = null }) {
+    const fallback = copy[entity];
+    const heroSection = pageCms?.sections?.find((section) => section.type === 'hero' || section.type === 'filter') || null;
+    const { eyebrow, title, description } = {
+        eyebrow: heroSection?.data?.subtitle || fallback.eyebrow,
+        title: heroSection?.data?.title || fallback.title,
+        description: heroSection?.data?.content || fallback.description,
+    };
 
     return (
         <PublicLayout>
-            <SeoHead title={eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase()} description={description} />
+            <SeoHead title={pageCms?.seo?.title || (eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase())} description={pageCms?.seo?.description || description} />
             <section className="bg-white pt-28">
                 <Container className="space-y-6">
                     <div className="mx-auto max-w-4xl text-center">
