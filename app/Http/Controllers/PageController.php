@@ -22,6 +22,6 @@ class PageController extends Controller
     {
         abort_unless($page->status === 'published' && $page->published_at?->isPast(), 404);
 
-        return Inertia::render('Public/Content/Page', ['page' => $page->load('seo')]);
+        return Inertia::render('Public/Content/Page', ['page' => $page->load(['seo', 'sections'])]);
     }
 }

@@ -23,7 +23,7 @@ class CmsController extends Controller
 
     public function pages(): Response
     {
-        return Inertia::render('Admin/Pages/Index', ['items' => Page::latest()->paginate(20)]);
+        return Inertia::render('Admin/Pages/Index', ['items' => Page::withCount('sections')->latest()->paginate(20)]);
     }
 
     public function createPage(): Response
@@ -33,7 +33,7 @@ class CmsController extends Controller
 
     public function editPage(Page $page): Response
     {
-        return Inertia::render('Admin/Pages/Form', ['item' => $page->load('seo')]);
+        return Inertia::render('Admin/Pages/Form', ['item' => $page->load(['seo', 'sections'])]);
     }
 
     public function storePage(Request $request): RedirectResponse
@@ -213,8 +213,20 @@ class CmsController extends Controller
             'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string|max:500',
+            'sections' => ['nullable', 'array'],
+            'sections.*.type' => ['required_with:sections', 'string', 'max:100'],
+            'sections.*.title' => ['nullable', 'string', 'max:255'],
+            'sections.*.subtitle' => ['nullable', 'string', 'max:255'],
+            'sections.*.content' => ['nullable', 'string'],
+            'sections.*.image' => ['nullable', 'string', 'max:2048'],
+            'sections.*.button_label' => ['nullable', 'string', 'max:255'],
+            'sections.*.button_url' => ['nullable', 'string', 'max:255'],
+            'sections.*.layout' => ['nullable', 'string', 'max:100'],
+            'sections.*.sort_order' => ['nullable', 'integer', 'min:0'],
+            'sections.*.is_active' => ['nullable', 'boolean'],
         ]);
 
+        $sections = Arr::pull($data, 'sections', []);
         $seo = Arr::only($data, ['seo_title', 'seo_description']);
         unset($data['seo_title'], $data['seo_description']);
 
@@ -223,6 +235,23 @@ class CmsController extends Controller
         }
 
         $page->fill($data)->save();
+        $page->sections()->delete();
+        foreach (array_values($sections) as $index => $section) {
+            $page->sections()->create([
+                'type' => (string) ($section['type'] ?? 'content'),
+                'data' => [
+                    'title' => $section['title'] ?? null,
+                    'subtitle' => $section['subtitle'] ?? null,
+                    'content' => $section['content'] ?? null,
+                    'image' => $section['image'] ?? null,
+                    'button_label' => $section['button_label'] ?? null,
+                    'button_url' => $section['button_url'] ?? null,
+                    'layout' => $section['layout'] ?? null,
+                ],
+                'sort_order' => (int) ($section['sort_order'] ?? $index),
+                'is_active' => (bool) ($section['is_active'] ?? true),
+            ]);
+        }
         $page->seo()->updateOrCreate([], ['title' => $seo['seo_title'] ?? null, 'description' => $seo['seo_description'] ?? null]);
     }
 
