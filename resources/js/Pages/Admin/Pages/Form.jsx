@@ -30,7 +30,9 @@ const presets = {
     'sobre-nos': [
         baseSection('hero', 'Hero'),
         baseSection('history', 'História'),
-        baseSection('institucional', 'Missão, Visão e Valores'),
+        baseSection('mission', 'Missão'),
+        baseSection('vision', 'Visão'),
+        baseSection('values', 'Valores'),
         baseSection('cta', 'CTA'),
     ],
     condominios: [
@@ -130,18 +132,56 @@ export default function Form({ item }) {
 
         if (item?.sections?.length) {
             return item.sections.flatMap((section, index) => {
-                if (item?.slug === 'sobre-nos' && (section.type === 'institucional' || section.type === 'mission' || section.type === 'vision' || section.type === 'values') && Array.isArray(section.data?.content)) {
-                    return section.data.content.slice(0, 3).map((block, blockIndex) => ({
-                        type: ['mission', 'vision', 'values'][blockIndex],
-                        label: block.title || ['Missão', 'Visão', 'Valores'][blockIndex],
-                        title: block.title || ['Missão', 'Visão', 'Valores'][blockIndex].toUpperCase(),
-                        content: block.text || '',
-                        image: block.image || '',
-                        recipient_email: '',
-                        layout: '',
-                        sort_order: (section.sort_order ?? index) + (blockIndex * 0.01),
-                        is_active: Boolean(section.is_active ?? true),
-                    }));
+                if (item?.slug === 'sobre-nos') {
+                    const legacyInstitutional = section.type === 'institucional' || (section.type === 'history' && /miss[aã]o|vis[aã]o|valores/i.test(`${section.data?.label || ''} ${section.data?.title || ''}`));
+
+                    if (legacyInstitutional && Array.isArray(section.data?.content)) {
+                        return section.data.content.slice(0, 3).map((block, blockIndex) => ({
+                            type: ['mission', 'vision', 'values'][blockIndex],
+                            title: block.title || ['MISSÃO', 'VISÃO', 'VALORES'][blockIndex],
+                            content: block.text || '',
+                            image: block.image || '',
+                            recipient_email: '',
+                            layout: '',
+                            sort_order: (section.sort_order ?? index) + (blockIndex * 0.01),
+                            is_active: Boolean(section.is_active ?? true),
+                        }));
+                    }
+
+                    if (legacyInstitutional && typeof section.data?.content === 'string') {
+                        return [
+                            {
+                                type: 'mission',
+                                title: 'MISSÃO',
+                                content: 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.',
+                                image: '/reference-assets/blog-city.jpg',
+                                recipient_email: '',
+                                layout: '',
+                                sort_order: (section.sort_order ?? index) + 0.01,
+                                is_active: Boolean(section.is_active ?? true),
+                            },
+                            {
+                                type: 'vision',
+                                title: 'VISÃO',
+                                content: 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.',
+                                image: '/reference-assets/about-plans.jpg',
+                                recipient_email: '',
+                                layout: '',
+                                sort_order: (section.sort_order ?? index) + 0.02,
+                                is_active: Boolean(section.is_active ?? true),
+                            },
+                            {
+                                type: 'values',
+                                title: 'VALORES',
+                                content: 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.',
+                                image: '/reference-assets/about-meeting.jpg',
+                                recipient_email: '',
+                                layout: '',
+                                sort_order: (section.sort_order ?? index) + 0.03,
+                                is_active: Boolean(section.is_active ?? true),
+                            },
+                        ];
+                    }
                 }
 
                 return [{
@@ -309,7 +349,6 @@ export default function Form({ item }) {
                             <div className="space-y-4">
                                 <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                                 <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
-                                <Field label="Alt da imagem" value={section.alt || ''} onChange={(event) => updateSection(index, 'alt', event.target.value)} />
                                 <div className="flex items-center gap-3">
                                     <label className="flex items-center gap-2 text-sm text-gray-600">
                                         <input type="checkbox" checked={section.is_active} onChange={(event) => updateSection(index, 'is_active', event.target.checked)} />
@@ -326,9 +365,9 @@ export default function Form({ item }) {
                                         </div>
                                         <button type="button" className="text-sm font-medium text-red-700" onClick={() => updateSection(index, 'image', '')}>Remover imagem</button>
                                     </div>
-                                    <img src={imagePreview(section.image)} alt={section.alt || section.title || ''} className="h-52 w-full object-cover" />
+                                    <img src={imagePreview(section.image)} alt={section.title || ''} className="h-52 w-full object-cover" />
                                 </div>
-                                <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                                <Field label="Trocar imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
                                 <p className="text-xs text-gray-500">Use a imagem atual do card ou substitua pela URL de outra imagem já cadastrada.</p>
                             </div>
                         </div>
