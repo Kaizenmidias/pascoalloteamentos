@@ -6,10 +6,8 @@ function MainTab({ active, children, onClick }) {
         <button
             type="button"
             onClick={onClick}
-            className={`min-h-14 shrink-0 rounded-[18px] border px-6 py-3 text-sm font-medium transition tablet:px-8 tablet:text-base ${
-                active
-                    ? 'border-brand text-brand'
-                    : 'border-[#d9d9d9] text-[#7b7b7b]'
+            className={`min-h-[5.25rem] min-w-[12.25rem] shrink-0 rounded-[8px] border px-6 py-4 text-[1.2rem] font-normal transition tablet:min-w-[12.75rem] tablet:px-8 tablet:text-[1.3rem] ${
+                active ? 'border-brand text-brand' : 'border-[#d9d9d9] text-[#7b7b7b]'
             } bg-white`}
         >
             {children}
@@ -18,19 +16,10 @@ function MainTab({ active, children, onClick }) {
 }
 
 function OptionLine({ options = [], value, onChange, compactLabel = false }) {
-    if (!options.length) {
-        return null;
-    }
+    if (!options.length) return null;
 
     return (
-        <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm tablet:gap-x-8">
-            <button
-                type="button"
-                onClick={() => onChange('')}
-                className={`transition ${!value ? 'font-semibold text-brand' : 'font-normal text-[#7d7d7d] hover:text-ink'}`}
-            >
-                Todos
-            </button>
+        <div className="flex flex-wrap gap-x-7 gap-y-3 text-[1.05rem] tablet:gap-x-10">
             {options.map((option) => (
                 <button
                     key={option.slug}
@@ -45,10 +34,8 @@ function OptionLine({ options = [], value, onChange, compactLabel = false }) {
     );
 }
 
-function useInitialTab(includeCategory, categories, cities, statuses, types) {
-    if (includeCategory && categories.length) {
-        return 'category';
-    }
+function initialTab(includeCategory, categories, cities, statuses, types) {
+    if (includeCategory && categories.length) return 'category';
     if (cities.length) return 'city';
     if (statuses.length) return 'status';
     if (types.length) return 'type';
@@ -76,20 +63,19 @@ export default function HeroSearch({
         business_type: filters.business_type || '',
     });
 
-    const [activeTab, setActiveTab] = useState(useInitialTab(includeCategory, categories, cities, statuses, types));
+    const [activeTab, setActiveTab] = useState(initialTab(includeCategory, categories, cities, statuses, types));
 
     useEffect(() => {
-        setActiveTab(useInitialTab(includeCategory, categories, cities, statuses, types));
+        setActiveTab(initialTab(includeCategory, categories, cities, statuses, types));
     }, [includeCategory, categories, cities, statuses, types]);
 
     const availableTypes = useMemo(() => {
         if (!includeCategory || !values.category) return types;
-        const match = {
+        return {
             properties: types,
             condominiums: types,
             subdivisions: types,
-        };
-        return match[values.category] || types;
+        }[values.category] || types;
     }, [includeCategory, types, values.category]);
 
     const submit = (next) => {
@@ -116,42 +102,40 @@ export default function HeroSearch({
 
     const sections = includeCategory
         ? [
-            { key: 'category', label: 'Categorias', options: categories, value: values.category, placeholder: 'Todos', compactLabel: true },
-            { key: 'city', label: 'Cidade', options: cities, value: values.city, placeholder: 'Todos' },
-            { key: 'type', label: 'Tipo de imóvel', options: availableTypes, value: values.type, placeholder: 'Todos' },
-            ...(businessTypes.length ? [{ key: 'business_type', label: 'Tipo de negócio', options: businessTypes, value: values.business_type, placeholder: 'Todos' }] : []),
+            { key: 'category', options: categories, value: values.category, compactLabel: true },
+            { key: 'city', options: cities, value: values.city },
+            { key: 'type', options: availableTypes, value: values.type },
+            ...(businessTypes.length ? [{ key: 'business_type', options: businessTypes, value: values.business_type }] : []),
         ]
         : [
-            { key: 'city', label: 'Cidade', options: cities, value: values.city, placeholder: 'Todos' },
-            ...(statuses.length ? [{ key: 'status', label: 'Status do empreendimento', options: statuses, value: values.status, placeholder: 'Todos' }] : []),
-            ...(types.length ? [{ key: 'type', label: 'Tipo de imóvel', options: availableTypes, value: values.type, placeholder: 'Todos' }] : []),
+            { key: 'city', options: cities, value: values.city },
+            ...(statuses.length ? [{ key: 'status', options: statuses, value: values.status }] : []),
+            ...(types.length ? [{ key: 'type', options: availableTypes, value: values.type }] : []),
         ];
 
     const activeSection = sections.find((section) => section.key === activeTab) || sections[0];
 
-    const mainTabs = includeCategory
+    const tabs = includeCategory
         ? [
             { key: 'category', label: 'Residenciais' },
-            { key: 'city', label: 'Cidade' },
-            ...(businessTypes.length ? [{ key: 'business_type', label: 'Tipo de negócio' }] : []),
+            { key: 'type', label: 'Loteamentos' },
         ]
         : [
             { key: 'city', label: 'Cidade' },
-            ...(statuses.length ? [{ key: 'status', label: 'Status do empreendimento' }] : []),
-            ...(types.length ? [{ key: 'type', label: 'Tipo de imóvel' }] : []),
+            { key: 'status', label: 'Status do empreendimento' },
         ];
 
     return (
         <div className="mx-auto mt-10 max-w-[76rem]">
-            <div className="space-y-7">
-                <div className="flex flex-nowrap gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden tablet:gap-4">
-                    {mainTabs.map((tab) => (
+            <div className="space-y-10">
+                <div className="flex flex-nowrap gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden tablet:gap-5">
+                    {tabs.map((tab) => (
                         <MainTab key={tab.key} active={activeTab === tab.key} onClick={() => setActiveTab(tab.key)}>
                             {tab.label}
                         </MainTab>
                     ))}
                 </div>
-                <div className="min-h-[4rem]">
+                <div className="min-h-[2.5rem]">
                     {activeSection && (
                         <OptionLine
                             options={activeSection.options}
