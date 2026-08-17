@@ -446,10 +446,25 @@ export default function Form({ item }) {
                         <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">Seção / Cabeçalho</p>
                         <p className="mt-1 text-sm text-gray-500">Apenas o texto da primeira seção pode ser alterado aqui.</p>
                     </div>
-                    <div className="grid gap-4 tablet:grid-cols-2">
-                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                        <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                        <Field label="Texto introdutório" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                    <div className="grid gap-6 tablet:grid-cols-[1fr_0.9fr]">
+                        <div className="space-y-4">
+                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                            <Field label="Texto introdutório" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                        </div>
+                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Preview da capa</p>
+                                    <p className="text-sm text-gray-600">{section.image ? 'Imagem carregada' : 'Sem imagem definida'}</p>
+                                </div>
+                                <button type="button" className="text-sm font-medium text-red-700" onClick={() => updateSection(index, 'image', '')}>Remover imagem</button>
+                            </div>
+                            <img src={sectionPreview(section)} alt={section.alt || section.title || ''} className="h-48 w-full object-cover" />
+                            <div className="p-4">
+                                <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
