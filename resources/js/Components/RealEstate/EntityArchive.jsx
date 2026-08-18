@@ -37,7 +37,7 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
     return (
         <PublicLayout>
             <SeoHead title={pageCms?.seo?.title || (eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase())} description={pageCms?.seo?.description || description} />
-            <section className="bg-white pt-[70px]">
+            <section className="bg-white pt-[160px]">
                 <Container className="space-y-5">
                     <div className="mx-auto max-w-[75rem] text-center">
                         <p className="eyebrow">{eyebrow}</p>

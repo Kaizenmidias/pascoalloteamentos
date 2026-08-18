@@ -45,14 +45,14 @@ export default function HeroSearch({ action, entity, filters = {}, cities = [], 
     const hasFilters = Boolean(values.city || values.type || values.status);
 
     return (
-        <div className="mx-auto mt-8 max-w-[80rem] pb-2">
+        <div className="mx-auto mt-12 max-w-[80rem] pb-2">
             <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden tablet:gap-5">
                 {sections.map((section) => <FilterTab key={section.key} active={activeTab === section.key} onClick={() => setActiveTab(section.key)}>{section.label}</FilterTab>)}
             </div>
-            <div className="mt-8 border-t border-line pt-6">
+            <div className="mt-10 border-t border-line pt-7">
                 {activeSection.options.length ? <FilterOptions options={activeSection.options} value={values[activeSection.key]} onChange={(value) => update(activeSection.key, value)} /> : <p className="text-sm text-muted">Nenhuma opção disponível.</p>}
             </div>
-            {hasFilters && <button type="button" onClick={clear} className="mt-5 text-xs font-medium uppercase tracking-[.08em] text-brand underline underline-offset-4">Limpar filtros</button>}
+            {hasFilters && <button type="button" onClick={clear} className="mt-6 text-xs font-medium uppercase tracking-[.08em] text-brand underline underline-offset-4">Limpar filtros</button>}
         </div>
     );
 }
