@@ -8,7 +8,10 @@ trait HasRealEstateContentRules
     {
         return [
             'gallery_images' => ['nullable', 'array', 'max:30'],
-            'gallery_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:12288'],
+            'gallery_media' => ['nullable', 'array', 'max:30'],
+            'gallery_media.*' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif,image/heic-sequence,image/heif-sequence,video/mp4,video/quicktime', 'max:524288'],
+            'media_order' => ['nullable', 'array'],
+            'media_order.*' => ['integer', 'exists:media_assets,id'],
             'remove_media_ids' => ['nullable', 'array'],
             'remove_media_ids.*' => ['integer', 'exists:media_assets,id'],
             'featured_media_id' => ['nullable', 'integer', 'exists:media_assets,id'],
@@ -47,7 +50,7 @@ trait HasRealEstateContentRules
             'gallery_images.*' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif,image/heic-sequence,image/heif-sequence', 'max:25600'],
             'featured_image' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif,image/heic-sequence,image/heif-sequence', 'max:25600'],
             'gallery_videos' => ['nullable', 'array', 'max:30'],
-            'gallery_videos.*' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm,video/quicktime', 'max:102400'],
+            'gallery_videos.*' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm,video/quicktime', 'max:524288'],
             'gallery_video_urls' => ['nullable', 'array', 'max:30'],
             'gallery_video_urls.*' => ['nullable', 'url', 'max:2048'],
             'seo_title' => ['nullable', 'string', 'max:255'],

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import ResponsiveImage from './ResponsiveImage';
 
-const isVideo = (item) => item?.mime_type?.startsWith('video/');
+const isVideo = (item) => item?.type === 'video' || item?.mime_type?.startsWith('video/');
 const embedUrl = (url = '') => {
     const youtube = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&?/]+)/i);
     if (youtube) return `https://www.youtube.com/embed/${youtube[1]}`;
@@ -10,12 +10,13 @@ const embedUrl = (url = '') => {
 };
 
 function Media({ item, thumbnail = false }) {
+    if (isVideo(item) && thumbnail && item.poster_url) return <span className="relative block h-20 w-28 overflow-hidden rounded-[6px] bg-ink"><img src={item.poster_url} alt="" className="h-full w-full object-cover opacity-75" /><span className="absolute inset-0 grid place-items-center text-xs font-medium uppercase text-white">Video</span></span>;
     if (!isVideo(item)) return <ResponsiveImage src={item?.url} alt={item?.alt_text || ''} className={thumbnail ? 'h-20 w-28 rounded-[6px] object-cover' : 'aspect-[16/9] w-full object-cover'} />;
     if (thumbnail) return <span className="grid h-20 w-28 place-items-center rounded-[6px] bg-ink text-xs font-medium uppercase text-white">Vídeo</span>;
     const embed = item.mime_type === 'video/external' ? embedUrl(item.url) : null;
     return embed
         ? <iframe src={embed} title={item.caption || 'Vídeo'} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="aspect-[16/9] w-full border-0" />
-        : <video src={item.url} controls playsInline preload="metadata" className="aspect-[16/9] w-full bg-black object-contain" />;
+        : <video src={item.url} poster={item.poster_url || undefined} controls playsInline preload="metadata" className="aspect-[16/9] w-full bg-black object-contain" />;
 }
 
 export default function Gallery({ items = [] }) {

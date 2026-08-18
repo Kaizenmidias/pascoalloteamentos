@@ -10,7 +10,7 @@ class MediaAsset extends Model
 {
     protected $guarded = ['id'];
 
-    protected $appends = ['url'];
+    protected $appends = ['url', 'poster_url', 'type'];
 
     protected function casts(): array
     {
@@ -24,5 +24,18 @@ class MediaAsset extends Model
             'external' => $this->path,
             default => Storage::disk($this->disk)->url($this->path),
         });
+    }
+
+    protected function posterUrl(): Attribute
+    {
+        return Attribute::get(fn () => $this->poster_path
+            ? Storage::disk($this->poster_disk ?: $this->disk)->url($this->poster_path)
+            : null);
+    }
+
+    protected function type(): Attribute
+    {
+        return Attribute::get(fn () => $this->media_type
+            ?: (str_starts_with((string) $this->mime_type, 'video/') ? 'video' : 'image'));
     }
 }

@@ -19,9 +19,11 @@ class RealEstateContentService
         return DB::transaction(function () use ($item, $data) {
             $features = Arr::pull($data, 'feature_ids', []);
             $uploads = Arr::pull($data, 'gallery_images', []);
+            $mediaUploads = Arr::pull($data, 'gallery_media', []);
             $videoUploads = Arr::pull($data, 'gallery_videos', []);
             $videoUrls = Arr::pull($data, 'gallery_video_urls', []);
             $removeMedia = Arr::pull($data, 'remove_media_ids', []);
+            $mediaOrder = Arr::pull($data, 'media_order', []);
             $featuredMediaId = Arr::pull($data, 'featured_media_id');
             $featuredImage = Arr::pull($data, 'featured_image');
             $aboutImage = Arr::pull($data, 'about_image');
@@ -127,6 +129,9 @@ class RealEstateContentService
             if ($removeMedia) {
                 $item->mediaAssets()->detach($removeMedia);
             }
+            foreach (array_values($mediaOrder ?: []) as $index => $mediaId) {
+                $item->mediaAssets()->updateExistingPivot($mediaId, ['sort_order' => $index]);
+            }
             if ($featuredImage) {
                 $asset = $this->media->store($featuredImage, 'real-estate/featured');
                 $item->mediaAssets()->syncWithoutDetaching([$asset->id => ['collection' => 'featured', 'sort_order' => 0, 'is_featured' => true]]);
@@ -140,6 +145,13 @@ class RealEstateContentService
             foreach (array_values($videoUploads ?: []) as $index => $upload) {
                 $asset = $this->media->store($upload, 'real-estate/gallery-videos');
                 $item->mediaAssets()->syncWithoutDetaching([$asset->id => ['collection' => 'gallery', 'sort_order' => $item->mediaAssets()->count() + $index, 'is_featured' => false]]);
+            }
+            foreach (array_values($mediaUploads ?: []) as $index => $upload) {
+                $asset = $this->media->store($upload, 'real-estate/gallery');
+                $item->mediaAssets()->syncWithoutDetaching([$asset->id => ['collection' => 'gallery', 'sort_order' => $item->mediaAssets()->count() + $index, 'is_featured' => false]]);
+                if ($asset->type === 'image') {
+                    $featuredMediaId ??= $asset->id;
+                }
             }
             foreach (array_values(array_filter($videoUrls ?: [])) as $index => $url) {
                 $asset = MediaAsset::firstOrCreate(
