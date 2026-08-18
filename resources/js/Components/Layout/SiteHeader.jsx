@@ -62,7 +62,8 @@ export default function SiteHeader() {
     const { url, props } = usePage();
     const pathname = pathnameFromUrl(url);
     const lightPages = ['/sobre-nos', '/condominios', '/loteamentos', '/imoveis'];
-    const lightHeader = lightPages.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+    const condominiumDetail = pathname.startsWith('/condominios/');
+    const lightHeader = !condominiumDetail && lightPages.some((path) => pathname === path || pathname.startsWith(`${path}/`));
     const realEstate = props.realEstate || {};
     const menuGroups = useMemo(() => ({
         condominios: realEstate.menuGroups?.condominiums || [],
@@ -75,7 +76,7 @@ export default function SiteHeader() {
         update();
         addEventListener('scroll', update, { passive: true });
         return () => removeEventListener('scroll', update);
-    }, []);
+    }, [pathname]);
 
     useEffect(() => {
         const isHome = pathname === '/';
