@@ -5,6 +5,7 @@ import Button from '../../../Components/UI/Button';
 import FeatureChoices from '../../../Components/Forms/FeatureChoices';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
+import LocationFields from '../../../Components/Forms/LocationFields';
 
 const numericFields = [['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['rent_price', 'Preço de locação'], ['condominium_fee', 'Condomínio'], ['iptu', 'IPTU'], ['usable_area', 'Área útil'], ['total_area', 'Área total'], ['built_area', 'Área construída'], ['land_area', 'Área do terreno'], ['bedrooms', 'Quartos'], ['suites', 'Suítes'], ['bathrooms', 'Banheiros'], ['lavatories', 'Lavabos'], ['parking_spaces', 'Vagas'], ['rooms', 'Salas']];
 
@@ -59,12 +60,12 @@ export default function Form({ item, options }) {
                     <SelectField label="Tipo de imóvel" options={options.types} value={data.property_type_id} onChange={(e) => setData('property_type_id', e.target.value)} />
                     <SelectField label="Estágio" options={options.statuses} value={data.development_status_id} onChange={(e) => setData('development_status_id', e.target.value)} />
                     <SelectField label="Tipo de negócio" options={options.businessTypes} value={data.business_type_id} onChange={(e) => setData('business_type_id', e.target.value)} />
-                    <SelectField label="Cidade" options={options.cities} value={data.city_id} onChange={(e) => setData('city_id', e.target.value)} />
                     <SelectField label="Condomínio relacionado" options={options.condominiums} labelKey="title" value={data.condominium_id} onChange={(e) => setData('condominium_id', e.target.value)} />
                     <Field label="Status comercial" value={data.commercial_status} onChange={(e) => setData('commercial_status', e.target.value)} />
                     <Field label="Resumo para cards" as="textarea" value={data.excerpt} onChange={(e) => setData('excerpt', e.target.value)} />
                     <Field label="Descrição completa" as="textarea" value={data.description} onChange={(e) => setData('description', e.target.value)} />
                 </section>
+                <LocationFields states={options.states} initialCity={item?.city} cityId={data.city_id} onCityChange={(cityId) => setData('city_id', cityId)} error={errors.city_id} />
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-3">
                     <Field label="Endereço" value={data.address} onChange={(e) => setData('address', e.target.value)} />
                     <Field label="Número" value={data.address_number} onChange={(e) => setData('address_number', e.target.value)} />

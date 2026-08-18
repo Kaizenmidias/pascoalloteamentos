@@ -5,6 +5,7 @@ import FeatureChoices from '../../../Components/Forms/FeatureChoices';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import ContentManager, { contentDefaults } from '../../../Components/Admin/ContentManager';
+import LocationFields from '../../../Components/Forms/LocationFields';
 
 export default function Form({ item, options }) {
     const editing = Boolean(item);
@@ -51,13 +52,14 @@ export default function Form({ item, options }) {
         <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
             <Field label="Título" value={data.title} onChange={e => setData('title', e.target.value)} error={errors.title} /><Field label="Slug" value={data.slug} onChange={e => setData('slug', e.target.value)} error={errors.slug} />
             <SelectField label="Tipo de loteamento" options={options.types} value={data.subdivision_type_id} onChange={e => setData('subdivision_type_id', e.target.value)} /><SelectField label="Estágio" options={options.statuses} value={data.development_status_id} onChange={e => setData('development_status_id', e.target.value)} />
-            <SelectField label="Tipo de negócio" options={options.businessTypes} value={data.business_type_id} onChange={e => setData('business_type_id', e.target.value)} /><SelectField label="Cidade" options={options.cities} value={data.city_id} onChange={e => setData('city_id', e.target.value)} />
+            <SelectField label="Tipo de negócio" options={options.businessTypes} value={data.business_type_id} onChange={e => setData('business_type_id', e.target.value)} />
             <Field label="Endereço" value={data.address} onChange={e => setData('address', e.target.value)} /><Field label="Resumo" as="textarea" value={data.excerpt} onChange={e => setData('excerpt', e.target.value)} />
             <Field label="Descrição" as="textarea" value={data.description} onChange={e => setData('description', e.target.value)} /><Field label="Título da seção institucional" value={data.about_title} onChange={e => setData('about_title', e.target.value)} />
             <Field label="Texto institucional" as="textarea" value={data.about_text} onChange={e => setData('about_text', e.target.value)} /><Field label="Headline promocional" value={data.promotion_headline} onChange={e => setData('promotion_headline', e.target.value)} />
             <Field label="URL promocional" type="url" value={data.promotion_url} onChange={e => setData('promotion_url', e.target.value)} />
         </section>
         <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-4">{[['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['minimum_lot_area', 'Área mínima'], ['maximum_lot_area', 'Área máxima'], ['total_lots', 'Total de lotes'], ['available_lots', 'Lotes disponíveis']].map(([key, label]) => <Field key={key} label={label} type="number" step="0.01" min="0" value={data[key]} onChange={e => setData(key, e.target.value)} error={errors[key]} />)}<Field label="Previsão de entrega" type="date" value={data.expected_delivery_date} onChange={e => setData('expected_delivery_date', e.target.value)} /></section>
+        <LocationFields states={options.states} initialCity={item?.city} cityId={data.city_id} onCityChange={(cityId) => setData('city_id', cityId)} error={errors.city_id} />
         <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={ids => setData('feature_ids', ids)} /></section><ContentManager data={data} setData={setData} item={item} />
         <section className="flex flex-wrap items-end gap-5 rounded-card bg-white p-6 shadow-card"><SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={e => setData('status', e.target.value)} /><SelectField label="Negócio" options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Locação' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={e => setData('commercial_purpose', e.target.value)} />{[['featured', 'Destaque'], ['price_on_request', 'Preço sob consulta']].map(([key, label]) => <label key={key} className="flex gap-2 pb-3"><input type="checkbox" checked={data[key]} onChange={e => setData(key, e.target.checked)} />{label}</label>)}<Button type="submit" disabled={processing}>Salvar loteamento</Button></section>
     </form></AdminLayout>;

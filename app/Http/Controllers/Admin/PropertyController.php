@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePropertyRequest;
 use App\Http\Requests\Admin\UpdatePropertyRequest;
-use App\Models\City;
+use App\Models\State;
 use App\Models\Condominium;
 use App\Models\BusinessType;
 use App\Models\DevelopmentStatus;
@@ -53,11 +53,11 @@ class PropertyController extends Controller
 
     private function options(): array
     {
-        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => PropertyType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'condominiums' => Condominium::orderBy('title')->get(['id', 'title']), 'features' => Feature::orderBy('sort_order')->get()];
+        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => PropertyType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'condominiums' => Condominium::orderBy('title')->get(['id', 'title']), 'features' => Feature::orderBy('sort_order')->get()];
     }
 
     private function contentRelations(): array
     {
-        return ['features', 'mediaAssets', 'floorPlans', 'constructionStages', 'faqs', 'seo'];
+        return ['city.state', 'features', 'mediaAssets', 'floorPlans', 'constructionStages', 'faqs', 'seo'];
     }
 }

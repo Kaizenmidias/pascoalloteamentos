@@ -43,7 +43,7 @@ function HomeHero({ slides = [], hero = {} }) {
 }
 
 export default function Home({ featuredItems = [], homeEntities = [], posts = [], homeNumbers = [], homeHero = null, homeDifferentials = [] }) {
-    const [filters, setFilters] = useState({ category: 'condominiums', city: '', enterprise: '' });
+    const [filters, setFilters] = useState({ category: 'condominiums', cityId: '' });
     const safeDifferentials = Array.isArray(homeDifferentials) ? homeDifferentials : [];
     const safeNumbers = Array.isArray(homeNumbers) ? homeNumbers : [];
 
@@ -55,8 +55,7 @@ export default function Home({ featuredItems = [], homeEntities = [], posts = []
 
     const previewItems = useMemo(() => {
         let items = homeEntities.filter((item) => !filters.category || item.category === filters.category);
-        if (filters.city) items = items.filter((item) => item.city?.slug === filters.city);
-        if (filters.enterprise) items = items.filter((item) => item.slug === filters.enterprise);
+        if (filters.cityId) items = items.filter((item) => String(item.city?.id) === String(filters.cityId));
         return items;
     }, [filters, homeEntities]);
 
@@ -85,7 +84,7 @@ export default function Home({ featuredItems = [], homeEntities = [], posts = []
             <section className="pb-[var(--section-space)]">
                 <Container>
                     {previewItems.length ? (
-                        <Carousel label="Empreendimentos em destaque">
+                        <Carousel key={`${filters.category}-${filters.cityId}`} label="Empreendimentos em destaque">
                             {previewItems.map((item) => <EntityCard key={`${item.category}-${item.id}`} item={item} href={item.href} />)}
                         </Carousel>
                     ) : (

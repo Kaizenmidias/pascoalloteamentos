@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreCondominiumRequest;
 use App\Http\Requests\Admin\UpdateCondominiumRequest;
 use App\Models\BusinessType;
-use App\Models\City;
+use App\Models\State;
 use App\Models\Condominium;
 use App\Models\CondominiumType;
 use App\Models\DevelopmentStatus;
@@ -40,7 +40,7 @@ class CondominiumController extends Controller
 
     public function edit(Condominium $condominium): Response
     {
-        return Inertia::render('Admin/Condominiums/Form', ['item' => $condominium->load(['features', 'mediaAssets', 'floorPlans', 'constructionStages', 'faqs', 'seo']), 'options' => $this->options()]);
+        return Inertia::render('Admin/Condominiums/Form', ['item' => $condominium->load(['city.state', 'features', 'mediaAssets', 'floorPlans', 'constructionStages', 'faqs', 'seo']), 'options' => $this->options()]);
     }
 
     public function update(UpdateCondominiumRequest $request, Condominium $condominium): RedirectResponse
@@ -52,6 +52,6 @@ class CondominiumController extends Controller
 
     private function options(): array
     {
-        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::orderBy('sort_order')->get()];
+        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::orderBy('sort_order')->get()];
     }
 }

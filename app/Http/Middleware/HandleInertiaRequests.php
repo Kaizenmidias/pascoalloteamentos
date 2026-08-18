@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Models\BusinessType;
-use App\Models\City;
 use App\Models\Condominium;
 use App\Models\DevelopmentStatus;
 use App\Models\Property;
@@ -18,7 +17,6 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
-        $cityOptions = Schema::hasTable('cities') ? City::query()->orderBy('name')->get(['name', 'slug']) : collect();
         $propertyTypes = Schema::hasTable('property_types') ? \App\Models\PropertyType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']) : collect();
         $condominiumTypes = Schema::hasTable('condominium_types') ? \App\Models\CondominiumType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']) : collect();
         $subdivisionTypes = Schema::hasTable('subdivision_types') ? \App\Models\SubdivisionType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']) : collect();
@@ -34,7 +32,6 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'appName' => config('app.name'),
             'realEstate' => [
-                'cities' => $cityOptions,
                 'propertyTypes' => $propertyTypes,
                 'condominiumTypes' => $condominiumTypes,
                 'subdivisionTypes' => $subdivisionTypes,

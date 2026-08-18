@@ -23,7 +23,7 @@ class SubdivisionController extends Controller
         return Inertia::render('Public/Subdivisions/Index', [
             'items' => $items,
             'filters' => $request->only(['city', 'type', 'status', 'business_type']),
-            'cities' => City::query()->orderBy('name')->get(['name', 'slug']),
+            'cities' => City::query()->whereHas('subdivisions', fn ($query) => $query->published())->orderBy('name')->get(['name', 'slug']),
             'types' => SubdivisionType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
             'statuses' => DevelopmentStatus::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
             'businessTypes' => Schema::hasTable('business_types') ? BusinessType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']) : collect(),

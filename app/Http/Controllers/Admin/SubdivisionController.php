@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSubdivisionRequest;
 use App\Http\Requests\Admin\UpdateSubdivisionRequest;
 use App\Models\BusinessType;
-use App\Models\City;
+use App\Models\State;
 use App\Models\DevelopmentStatus;
 use App\Models\Feature;
 use App\Models\Subdivision;
@@ -40,7 +40,7 @@ class SubdivisionController extends Controller
 
     public function edit(Subdivision $subdivision): Response
     {
-        return Inertia::render('Admin/Subdivisions/Form', ['item' => $subdivision->load(['features', 'mediaAssets', 'floorPlans', 'constructionStages', 'faqs', 'seo']), 'options' => $this->options()]);
+        return Inertia::render('Admin/Subdivisions/Form', ['item' => $subdivision->load(['city.state', 'features', 'mediaAssets', 'floorPlans', 'constructionStages', 'faqs', 'seo']), 'options' => $this->options()]);
     }
 
     public function update(UpdateSubdivisionRequest $request, Subdivision $subdivision): RedirectResponse
@@ -52,6 +52,6 @@ class SubdivisionController extends Controller
 
     private function options(): array
     {
-        return ['cities' => City::with('state')->orderBy('name')->get(), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::orderBy('sort_order')->get()];
+        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::orderBy('sort_order')->get()];
     }
 }
