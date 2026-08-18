@@ -11,19 +11,11 @@ export default function OverallProgressBar({ value, compact = false, completionD
     const date = formatDate(completionDate);
 
     return (
-        <div className={compact ? 'px-4 py-3' : ''}>
-            <div className={`mb-2 flex flex-wrap items-center justify-between gap-2 ${compact ? 'text-[.7rem] text-muted' : 'text-sm'}`}>
-                <span className={compact ? '' : 'font-medium uppercase text-brand'}>
-                    {compact ? (date ? `Conclusão prevista: ${date}` : 'Conclusão da obra') : 'Conclusão geral'}
-                </span>
-                {!compact && date && <span className="text-muted">Conclusão prevista: {date}</span>}
-            </div>
-            <div className={`flex items-center gap-3 ${compact ? 'text-[.7rem] text-muted' : 'text-xs text-muted'}`}>
-                {compact && date && <span className="shrink-0 whitespace-nowrap">{date}</span>}
-                <div className="relative h-5 min-w-0 flex-1 overflow-hidden rounded-full bg-[#e3e5e6]">
-                    <div className="relative h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${percentage}%` }}>
-                        <span className="absolute inset-0 grid place-items-center whitespace-nowrap text-[.65rem] font-semibold text-white">{percentage}%</span>
-                    </div>
+        <div className={compact ? 'w-full' : ''}>
+            {compact && date && <div className="px-3 pb-2 text-[.68rem] font-medium text-muted">{date}</div>}
+            <div className="relative h-5 w-full overflow-hidden rounded-full bg-[#e3e5e6]">
+                <div className="relative h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${percentage}%` }}>
+                    <span className="absolute inset-0 grid place-items-center whitespace-nowrap text-[.65rem] font-semibold text-white">{percentage}%</span>
                 </div>
             </div>
         </div>
