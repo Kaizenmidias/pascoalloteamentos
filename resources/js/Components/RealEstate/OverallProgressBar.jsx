@@ -12,10 +12,10 @@ export default function OverallProgressBar({ value, compact = false, completionD
 
     return (
         <div className={compact ? 'w-full' : ''}>
-            {compact && date && <div className="px-3 pb-2 text-[.68rem] font-medium text-muted">{date}</div>}
-            <div className="relative h-5 w-full overflow-hidden rounded-full bg-[#e3e5e6]">
-                <div className="relative h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${percentage}%` }}>
-                    <span className="absolute inset-0 grid place-items-center whitespace-nowrap text-[.65rem] font-semibold text-white">{percentage}%</span>
+            {compact && date && <div className="px-0 pb-1 text-[.62rem] font-medium leading-none text-muted">{date}</div>}
+            <div className={`relative w-full overflow-hidden bg-[#e3e5e6] ${compact ? 'h-[14px] rounded-none' : 'h-5 rounded-full'}`}>
+                <div className="relative h-full bg-brand transition-[width] duration-500" style={{ width: `${percentage}%` }}>
+                    <span className="absolute inset-0 grid place-items-center whitespace-nowrap text-[.6rem] font-semibold leading-none text-white">{percentage}%</span>
                 </div>
             </div>
         </div>
