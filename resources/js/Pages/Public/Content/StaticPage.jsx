@@ -134,7 +134,7 @@ function SectionRenderer({ section, kind, reverse = false }) {
                             <article key={item.title} className="flex h-full flex-col rounded-card border border-line bg-white p-6 text-center shadow-sm">
                                 <strong className="text-[2rem] font-light leading-none text-brand">{item.value}</strong>
                                 <p className="mt-3 text-base font-medium text-ink">{item.title}</p>
-                                <p className="mt-2 text-sm leading-6 text-muted">{item.description}</p>
+                                <p className="mt-2 text-base leading-7 text-muted">{item.description}</p>
                             </article>
                         ))}
                     </div>
