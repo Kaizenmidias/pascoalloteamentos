@@ -10,7 +10,7 @@ export default function EntityCard({ item, href }) {
     const showProgress = item.category !== 'properties' && item.overall_progress !== null && item.overall_progress !== undefined;
 
     return (
-        <article className="group min-w-0 overflow-hidden rounded-[18px] border border-line bg-white transition duration-300 hover:-translate-y-1 hover:shadow-card">
+        <article className="group min-w-0 overflow-hidden rounded-[18px] border border-line bg-white shadow-[0_4px_12px_rgba(17,17,17,0.05)] transition-[box-shadow,border-color] duration-300 hover:border-[#d9d9d9] hover:shadow-[0_6px_16px_rgba(17,17,17,0.07)]">
             <Link href={href} className="block">
                 {showProgress && <OverallProgressBar value={item.overall_progress} completionDate={item.expected_delivery_date} compact />}
                 <div className="relative aspect-[1.08] overflow-hidden bg-surface">
