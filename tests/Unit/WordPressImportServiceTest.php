@@ -181,6 +181,41 @@ class WordPressImportServiceTest extends TestCase
         $this->assertSame(0, $result['failed']);
     }
 
+    public function test_property_catalog_aliases_are_mapped_and_unknown_metadata_is_preserved(): void
+    {
+        $service = $this->makeImportService();
+        $post = ['ID' => 77, 'post_title' => 'Casa legado', 'post_name' => 'casa-legado', 'post_status' => 'publish', 'post_content' => 'Conteúdo original', 'post_excerpt' => '', 'post_date' => '2024-01-01 10:00:00'];
+        $meta = [
+            'texto_empreendimento' => 'Descrição do catálogo', 'endereco_imovel' => 'Rua Legado, 10',
+            'valor_venda_copy' => 'R$ 850.000,00', 'valor_condominio' => '650,00', 'valor_iptu' => '120,00',
+            'texto_plantas' => 'Veja a planta', 'campo_rural_sem_destino' => 'Preservar',
+        ];
+
+        $data = $this->invokePrivate($service, 'mapEntityData', ['properties', $post, $meta, 77]);
+
+        $this->assertSame('Descrição do catálogo', $data['description']);
+        $this->assertSame('Rua Legado, 10', $data['address']);
+        $this->assertSame('850000.00', $data['sale_price']);
+        $this->assertSame('650.00', $data['condominium_fee']);
+        $this->assertSame('Veja a planta', $data['floor_plans_support_text']);
+        $this->assertSame('Preservar', $data['legacy_metadata']['campo_rural_sem_destino']);
+    }
+
+    public function test_gallery_urls_are_resolved_to_real_attachment_ids(): void
+    {
+        $service = $this->makeImportService();
+        $dump = new WordPressDump('/tmp/dump.sql', 'wp_');
+        $dump->attachments = [
+            ['ID' => 901, 'guid' => 'https://legacy.test/wp-content/uploads/2024/08/fachada.jpg'],
+            ['ID' => 902, 'guid' => 'https://legacy.test/wp-content/uploads/2024/08/piscina.jpg'],
+        ];
+        $meta = ['galeria_imoveis' => 'https://legacy.test/wp-content/uploads/2024/08/fachada.jpg,https://legacy.test/wp-content/uploads/2024/08/piscina.jpg'];
+
+        $ids = $this->invokePrivate($service, 'attachmentIdsFromUrls', [$meta, ['galeria_imoveis'], $dump]);
+
+        $this->assertSame([901, 902], $ids);
+    }
+
     private function makeImportService(): WordPressImportService
     {
         return new WordPressImportService(

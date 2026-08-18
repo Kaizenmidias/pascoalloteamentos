@@ -18,7 +18,7 @@ class Property extends Model
 
     protected function casts(): array
     {
-        return ['regular_price' => 'decimal:2', 'sale_price' => 'decimal:2', 'rent_price' => 'decimal:2', 'condominium_fee' => 'decimal:2', 'iptu' => 'decimal:2', 'usable_area' => 'decimal:2', 'total_area' => 'decimal:2', 'built_area' => 'decimal:2', 'land_area' => 'decimal:2', 'price_on_request' => 'boolean', 'featured' => 'boolean', 'furnished' => 'boolean', 'accepts_financing' => 'boolean', 'accepts_exchange' => 'boolean', 'is_new' => 'boolean', 'published_at' => 'datetime'];
+        return ['regular_price' => 'decimal:2', 'sale_price' => 'decimal:2', 'rent_price' => 'decimal:2', 'condominium_fee' => 'decimal:2', 'iptu' => 'decimal:2', 'usable_area' => 'decimal:2', 'total_area' => 'decimal:2', 'built_area' => 'decimal:2', 'land_area' => 'decimal:2', 'price_on_request' => 'boolean', 'featured' => 'boolean', 'furnished' => 'boolean', 'accepts_financing' => 'boolean', 'accepts_exchange' => 'boolean', 'is_new' => 'boolean', 'published_at' => 'datetime', 'legacy_metadata' => 'array'];
     }
 
     public function getRouteKeyName(): string

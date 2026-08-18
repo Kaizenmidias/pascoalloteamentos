@@ -21,7 +21,7 @@ class Condominium extends Model
 
     protected function casts(): array
     {
-        return ['starting_price' => 'decimal:2', 'promotion_price' => 'decimal:2', 'minimum_unit_area' => 'decimal:2', 'price_on_request' => 'boolean', 'featured' => 'boolean', 'expected_delivery_date' => 'date', 'published_at' => 'datetime'];
+        return ['starting_price' => 'decimal:2', 'promotion_price' => 'decimal:2', 'minimum_unit_area' => 'decimal:2', 'price_on_request' => 'boolean', 'featured' => 'boolean', 'expected_delivery_date' => 'date', 'published_at' => 'datetime', 'legacy_metadata' => 'array'];
     }
 
     public function getRouteKeyName(): string

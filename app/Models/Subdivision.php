@@ -18,7 +18,7 @@ class Subdivision extends Model
 
     protected function casts(): array
     {
-        return ['regular_price' => 'decimal:2', 'sale_price' => 'decimal:2', 'minimum_lot_area' => 'decimal:2', 'maximum_lot_area' => 'decimal:2', 'price_on_request' => 'boolean', 'featured' => 'boolean', 'expected_delivery_date' => 'date', 'published_at' => 'datetime'];
+        return ['regular_price' => 'decimal:2', 'sale_price' => 'decimal:2', 'minimum_lot_area' => 'decimal:2', 'maximum_lot_area' => 'decimal:2', 'price_on_request' => 'boolean', 'featured' => 'boolean', 'expected_delivery_date' => 'date', 'published_at' => 'datetime', 'legacy_metadata' => 'array'];
     }
 
     public function getRouteKeyName(): string

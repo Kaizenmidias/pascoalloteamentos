@@ -21,6 +21,7 @@ class StorePropertyRequest extends FormRequest
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('properties')], 'property_type_id' => ['nullable', 'exists:property_types,id'],
             'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
             'condominium_id' => ['nullable', 'exists:condominiums,id'], 'excerpt' => ['nullable', 'string'], 'description' => ['nullable', 'string'],
+            'floor_plans_support_text' => ['nullable', 'string'],
             'address' => ['nullable', 'string', 'max:255'], 'neighborhood' => ['nullable', 'string', 'max:255'], 'postal_code' => ['nullable', 'string', 'max:12'],
             'address_number' => ['nullable', 'string', 'max:30'], 'complement' => ['nullable', 'string', 'max:255'], 'condominium_name' => ['nullable', 'string', 'max:255'], 'whatsapp_contact' => ['nullable', 'string', 'max:30'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'], 'longitude' => ['nullable', 'numeric', 'between:-180,180'],

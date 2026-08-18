@@ -58,6 +58,6 @@ class PropertyController extends Controller
 
     private function contentRelations(): array
     {
-        return ['city.state', 'features', 'mediaAssets', 'floorPlans', 'constructionStages', 'faqs', 'seo'];
+        return ['city.state', 'features', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo'];
     }
 }

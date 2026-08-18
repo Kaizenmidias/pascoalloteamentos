@@ -647,11 +647,14 @@ class WordPressImportService
             'title' => $title,
             'slug' => $slug,
             'excerpt' => $this->stringMeta($meta, ['_yoast_wpseo_metadesc', 'excerpt']) ?: (string) ($post['post_excerpt'] ?? ''),
-            'description' => (string) ($post['post_content'] ?? ''),
+            'description' => $target === 'properties'
+                ? ($this->stringMeta($meta, ['texto_empreendimento']) ?: (string) ($post['post_content'] ?? ''))
+                : (string) ($post['post_content'] ?? ''),
             'status' => $this->statusFromLegacy((string) ($post['post_status'] ?? 'draft')),
             'published_at' => in_array(($post['post_status'] ?? ''), ['publish', 'published'], true) ? ($post['post_date'] ?? now()) : null,
             'commercial_purpose' => $this->commercialPurpose($meta),
             'featured' => $this->boolMeta($meta, ['_featured', 'featured', 'destaque']),
+            'legacy_metadata' => $this->preservedLegacyMetadata($meta),
         ];
 
         if ($target === 'properties') {
@@ -659,35 +662,37 @@ class WordPressImportService
                 'reference_code' => $this->stringMeta($meta, ['reference_code', '_reference_code', 'codigo']) ?: null,
                 'property_type_id' => $this->classificationId(PropertyType::class, $this->taxonomySlug($meta, ['tipo_imovel', 'tipo-de-imovel', 'property_type'])),
                 'development_status_id' => $this->classificationId(DevelopmentStatus::class, $this->taxonomySlug($meta, ['estagio', 'stage', 'development_status'])),
-                'business_type_id' => $this->classificationId(BusinessType::class, $this->taxonomySlug($meta, ['tipo_negocio', 'business_type'])),
+                'business_type_id' => $this->classificationId(BusinessType::class, $this->taxonomySlug($meta, ['tipo_negocio', 'tipo-de-negocio', 'business_type', 'finalidade'])),
                 'city_id' => $this->cityId($meta),
                 'condominium_id' => $this->foreignBySlug(Condominium::class, $this->stringMeta($meta, ['condominium_slug', 'condominio_slug', 'condominium'])),
                 'commercial_status' => $this->stringMeta($meta, ['commercial_status', 'status_comercial']) ?: null,
-                'regular_price' => $this->decimalMeta($meta, ['preco', 'price', 'regular_price']),
-                'sale_price' => $this->decimalMeta($meta, ['sale_price']),
-                'rent_price' => $this->decimalMeta($meta, ['rent_price']),
-                'condominium_fee' => $this->decimalMeta($meta, ['condominium_fee']),
-                'iptu' => $this->decimalMeta($meta, ['iptu']),
+                'floor_plans_support_text' => $this->stringMeta($meta, ['texto_plantas']) ?: null,
+                'regular_price' => $this->decimalMeta($meta, ['valor_regular', 'preco', 'price', 'regular_price']),
+                'sale_price' => $this->decimalMeta($meta, ['preco_destaque', 'sale_price', 'valor_venda_copy']),
+                'rent_price' => $this->decimalMeta($meta, ['preco_aluguel', 'rent_price']),
+                'condominium_fee' => $this->decimalMeta($meta, ['condominio_-_valor', 'condominium_fee', 'valor_condominio']),
+                'iptu' => $this->decimalMeta($meta, ['iptu_-_valor', 'iptu', 'valor_iptu']),
                 'usable_area' => $this->decimalMeta($meta, ['area_util', 'usable_area', 'metrage']),
-                'total_area' => $this->decimalMeta($meta, ['area_total', 'total_area']),
+                'total_area' => $this->decimalMeta($meta, ['area_total_sigle', 'area_total', 'area_total_teste', 'total_area']),
                 'built_area' => $this->decimalMeta($meta, ['area_construida', 'built_area']),
                 'land_area' => $this->decimalMeta($meta, ['area_terreno', 'land_area']),
                 'bedrooms' => $this->integerMeta($meta, ['quartos', 'bedrooms']),
                 'suites' => $this->integerMeta($meta, ['suites']),
                 'bathrooms' => $this->integerMeta($meta, ['banheiros', 'bathrooms']),
-                'lavatories' => $this->integerMeta($meta, ['lavabos', 'lavatories']),
+                'lavatories' => $this->integerMeta($meta, ['lavabo', 'lavabos', 'lavatories']),
                 'parking_spaces' => $this->integerMeta($meta, ['vagas', 'parking_spaces']),
                 'rooms' => $this->integerMeta($meta, ['salas', 'rooms']),
                 'furnished' => $this->boolMeta($meta, ['furnished', 'mobiliado']),
-                'accepts_financing' => $this->boolMeta($meta, ['accepts_financing']),
-                'accepts_exchange' => $this->boolMeta($meta, ['accepts_exchange']),
+                'accepts_financing' => $this->boolMeta($meta, ['aceita_financiamento', 'accepts_financing']),
+                'accepts_exchange' => $this->boolMeta($meta, ['aceita_permuta', 'accepts_exchange']),
                 'is_new' => $this->boolMeta($meta, ['is_new', 'imovel_novo']),
                 'price_on_request' => $this->boolMeta($meta, ['price_on_request', 'sob_consulta']),
-                'address' => $this->stringMeta($meta, ['address', 'endereco']) ?: null,
+                'address' => $this->stringMeta($meta, ['localizacao', 'endereco_imovel', 'mapa_plantas', 'address', 'endereco']) ?: null,
                 'neighborhood' => $this->stringMeta($meta, ['neighborhood', 'bairro']) ?: null,
                 'postal_code' => $this->stringMeta($meta, ['postal_code', 'cep']) ?: null,
                 'address_number' => $this->stringMeta($meta, ['address_number', 'numero']) ?: null,
                 'complement' => $this->stringMeta($meta, ['complement', 'complemento']) ?: null,
+                'condominium_name' => $this->stringMeta($meta, ['nome_condominio']) ?: null,
                 'whatsapp_contact' => $this->stringMeta($meta, ['whatsapp', 'whatsapp_contact']) ?: null,
                 'latitude' => $this->decimalMeta($meta, ['latitude']),
                 'longitude' => $this->decimalMeta($meta, ['longitude']),
@@ -702,17 +707,17 @@ class WordPressImportService
                 'business_type_id' => $this->classificationId(BusinessType::class, $this->taxonomySlug($meta, ['tipo_negocio', 'business_type'])),
                 'city_id' => $this->cityId($meta),
                 'commercial_status' => $this->stringMeta($meta, ['commercial_status', 'status_comercial']) ?: null,
-                'about_title' => $this->stringMeta($meta, ['about_title', 'titulo_sobre']) ?: null,
-                'about_text' => $this->stringMeta($meta, ['about_text', 'texto_sobre']) ?: null,
-                'floor_plans_support_text' => $this->stringMeta($meta, ['floor_plans_support_text']) ?: null,
-                'starting_price' => $this->decimalMeta($meta, ['starting_price', 'preco_inicial']),
-                'promotion_price' => $this->decimalMeta($meta, ['promotion_price', 'preco_promocional']),
-                'minimum_unit_area' => $this->decimalMeta($meta, ['minimum_unit_area', 'area_minima']),
-                'promotion_headline' => $this->stringMeta($meta, ['promotion_headline']) ?: null,
-                'promotion_url' => $this->stringMeta($meta, ['promotion_url']) ?: null,
-                'expected_delivery_date' => $this->dateMeta($meta, ['expected_delivery_date', 'previsao_entrega']),
+                'about_title' => $this->stringMeta($meta, ['titulo_-_sobre_o_empreendimento', 'titulo_empreendimento', 'about_title', 'titulo_sobre']) ?: null,
+                'about_text' => $this->stringMeta($meta, ['texto_de_apoio_-_sobre_o_empreendimento', 'texto_empreendimento', 'about_text', 'texto_sobre']) ?: null,
+                'floor_plans_support_text' => $this->stringMeta($meta, ['texto_de_apoio_-_plantas', 'texto_plantas', 'floor_plans_support_text']) ?: null,
+                'starting_price' => $this->decimalMeta($meta, ['valor_regular_produto', 'starting_price', 'preco_inicial']),
+                'promotion_price' => $this->decimalMeta($meta, ['preco_destaque_produto', 'promotion_price', 'preco_promocional']),
+                'minimum_unit_area' => $this->decimalMeta($meta, ['area_minima_dos_empreendimentos', 'minimum_unit_area', 'area_minima']),
+                'promotion_headline' => $this->stringMeta($meta, ['titulo_principal', 'promotion_headline']) ?: null,
+                'promotion_url' => $this->stringMeta($meta, ['link_do_botao_do_empreendimento_em_promocao', 'promotion_url']) ?: null,
+                'expected_delivery_date' => $this->dateMeta($meta, ['data_de_entrega', 'data_entrega', 'expected_delivery_date', 'previsao_entrega']),
                 'price_on_request' => $this->boolMeta($meta, ['price_on_request', 'sob_consulta']),
-                'address' => $this->stringMeta($meta, ['address', 'endereco']) ?: null,
+                'address' => $this->stringMeta($meta, ['endereco_do_empreendimento', 'localizacao', 'mapa_plantas', 'address', 'endereco']) ?: null,
                 'neighborhood' => $this->stringMeta($meta, ['neighborhood', 'bairro']) ?: null,
                 'postal_code' => $this->stringMeta($meta, ['postal_code', 'cep']) ?: null,
                 'address_number' => $this->stringMeta($meta, ['address_number', 'numero']) ?: null,
@@ -730,19 +735,19 @@ class WordPressImportService
             'business_type_id' => $this->classificationId(BusinessType::class, $this->taxonomySlug($meta, ['tipo_negocio', 'business_type'])),
             'city_id' => $this->cityId($meta),
             'commercial_status' => $this->stringMeta($meta, ['commercial_status', 'status_comercial']) ?: null,
-            'about_title' => $this->stringMeta($meta, ['about_title', 'titulo_sobre']) ?: null,
-            'about_text' => $this->stringMeta($meta, ['about_text', 'texto_sobre']) ?: null,
-            'regular_price' => $this->decimalMeta($meta, ['regular_price', 'preco_regular']),
-            'sale_price' => $this->decimalMeta($meta, ['sale_price', 'preco_venda']),
+            'about_title' => $this->stringMeta($meta, ['titulo_-_sobre_o_lote', 'about_title', 'titulo_sobre']) ?: null,
+            'about_text' => $this->stringMeta($meta, ['texto_de_apoio_-_sobre_o_lote', 'about_text', 'texto_sobre']) ?: null,
+            'regular_price' => $this->decimalMeta($meta, ['valor_regular_produto', 'regular_price', 'preco_regular']),
+            'sale_price' => $this->decimalMeta($meta, ['preco_destaque_produto', 'sale_price', 'preco_venda']),
             'minimum_lot_area' => $this->decimalMeta($meta, ['minimum_lot_area', 'area_minima']),
             'maximum_lot_area' => $this->decimalMeta($meta, ['maximum_lot_area', 'area_maxima']),
-            'total_lots' => $this->integerMeta($meta, ['total_lots', 'total_lotes']),
+            'total_lots' => $this->integerMeta($meta, ['total_de_lotes', 'quantidade_de_lotes', 'total_lots', 'total_lotes']),
             'available_lots' => $this->integerMeta($meta, ['available_lots', 'lotes_disponiveis']),
             'price_on_request' => $this->boolMeta($meta, ['price_on_request', 'sob_consulta']),
-            'promotion_headline' => $this->stringMeta($meta, ['promotion_headline']) ?: null,
-            'promotion_url' => $this->stringMeta($meta, ['promotion_url']) ?: null,
-            'expected_delivery_date' => $this->dateMeta($meta, ['expected_delivery_date', 'previsao_entrega']),
-            'address' => $this->stringMeta($meta, ['address', 'endereco']) ?: null,
+            'promotion_headline' => $this->stringMeta($meta, ['headline_loteamento', 'titulo_principal', 'promotion_headline']) ?: null,
+            'promotion_url' => $this->stringMeta($meta, ['link_do_botao_do_empreendimento_em_promocao', 'promotion_url']) ?: null,
+            'expected_delivery_date' => $this->dateMeta($meta, ['data_de_entrega', 'expected_delivery_date', 'previsao_entrega']),
+            'address' => $this->stringMeta($meta, ['endereco_do_empreendimento', 'localizacao', 'address', 'endereco']) ?: null,
             'neighborhood' => $this->stringMeta($meta, ['neighborhood', 'bairro']) ?: null,
             'postal_code' => $this->stringMeta($meta, ['postal_code', 'cep']) ?: null,
             'address_number' => $this->stringMeta($meta, ['address_number', 'numero']) ?: null,
@@ -755,7 +760,15 @@ class WordPressImportService
 
     private function importEntityRelations(WordPressDump $dump, Model $model, array $post, array $meta): void
     {
-        $mediaIds = $this->attachmentIdsFromMeta($meta);
+        $galleryKeys = [
+            'gallery', 'galeria', 'images', 'images_ids', 'gallery_ids', 'galeira_de_fotos',
+            'galeria_imoveis', 'galeria_condominio', 'galeria_-_imagens_do_empreendimento',
+            'galeria_-_imagens_do_lote',
+        ];
+        $mediaIds = array_values(array_unique([
+            ...$this->attachmentIdsFromMeta($meta, $galleryKeys),
+            ...$this->attachmentIdsFromUrls($meta, $galleryKeys, $dump),
+        ]));
         foreach ($mediaIds as $index => $attachmentId) {
             if ($media = $this->mediaAssetByLegacyId($attachmentId)) {
                 $model->mediaAssets()->syncWithoutDetaching([$media->id => ['collection' => 'gallery', 'sort_order' => $index, 'is_featured' => $index === 0]]);
@@ -765,6 +778,29 @@ class WordPressImportService
         if ($featured = $this->featuredAttachmentId($meta, $dump, (int) $post['ID'])) {
             if ($media = $this->mediaAssetByLegacyId($featured)) {
                 $model->mediaAssets()->syncWithoutDetaching([$media->id => ['collection' => 'gallery', 'sort_order' => 0, 'is_featured' => true]]);
+            }
+        }
+
+        $this->attachSpecialMedia($model, $meta, ['imagem_principal_do_empreendimento', 'imagem_principal_do_lote'], 'about');
+        $this->attachSpecialMedia($model, $meta, ['imagem_do_empreendimento_em_promocao'], 'promotion');
+
+        if ($model instanceof Condominium && ! $model->floorPlans()->exists()) {
+            $this->importLegacyFloorPlans($model, $meta['plantas_condominio'] ?? null);
+        }
+
+        if ($model instanceof Subdivision) {
+            $downloadUrl = $this->stringMeta($meta, ['link_para_download_das_plantas', 'arquivos_e_documentos_para_download']);
+            if ($downloadUrl && ! $model->documents()->exists()) {
+                $model->documents()->create(['title' => 'Informações dos lotes', 'kind' => 'plans', 'external_url' => $downloadUrl, 'is_public' => true]);
+            }
+        }
+
+        if ($model instanceof Property) {
+            $planUrl = $this->stringMeta($meta, ['planta_link']);
+            $planMediaId = $this->firstAttachmentId($meta['planta_imovel'] ?? null);
+            if (($planUrl || $planMediaId) && ! $model->floorPlans()->exists()) {
+                $media = $planMediaId ? $this->mediaAssetByLegacyId($planMediaId) : null;
+                $model->floorPlans()->create(['name' => 'Planta do imóvel', 'media_asset_id' => $media?->id, 'external_url' => $planUrl, 'sort_order' => 0]);
             }
         }
 
@@ -782,7 +818,7 @@ class WordPressImportService
         $stages = [];
 
         foreach ($meta as $key => $value) {
-            if (! is_string($key) || ! str_contains(Str::lower($key), 'andamento_do_projeto') || ! is_scalar($value)) {
+            if (! is_string($key) || (! str_contains(Str::lower($key), 'andamento_do_projeto') && ! str_starts_with(Str::lower($key), 'andamento_da_obra_')) || ! is_scalar($value)) {
                 continue;
             }
 
@@ -796,7 +832,9 @@ class WordPressImportService
                 continue;
             }
 
-            $name = preg_replace('/_?andamento_do_projeto.*$/i', '', $key);
+            $name = str_starts_with(Str::lower($key), 'andamento_da_obra_')
+                ? preg_replace('/^andamento_da_obra_/i', '', $key)
+                : preg_replace('/_?andamento_do_projeto.*$/i', '', $key);
             $name = Str::of((string) $name)->replace('_', ' ')->squish()->title()->toString();
             if ($name === '') {
                 continue;
@@ -819,10 +857,10 @@ class WordPressImportService
         }
     }
 
-    private function attachmentIdsFromMeta(array $meta): array
+    private function attachmentIdsFromMeta(array $meta, array $keys = ['gallery', 'galeria', 'images', 'images_ids', 'gallery_ids']): array
     {
         $ids = [];
-        foreach (['gallery', 'galeria', 'images', 'images_ids', 'gallery_ids'] as $key) {
+        foreach ($keys as $key) {
             if (! isset($meta[$key])) {
                 continue;
             }
@@ -833,7 +871,7 @@ class WordPressImportService
                         $ids[] = (int) $item;
                     }
                 }
-            } elseif (is_string($value)) {
+            } elseif (is_string($value) && ! str_contains($value, '://')) {
                 foreach (preg_split('/[^0-9]+/', $value) ?: [] as $item) {
                     if (is_numeric($item)) {
                         $ids[] = (int) $item;
@@ -843,6 +881,129 @@ class WordPressImportService
         }
 
         return array_values(array_unique($ids));
+    }
+
+    private function attachmentIdsFromUrls(array $meta, array $keys, WordPressDump $dump): array
+    {
+        $urls = [];
+        foreach ($keys as $key) {
+            $this->collectUrls($meta[$key] ?? null, $urls);
+        }
+        if (! $urls) {
+            return [];
+        }
+
+        $attachmentsByFile = [];
+        foreach ($dump->attachments as $attachment) {
+            $path = parse_url((string) ($attachment['guid'] ?? ''), PHP_URL_PATH);
+            if (is_string($path) && $path !== '') {
+                $attachmentsByFile[basename($path)] = (int) ($attachment['ID'] ?? 0);
+            }
+        }
+
+        $ids = [];
+        foreach ($urls as $url) {
+            $path = parse_url($url, PHP_URL_PATH);
+            $file = is_string($path) ? basename($path) : '';
+            if ($file !== '' && isset($attachmentsByFile[$file])) {
+                $ids[] = $attachmentsByFile[$file];
+            }
+        }
+
+        return array_values(array_unique(array_filter($ids)));
+    }
+
+    private function collectUrls(mixed $value, array &$urls): void
+    {
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                $this->collectUrls($item, $urls);
+            }
+            return;
+        }
+        if (! is_string($value)) {
+            return;
+        }
+        preg_match_all('~https?://[^\s,\"\']+~i', $value, $matches);
+        foreach ($matches[0] ?? [] as $url) {
+            $urls[] = html_entity_decode($url);
+        }
+    }
+
+    private function firstAttachmentId(mixed $value): ?int
+    {
+        if (is_numeric($value)) {
+            return (int) $value;
+        }
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if ($id = $this->firstAttachmentId($item)) {
+                    return $id;
+                }
+            }
+        }
+        if (is_string($value) && ctype_digit(trim($value))) {
+            return (int) trim($value);
+        }
+
+        return null;
+    }
+
+    private function attachSpecialMedia(Model $model, array $meta, array $keys, string $collection): void
+    {
+        foreach ($keys as $key) {
+            $legacyId = $this->firstAttachmentId($meta[$key] ?? null);
+            $media = $legacyId ? $this->mediaAssetByLegacyId($legacyId) : null;
+            if (! $media) {
+                continue;
+            }
+            $model->mediaAssets()->syncWithoutDetaching([$media->id => ['collection' => $collection, 'sort_order' => 0, 'is_featured' => false]]);
+            $foreignKey = $collection.'_media_id';
+            $model->forceFill([$foreignKey => $media->id])->save();
+            return;
+        }
+    }
+
+    private function importLegacyFloorPlans(Condominium $model, mixed $plans): void
+    {
+        if (! is_array($plans)) {
+            return;
+        }
+        foreach (array_values($plans) as $index => $plan) {
+            if (! is_array($plan)) {
+                continue;
+            }
+            $legacyMediaId = $this->firstAttachmentId($plan['imagem_planta'] ?? null);
+            $media = $legacyMediaId ? $this->mediaAssetByLegacyId($legacyMediaId) : null;
+            $model->floorPlans()->create([
+                'name' => (string) ($plan['nome_da_planta'] ?? 'Planta '.($index + 1)),
+                'media_asset_id' => $media?->id,
+                'area' => $this->numericValue($plan['area_da_planta_605'] ?? null),
+                'bedrooms' => $this->integerValue($plan['quartos_planta'] ?? null),
+                'suites' => $this->integerValue($plan['suites_planta'] ?? null),
+                'parking_spaces' => $this->integerValue($plan['vagas_planta'] ?? null),
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
+    private function numericValue(mixed $value): ?float
+    {
+        $numeric = preg_replace('/[^0-9,.]/', '', is_scalar($value) ? (string) $value : '');
+        return $numeric === '' ? null : (float) str_replace(',', '.', $numeric);
+    }
+
+    private function integerValue(mixed $value): ?int
+    {
+        $numeric = preg_replace('/[^0-9]/', '', is_scalar($value) ? (string) $value : '');
+        return $numeric === '' ? null : (int) $numeric;
+    }
+
+    private function preservedLegacyMetadata(array $meta): array
+    {
+        return collect($meta)
+            ->reject(fn ($value, $key) => str_starts_with((string) $key, '_elementor') || str_starts_with((string) $key, '_edit'))
+            ->all();
     }
 
     private function featuredAttachmentId(array $meta, WordPressDump $dump, int $postId): ?int

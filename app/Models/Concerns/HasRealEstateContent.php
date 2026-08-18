@@ -12,9 +12,20 @@ use App\Support\ConstructionStageCatalog;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasRealEstateContent
 {
+    public function aboutMedia(): BelongsTo
+    {
+        return $this->belongsTo(MediaAsset::class, 'about_media_id');
+    }
+
+    public function promotionMedia(): BelongsTo
+    {
+        return $this->belongsTo(MediaAsset::class, 'promotion_media_id');
+    }
+
     public function mediaAssets(): MorphToMany
     {
         return $this->morphToMany(MediaAsset::class, 'mediable', 'mediables')

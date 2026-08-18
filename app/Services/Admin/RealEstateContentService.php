@@ -20,9 +20,12 @@ class RealEstateContentService
             $uploads = Arr::pull($data, 'gallery_images', []);
             $removeMedia = Arr::pull($data, 'remove_media_ids', []);
             $featuredMediaId = Arr::pull($data, 'featured_media_id');
+            $aboutImage = Arr::pull($data, 'about_image');
+            $promotionImage = Arr::pull($data, 'promotion_image');
             $floorPlans = Arr::pull($data, 'floor_plans');
             $stages = Arr::pull($data, 'construction_stages');
             $faqs = Arr::pull($data, 'faqs');
+            $documents = Arr::pull($data, 'documents');
             if (! Schema::hasColumn($item->getTable(), 'business_type_id')) {
                 Arr::pull($data, 'business_type_id');
             }
@@ -38,12 +41,22 @@ class RealEstateContentService
             }
 
             $item->fill($data)->save();
+
+            if ($aboutImage) {
+                $item->about_media_id = $this->media->store($aboutImage, 'real-estate/about')->id;
+            }
+            if ($promotionImage) {
+                $item->promotion_media_id = $this->media->store($promotionImage, 'real-estate/promotion')->id;
+            }
+            if ($item->isDirty(['about_media_id', 'promotion_media_id'])) {
+                $item->save();
+            }
             $item->features()->sync($features);
 
             if (is_array($floorPlans)) {
                 $item->floorPlans()->delete();
                 foreach (array_values($floorPlans) as $index => $row) {
-                    $item->floorPlans()->create([...$row, 'sort_order' => $index]);
+                    $item->floorPlans()->create([...Arr::only($row, ['media_asset_id', 'name', 'description', 'area', 'bedrooms', 'suites', 'bathrooms', 'parking_spaces', 'external_url']), 'sort_order' => $index]);
                 }
             }
             if (is_array($stages)) {
@@ -70,7 +83,21 @@ class RealEstateContentService
             if (is_array($faqs)) {
                 $item->faqs()->delete();
                 foreach (array_values($faqs) as $index => $row) {
-                    $item->faqs()->create([...$row, 'sort_order' => $index]);
+                    $item->faqs()->create([...Arr::only($row, ['question', 'answer', 'is_active']), 'is_active' => $row['is_active'] ?? true, 'sort_order' => $index]);
+                }
+            }
+            if (is_array($documents)) {
+                $item->documents()->delete();
+                foreach (array_values($documents) as $index => $row) {
+                    $file = Arr::pull($row, 'file');
+                    if ($file) {
+                        $row['media_asset_id'] = $this->media->store($file, 'real-estate/documents')->id;
+                    }
+                    $item->documents()->create([
+                        ...Arr::only($row, ['media_asset_id', 'title', 'kind', 'external_url', 'is_public']),
+                        'is_public' => $row['is_public'] ?? true,
+                        'sort_order' => $index,
+                    ]);
                 }
             }
 
