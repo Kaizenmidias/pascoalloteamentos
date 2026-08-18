@@ -23,8 +23,8 @@ class PropertyController extends Controller
             'items' => $items,
             'filters' => $request->only(['city', 'type', 'status', 'business_type']),
             'cities' => City::query()->whereHas('properties', fn ($query) => $query->published())->orderBy('name')->get(['name', 'slug']),
-            'types' => PropertyType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
-            'statuses' => DevelopmentStatus::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
+            'types' => PropertyType::query()->where('is_active', true)->whereHas('properties', fn ($query) => $query->published())->orderBy('sort_order')->get(['name', 'slug']),
+            'statuses' => DevelopmentStatus::query()->where('is_active', true)->whereHas('properties', fn ($query) => $query->published())->orderBy('sort_order')->get(['name', 'slug']),
             'businessTypes' => Schema::hasTable('business_types') ? BusinessType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']) : collect(),
             'pageCms' => Page::query()->where('slug', 'imoveis')->with(['seo', 'sections'])->first(),
         ]);

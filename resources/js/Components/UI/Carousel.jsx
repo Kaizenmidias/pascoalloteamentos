@@ -15,6 +15,7 @@ export default function Carousel({ children, label = 'Destaques', className = ''
     }, []);
 
     useEffect(() => {
+        track.current?.scrollTo({ left: 0 });
         updatePosition();
         window.addEventListener('resize', updatePosition);
         return () => window.removeEventListener('resize', updatePosition);
@@ -29,10 +30,10 @@ export default function Carousel({ children, label = 'Destaques', className = ''
 
     return (
         <div className={className} role="region" aria-label={label}>
-            <div className="mb-5 flex justify-end gap-2">
+            {items.length > 1 && <div className="mb-5 flex justify-end gap-2">
                 <button type="button" onClick={() => move(-1)} disabled={position.start} aria-label="Item anterior" className="grid size-10 place-items-center rounded-[7px] bg-brand text-lg text-white transition hover:bg-brand-dark disabled:cursor-default disabled:bg-line disabled:text-muted">&#8592;</button>
                 <button type="button" onClick={() => move(1)} disabled={position.end} aria-label="Próximo item" className="grid size-10 place-items-center rounded-[7px] bg-brand text-lg text-white transition hover:bg-brand-dark disabled:cursor-default disabled:bg-line disabled:text-muted">&#8594;</button>
-            </div>
+            </div>}
             <div ref={track} onScroll={updatePosition} className="-mx-1 flex snap-x snap-mandatory gap-5 overflow-x-auto px-1 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {items.map((child, index) => <div key={child.key ?? index} className="w-[88%] shrink-0 snap-start tablet:w-[48%] desktop:w-[calc((100%-2.5rem)/3)]">{child}</div>)}
             </div>

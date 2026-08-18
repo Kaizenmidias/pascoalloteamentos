@@ -6,6 +6,7 @@ import Container from '../../Components/UI/Container';
 import Carousel from '../../Components/UI/Carousel';
 import EntityCard from '../../Components/RealEstate/EntityCard';
 import HomeEntityFilter from '../../Components/RealEstate/HomeEntityFilter';
+import EmptyState from '../../Components/UI/EmptyState';
 
 const defaultHero = {
     title: 'Encontre o lugar onde sua próxima história começa.',
@@ -88,7 +89,7 @@ export default function Home({ featuredItems = [], homeEntities = [], posts = []
                             {previewItems.map((item) => <EntityCard key={`${item.category}-${item.id}`} item={item} href={item.href} />)}
                         </Carousel>
                     ) : (
-                        <div className="rounded-card border border-line bg-white p-8 text-center text-muted">Nenhum empreendimento encontrado para os filtros selecionados.</div>
+                        <EmptyState title="Nenhum empreendimento encontrado">Tente selecionar outra categoria ou cidade.</EmptyState>
                     )}
                 </Container>
             </section>

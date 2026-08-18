@@ -24,8 +24,8 @@ class CondominiumController extends Controller
             'items' => $items,
             'filters' => $request->only(['city', 'type', 'status', 'business_type']),
             'cities' => City::query()->whereHas('condominiums', fn ($query) => $query->published())->orderBy('name')->get(['name', 'slug']),
-            'types' => CondominiumType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
-            'statuses' => DevelopmentStatus::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']),
+            'types' => CondominiumType::query()->where('is_active', true)->whereHas('condominiums', fn ($query) => $query->published())->orderBy('sort_order')->get(['name', 'slug']),
+            'statuses' => DevelopmentStatus::query()->where('is_active', true)->whereHas('condominiums', fn ($query) => $query->published())->orderBy('sort_order')->get(['name', 'slug']),
             'businessTypes' => Schema::hasTable('business_types') ? BusinessType::query()->where('is_active', true)->orderBy('sort_order')->get(['name', 'slug']) : collect(),
             'pageCms' => Page::query()->where('slug', 'condominios')->with(['seo', 'sections'])->first(),
         ]);

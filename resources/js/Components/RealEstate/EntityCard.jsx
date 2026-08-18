@@ -24,12 +24,7 @@ export default function EntityCard({ item, href }) {
                 <div className="p-4 tablet:p-[1.125rem]">
                     <h2 className="text-[1.05rem] font-semibold leading-[1.25] text-ink">{item.title}</h2>
                     <p className="mt-2 line-clamp-2 min-h-10 text-sm font-light leading-5 text-muted">{item.excerpt || [item.neighborhood, city, item.city?.state?.code].filter(Boolean).join(' · ')}</p>
-                    <dl className="mt-4 grid gap-1.5 border-t border-line pt-3 text-xs">
-                        {type && <div className="flex justify-between gap-3"><dt className="text-muted">Tipo</dt><dd className="text-right font-medium text-ink">{type}</dd></div>}
-                        {city && <div className="flex justify-between gap-3"><dt className="text-muted">Cidade</dt><dd className="text-right font-medium text-ink">{city}</dd></div>}
-                        {status && <div className="flex justify-between gap-3"><dt className="text-muted">Status</dt><dd className="text-right font-medium text-ink">{status}</dd></div>}
-                    </dl>
-                    <span className="mt-4 inline-block text-xs font-medium uppercase tracking-[.06em] text-brand">Ver detalhes</span>
+                    <span className="mt-5 inline-block text-xs font-medium uppercase tracking-[.06em] text-brand">Ver detalhes</span>
                 </div>
             </Link>
         </article>

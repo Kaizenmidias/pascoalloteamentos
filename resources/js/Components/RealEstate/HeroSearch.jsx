@@ -1,151 +1,56 @@
 import { router } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-function MainTab({ active, children, onClick }) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={`min-h-[6.2rem] min-w-[12.8rem] shrink-0 rounded-[10px] border px-8 py-5 text-[1.35rem] font-normal transition tablet:min-w-[12.8rem] tablet:px-10 tablet:text-[1.35rem] ${
-                active ? 'border-[#1f4e5f] text-[#1f4e5f]' : 'border-[#dedede] text-[#6f8b97]'
-            } bg-white`}
-        >
-            {children}
-        </button>
-    );
+function FilterTab({ active, children, onClick }) {
+    return <button type="button" onClick={onClick} className={`min-h-[5.2rem] min-w-[12rem] shrink-0 rounded-[10px] border bg-white px-6 py-4 text-[1.1rem] transition tablet:min-w-[12.8rem] tablet:text-[1.25rem] ${active ? 'border-[#1f4e5f] text-[#1f4e5f]' : 'border-[#dedede] text-[#78909a] hover:border-[#9eb0b7]'}`}>{children}</button>;
 }
 
-function OptionLine({ options = [], value, onChange, compactLabel = false }) {
-    if (!options.length) return null;
-
-    return (
-        <div className="flex flex-wrap gap-x-10 gap-y-3 text-[1.1rem] tablet:gap-x-12">
-            {options.map((option) => (
-                <button
-                    key={option.slug}
-                    type="button"
-                    onClick={() => onChange(option.slug)}
-                    className={`transition ${value === option.slug ? 'font-semibold text-[#1f4e5f]' : 'font-normal text-[#7a8d96] hover:text-[#1f4e5f]'}`}
-                >
-                    {compactLabel ? option.short_name || option.name : option.name}
-                </button>
-            ))}
-        </div>
-    );
+function FilterOptions({ options, value, onChange }) {
+    return <div className="flex flex-wrap gap-x-9 gap-y-3 text-[1.05rem] tablet:gap-x-12">
+        {options.map((option) => <button key={option.slug} type="button" onClick={() => onChange(option.slug)} className={`transition ${value === option.slug ? 'font-semibold text-[#123f4e]' : 'text-[#78909a] hover:text-[#123f4e]'}`}>{option.name}</button>)}
+    </div>;
 }
 
-function initialTab(includeCategory, categories, cities, statuses, types) {
-    if (includeCategory && categories.length) return 'category';
-    if (cities.length) return 'city';
-    if (statuses.length) return 'status';
-    if (types.length) return 'type';
-    return 'city';
-}
-
-export default function HeroSearch({
-    action = '/imoveis',
-    filters = {},
-    cities = [],
-    types = [],
-    statuses = [],
-    businessTypes = [],
-    categories = [],
-    includeCategory = false,
-    onChange = null,
-    autoSubmit = true,
-    onClear = null,
-}) {
-    const [values, setValues] = useState({
-        category: filters.category || '',
-        type: filters.type || '',
-        city: filters.city || '',
-        status: filters.status || '',
-        business_type: filters.business_type || '',
-    });
-
-    const [activeTab, setActiveTab] = useState(initialTab(includeCategory, categories, cities, statuses, types));
+export default function HeroSearch({ action, entity, filters = {}, cities = [], types = [], statuses = [] }) {
+    const secondary = entity === 'properties'
+        ? { key: 'type', label: 'Tipo de imóvel', options: types }
+        : { key: 'status', label: 'Status do empreendimento', options: statuses };
+    const sections = [{ key: 'city', label: 'Cidade', options: cities }, secondary];
+    const [activeTab, setActiveTab] = useState('city');
+    const [values, setValues] = useState({ city: filters.city || '', type: filters.type || '', status: filters.status || '' });
 
     useEffect(() => {
-        setActiveTab(initialTab(includeCategory, categories, cities, statuses, types));
-    }, [includeCategory, categories, cities, statuses, types]);
+        setValues({ city: filters.city || '', type: filters.type || '', status: filters.status || '' });
+    }, [filters.city, filters.status, filters.type]);
 
-    const availableTypes = useMemo(() => {
-        if (!includeCategory || !values.category) return types;
-        return {
-            properties: types,
-            condominiums: types,
-            subdivisions: types,
-        }[values.category] || types;
-    }, [includeCategory, types, values.category]);
+    const navigate = (next) => router.get(action, Object.fromEntries(Object.entries(next).filter(([, value]) => value)), {
+        preserveScroll: true,
+        preserveState: true,
+        replace: true,
+    });
 
-    const submit = (next) => {
-        if (!autoSubmit) return;
-        const payload = { ...next };
-        if (!includeCategory) delete payload.category;
-        router.get(action, payload, { preserveState: true, preserveScroll: true, replace: true });
-    };
-
-    const update = (key, nextValue) => {
-        const next = { ...values, [key]: nextValue };
+    const update = (key, value) => {
+        const next = { ...values, [key]: values[key] === value ? '' : value };
         setValues(next);
-        onChange?.(next);
-        submit(next);
+        navigate(next);
     };
 
     const clear = () => {
-        const next = { category: '', type: '', city: '', status: '', business_type: '' };
+        const next = { city: '', type: '', status: '' };
         setValues(next);
-        onChange?.(next);
-        onClear?.();
-        submit(next);
+        navigate(next);
     };
 
-    const sections = includeCategory
-        ? [
-            { key: 'category', options: categories, value: values.category, compactLabel: true },
-            { key: 'city', options: cities, value: values.city },
-            { key: 'type', options: availableTypes, value: values.type },
-            ...(businessTypes.length ? [{ key: 'business_type', options: businessTypes, value: values.business_type }] : []),
-        ]
-        : [
-            { key: 'city', options: cities, value: values.city },
-            ...(statuses.length ? [{ key: 'status', options: statuses, value: values.status }] : []),
-            ...(types.length ? [{ key: 'type', options: availableTypes, value: values.type }] : []),
-        ];
-
     const activeSection = sections.find((section) => section.key === activeTab) || sections[0];
+    const hasFilters = Boolean(values.city || values.type || values.status);
 
-    const tabs = includeCategory
-        ? [
-            { key: 'category', label: 'Residenciais' },
-            { key: 'type', label: 'Loteamentos' },
-        ]
-        : [
-            { key: 'city', label: 'Cidade' },
-            { key: 'status', label: 'Status do empreendimento' },
-        ];
-
-    return (
-        <div className="mx-auto mt-10 max-w-[76rem]">
-            <div className="space-y-12">
-                <div className="flex flex-nowrap gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden tablet:gap-5">
-                    {tabs.map((tab) => (
-                        <MainTab key={tab.key} active={activeTab === tab.key} onClick={() => setActiveTab(tab.key)}>
-                            {tab.label}
-                        </MainTab>
-                    ))}
-                </div>
-                <div className="min-h-[2.25rem]">
-                    {activeSection && (
-                        <OptionLine
-                            options={activeSection.options}
-                            value={values[activeSection.key]}
-                            onChange={(nextValue) => update(activeSection.key, nextValue)}
-                            compactLabel={activeSection.key === 'category'}
-                        />
-                    )}
-                </div>
-            </div>
+    return <div className="mx-auto mt-10 max-w-[76rem] pb-4">
+        <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden tablet:gap-5">
+            {sections.map((section) => <FilterTab key={section.key} active={activeTab === section.key} onClick={() => setActiveTab(section.key)}>{section.label}</FilterTab>)}
         </div>
-    );
+        <div className="mt-10 min-h-10">
+            {activeSection.options.length ? <FilterOptions options={activeSection.options} value={values[activeSection.key]} onChange={(value) => update(activeSection.key, value)} /> : <p className="text-sm text-muted">Nenhuma opção disponível.</p>}
+        </div>
+        {hasFilters && <button type="button" onClick={clear} className="mt-6 text-xs font-medium uppercase tracking-[.08em] text-brand underline underline-offset-4">Limpar filtros</button>}
+    </div>;
 }
