@@ -18,9 +18,9 @@ const fallbackAbout = [
         title: 'Resultados que contam a nossa histÃ³ria',
         subtitle: 'Indicadores institucionais da Pascoal.',
         content: [
-            { value: '20+', title: 'Anos de experiÃªncia', description: 'de atuaÃ§Ã£o no mercado.' },
-            { value: '2', title: 'Cidades', description: 'com empreendimentos desenvolvidos.' },
-            { value: '2', title: 'Distritos', description: 'atendidos pela empresa.' },
+            { prefix: '+', value: '20', suffix: 'anos', description: 'de experiÃªncia no mercado.' },
+            { prefix: '', value: '2', suffix: 'cidades', description: 'com empreendimentos desenvolvidos.' },
+            { prefix: '', value: '2', suffix: 'distritos', description: 'atendidos.' },
         ],
     },
     {

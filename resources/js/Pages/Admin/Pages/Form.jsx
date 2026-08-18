@@ -72,7 +72,50 @@ const createSection = (type = 'content', label = 'Conteúdo') => ({
     is_active: true,
 });
 
+const blankNumberItem = () => ({
+    prefix: '',
+    value: '',
+    suffix: '',
+    description: '',
+});
+
+const parseNumberItems = (content) => {
+    if (!content) return [blankNumberItem(), blankNumberItem(), blankNumberItem()];
+
+    let items = content;
+
+    if (typeof content === 'string') {
+        try {
+            items = JSON.parse(content);
+        } catch {
+            items = [];
+        }
+    }
+
+    if (!Array.isArray(items) || !items.length) {
+        return [blankNumberItem(), blankNumberItem(), blankNumberItem()];
+    }
+
+    return items.slice(0, 3).map((item) => ({
+        prefix: item?.prefix ?? '',
+        value: item?.value ?? '',
+        suffix: item?.suffix ?? item?.title ?? '',
+        description: item?.description ?? '',
+    })).concat(Array.from({ length: Math.max(0, 3 - items.length) }, () => blankNumberItem()));
+};
+
+const serializeNumberItems = (items) => JSON.stringify(items.slice(0, 3).map((item) => ({
+    prefix: item?.prefix ?? '',
+    value: item?.value ?? '',
+    suffix: item?.suffix ?? '',
+    description: item?.description ?? '',
+})), null, 2);
+
     const formatSectionContent = (section) => {
+        if (section?.type === 'numbers' && Array.isArray(section?.data?.content)) {
+            return serializeNumberItems(section.data.content);
+        }
+
         if (Array.isArray(section?.data?.content)) {
             return JSON.stringify(section.data.content, null, 2);
         }
@@ -315,25 +358,75 @@ export default function Form({ item }) {
                             <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">{prettySectionName(sectionType)}</p>
                             <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
                         </div>
-                        <div className="grid gap-6 tablet:grid-cols-[1fr_0.9fr]">
-                            <div className="space-y-4">
-                                <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                                <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
-                            </div>
-                            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                                <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                                    <div>
-                                        <p className="text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Preview</p>
-                                        <p className="text-sm text-gray-600">{section.image ? 'Imagem associada' : 'Sem imagem'}</p>
+                        {sectionType === 'numbers' ? (
+                            <div className="space-y-5">
+                                {parseNumberItems(section.content).map((item, numberIndex) => (
+                                    <div key={numberIndex} className="rounded-xl border border-gray-200 bg-white p-4">
+                                        <p className="mb-4 text-xs font-semibold uppercase tracking-[.08em] text-gray-500">NÚMERO {numberIndex + 1}</p>
+                                        <div className="grid gap-4 tablet:grid-cols-2 desktop:grid-cols-4">
+                                            <Field
+                                                label="Texto antes do número"
+                                                value={item.prefix}
+                                                onChange={(event) => {
+                                                    const next = parseNumberItems(section.content);
+                                                    next[numberIndex].prefix = event.target.value;
+                                                    updateSection(index, 'content', serializeNumberItems(next));
+                                                }}
+                                            />
+                                            <Field
+                                                label="Número"
+                                                value={item.value}
+                                                onChange={(event) => {
+                                                    const next = parseNumberItems(section.content);
+                                                    next[numberIndex].value = event.target.value;
+                                                    updateSection(index, 'content', serializeNumberItems(next));
+                                                }}
+                                            />
+                                            <Field
+                                                label="Texto depois do número"
+                                                value={item.suffix}
+                                                onChange={(event) => {
+                                                    const next = parseNumberItems(section.content);
+                                                    next[numberIndex].suffix = event.target.value;
+                                                    updateSection(index, 'content', serializeNumberItems(next));
+                                                }}
+                                            />
+                                            <Field
+                                                label="Texto abaixo"
+                                                as="textarea"
+                                                rows="3"
+                                                value={item.description}
+                                                onChange={(event) => {
+                                                    const next = parseNumberItems(section.content);
+                                                    next[numberIndex].description = event.target.value;
+                                                    updateSection(index, 'content', serializeNumberItems(next));
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                    <button type="button" className="text-sm font-medium text-red-700" onClick={() => updateSection(index, 'image', '')}>Remover imagem</button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid gap-6 tablet:grid-cols-[1fr_0.9fr]">
+                                <div className="space-y-4">
+                                    <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                                    <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                                 </div>
-                                <img src={sectionPreview(section)} alt={section.alt || section.title || ''} className="h-48 w-full object-cover" />
-                                <div className="p-4">
-                                    <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                                    <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                                        <div>
+                                            <p className="text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Preview</p>
+                                            <p className="text-sm text-gray-600">{section.image ? 'Imagem associada' : 'Sem imagem'}</p>
+                                        </div>
+                                        <button type="button" className="text-sm font-medium text-red-700" onClick={() => updateSection(index, 'image', '')}>Remover imagem</button>
+                                    </div>
+                                    <img src={sectionPreview(section)} alt={section.alt || section.title || ''} className="h-48 w-full object-cover" />
+                                    <div className="p-4">
+                                        <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 );
             }
