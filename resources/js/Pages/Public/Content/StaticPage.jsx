@@ -132,15 +132,18 @@ function SectionRenderer({ section, kind, reverse = false }) {
                         {data.title && <h2 className="section-title mt-2">{data.title}</h2>}
                         {data.subtitle && <p className="mt-4 text-base leading-7 text-muted">{data.subtitle}</p>}
                     </div>
-                    <div className="mt-10 rounded-[15px] bg-[#93959814] p-6 tablet:p-10">
-                        <div className="grid gap-8 desktop:grid-cols-3">
-                        {items.map((item) => (
-                            <article key={item.title} className="flex h-full flex-col text-center">
-                                <strong className="text-[36px] font-light leading-none text-brand">{item.value}</strong>
-                                <p className="mt-3 text-base font-medium text-ink">{item.title}</p>
-                                <p className="mt-2 text-base leading-7 text-muted">{item.description}</p>
-                            </article>
-                        ))}
+                    <div className="mt-10 rounded-[18px] bg-[#f7f7f7] px-8 py-10 tablet:px-12 tablet:py-12 desktop:px-16">
+                        <div className="grid gap-10 text-center desktop:grid-cols-3 desktop:gap-6">
+                            {items.map((item) => (
+                                <article key={item.title} className="flex h-full flex-col items-center justify-center">
+                                    <div className="text-[32px] font-light leading-none text-ink tablet:text-[36px]">
+                                        {item.value}{item.title === 'Anos de experiência' ? ' anos' : ''}
+                                    </div>
+                                    <p className="mt-4 max-w-[18rem] text-sm font-light leading-6 text-muted tablet:text-base">
+                                        {item.description}
+                                    </p>
+                                </article>
+                            ))}
                         </div>
                     </div>
                 </Container>
