@@ -37,18 +37,18 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
     return (
         <PublicLayout>
             <SeoHead title={pageCms?.seo?.title || (eyebrow.charAt(0) + eyebrow.slice(1).toLowerCase())} description={pageCms?.seo?.description || description} />
-            <section className="bg-white pt-28">
-                <Container className="space-y-6">
-                    <div className="mx-auto max-w-4xl text-center">
+            <section className="bg-white pt-[70px]">
+                <Container className="space-y-5">
+                    <div className="mx-auto max-w-[70rem] text-center">
                         <p className="eyebrow">{eyebrow}</p>
-                        <h1 className="section-title mt-3">{title}</h1>
-                        <span className="mx-auto mt-3 block h-px w-16 bg-brand" />
-                        <p className="mx-auto mt-5 max-w-3xl text-base font-light leading-7 text-muted">{description}</p>
+                        <h1 className="mt-3 text-[clamp(2.4rem,4vw,3.25rem)] font-light leading-[1.08] tracking-[-.02em] text-ink">{title}</h1>
+                        <p className="mx-auto mt-4 max-w-4xl text-[1.25rem] font-light leading-[1.7] text-muted tablet:text-[1.375rem]">{description}</p>
+                        <span className="mx-auto mt-6 block h-px w-20 bg-line" />
                     </div>
                     <HeroSearch action={basePath} entity={entity} filters={filters} cities={cities} types={types} statuses={statuses} />
                 </Container>
             </section>
-            <Container className="py-[var(--section-space)]">
+            <Container className="pb-[var(--section-space)] pt-6">
                 {items.data.length ? (
                     <Carousel key={`${entity}-${filters.city || ''}-${filters.status || ''}-${filters.type || ''}`} label="Resultados da busca">
                         {items.data.map((item) => (
