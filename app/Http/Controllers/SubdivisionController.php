@@ -36,7 +36,7 @@ class SubdivisionController extends Controller
     {
         abort_unless($subdivision->status === 'published', 404);
 
-        $subdivision->load(['city.state', 'subdivisionType', 'developmentStatus', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']);
+        $subdivision->load(['city.state', 'subdivisionType', 'developmentStatus', 'features', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']);
         $subdivision->setRelation('constructionStages', ConstructionStageCatalog::applicableStages($subdivision, $subdivision->constructionStages));
 
         return Inertia::render('Public/Subdivisions/Show', ['item' => $subdivision]);
