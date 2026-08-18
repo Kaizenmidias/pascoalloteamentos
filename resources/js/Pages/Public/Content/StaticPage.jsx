@@ -91,7 +91,7 @@ function SectionRenderer({ section, kind, reverse = false }) {
 
     if (['history', 'content', 'purpose', 'differential'].includes(type)) {
         return (
-            <section className="py-[var(--section-space)]">
+            <section className={`py-[var(--section-space)] ${type === 'history' ? 'pt-20 desktop:pt-28' : ''}`}>
                 <Container className="grid gap-10 desktop:grid-cols-2 desktop:items-center">
                     {data.image && <img src={data.image} alt={data.title || ''} className={`mx-auto w-full max-h-[480px] rounded-card object-cover ${reverse ? 'desktop:order-2' : 'desktop:order-1'}`} />}
                     <div className={reverse ? 'desktop:order-1' : 'desktop:order-2'}>

@@ -24,40 +24,40 @@ const presets = {
     home: [
         baseSection('hero', 'Hero / Carrossel'),
         baseSection('filter', 'Filtro de Empreendimentos'),
-        baseSection('numbers', 'Nossos Números'),
+        baseSection('numbers', 'Nossos NÃƒÆ’Ã‚Âºmeros'),
         baseSection('differentials', 'Diferenciais'),
     ],
     'sobre-nos': [
         baseSection('hero', 'Hero'),
-        baseSection('history', 'História'),
-        baseSection('mission', 'Missão'),
-        baseSection('vision', 'Visão'),
+        baseSection('history', 'HistÃƒÆ’Ã‚Â³ria'),
+        baseSection('mission', 'MissÃƒÆ’Ã‚Â£o'),
+        baseSection('vision', 'VisÃƒÆ’Ã‚Â£o'),
         baseSection('values', 'Valores'),
         baseSection('cta', 'CTA'),
     ],
     condominios: [
-        baseSection('hero', 'Cabeçalho da Página'),
+        baseSection('hero', 'CabeÃƒÆ’Ã‚Â§alho da PÃƒÆ’Ã‚Â¡gina'),
         baseSection('filters', 'Filtros'),
     ],
     loteamentos: [
-        baseSection('hero', 'Cabeçalho da Página'),
+        baseSection('hero', 'CabeÃƒÆ’Ã‚Â§alho da PÃƒÆ’Ã‚Â¡gina'),
         baseSection('filters', 'Filtros'),
     ],
     imoveis: [
-        baseSection('hero', 'Cabeçalho da Página'),
+        baseSection('hero', 'CabeÃƒÆ’Ã‚Â§alho da PÃƒÆ’Ã‚Â¡gina'),
         baseSection('filters', 'Filtros'),
     ],
     contato: [
-        baseSection('hero', 'Cabeçalho da Página'),
+        baseSection('hero', 'CabeÃƒÆ’Ã‚Â§alho da PÃƒÆ’Ã‚Â¡gina'),
         baseSection('contact-data', 'Dados de Contato'),
-        baseSection('contact-form', 'Formulário'),
+        baseSection('contact-form', 'FormulÃƒÆ’Ã‚Â¡rio'),
         baseSection('social', 'Redes Sociais'),
     ],
 };
 
 const structuredTemplates = new Set(['home', 'institutional', 'listing', 'contact']);
 
-const createSection = (type = 'content', label = 'Conteúdo') => ({
+const createSection = (type = 'content', label = 'ConteÃƒÆ’Ã‚Âºdo') => ({
     type,
     label,
     title: '',
@@ -86,32 +86,32 @@ const createSection = (type = 'content', label = 'Conteúdo') => ({
 const structuredSchemas = {
     home: {
         title: 'Home',
-        description: 'Edite os blocos principais da página inicial com segurança e sem campos técnicos desnecessários.',
+        description: 'Edite os blocos principais da pÃƒÆ’Ã‚Â¡gina inicial com seguranÃƒÆ’Ã‚Â§a e sem campos tÃƒÆ’Ã‚Â©cnicos desnecessÃƒÆ’Ã‚Â¡rios.',
         sections: ['hero', 'filter', 'numbers', 'differentials'],
     },
     'sobre-nos': {
-        title: 'Sobre nós',
-        description: 'Organize a apresentação institucional da empresa com blocos reais da página.',
-        sections: ['hero', 'history', 'history', 'numbers', 'content', 'mission', 'vision', 'values', 'content'],
+        title: 'Sobre nÃƒÆ’Ã‚Â³s',
+        description: 'Organize a apresentaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o institucional da empresa com blocos reais da pÃƒÆ’Ã‚Â¡gina.',
+        sections: ['hero', 'history', 'numbers', 'content', 'mission', 'vision', 'values', 'differential', 'cta'],
     },
     contato: {
         title: 'Contato',
-        description: 'Atualize os dados de contato, o formulário e as redes sociais exibidas no site.',
+        description: 'Atualize os dados de contato, o formulÃƒÆ’Ã‚Â¡rio e as redes sociais exibidas no site.',
         sections: ['hero', 'contact-data', 'contact-form', 'social'],
     },
     condominios: {
-        title: 'Condomínios',
-        description: 'Ajuste apenas o cabeçalho da página de listagem. Os empreendimentos continuam vindo da base.',
+        title: 'CondomÃƒÆ’Ã‚Â­nios',
+        description: 'Ajuste apenas o cabeÃƒÆ’Ã‚Â§alho da pÃƒÆ’Ã‚Â¡gina de listagem. Os empreendimentos continuam vindo da base.',
         sections: ['hero'],
     },
     loteamentos: {
         title: 'Loteamentos',
-        description: 'Edite apenas o texto da primeira seção. Filtros e cards vêm do módulo de empreendimentos.',
+        description: 'Edite apenas o texto da primeira seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o. Filtros e cards vÃƒÆ’Ã‚Âªm do mÃƒÆ’Ã‚Â³dulo de empreendimentos.',
         sections: ['hero'],
     },
     imoveis: {
-        title: 'Imóveis',
-        description: 'Edite apenas o texto da primeira seção. Os imóveis continuam sendo gerenciados em Empreendimentos.',
+        title: 'ImÃƒÆ’Ã‚Â³veis',
+        description: 'Edite apenas o texto da primeira seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o. Os imÃƒÆ’Ã‚Â³veis continuam sendo gerenciados em Empreendimentos.',
         sections: ['hero'],
     },
 };
@@ -122,23 +122,15 @@ export default function Form({ item }) {
     const isStructured = structuredTemplates.has(item?.template) || Boolean(schema);
     const canAddSections = !schema;
     const initialSections = useMemo(() => {
-        if (presets[item?.slug]?.length) {
-            return presets[item.slug].map((section, index) => ({
-                ...section,
-                sort_order: index,
-                is_active: true,
-            }));
-        }
-
         if (item?.sections?.length) {
             return item.sections.flatMap((section, index) => {
                 if (item?.slug === 'sobre-nos') {
-                    const legacyInstitutional = section.type === 'institucional' || (section.type === 'history' && /miss[aã]o|vis[aã]o|valores/i.test(`${section.data?.label || ''} ${section.data?.title || ''}`));
+                    const legacyInstitutional = section.type === 'institucional' || (section.type === 'history' && /miss[aÃƒÂ£]o|vis[aÃƒÂ£]o|valores/i.test(`${section.data?.label || ''} ${section.data?.title || ''}`));
 
                     if (legacyInstitutional && Array.isArray(section.data?.content)) {
                         return section.data.content.slice(0, 3).map((block, blockIndex) => ({
                             type: ['mission', 'vision', 'values'][blockIndex],
-                            title: block.title || ['MISSÃO', 'VISÃO', 'VALORES'][blockIndex],
+                            title: block.title || ['MISSÃƒÆ’O', 'VISÃƒÆ’O', 'VALORES'][blockIndex],
                             content: block.text || '',
                             image: block.image || '',
                             recipient_email: '',
@@ -152,8 +144,8 @@ export default function Form({ item }) {
                         return [
                             {
                                 type: 'mission',
-                                title: 'MISSÃO',
-                                content: 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.',
+                                title: 'MISSÃƒÆ’O',
+                                content: 'Desenvolver empreendimentos planejados com qualidade, seguranÃƒÂ§a e infraestrutura completa, proporcionando valorizaÃƒÂ§ÃƒÂ£o, bem-estar e qualidade de vida aos nossos clientes.',
                                 image: '/reference-assets/blog-city.jpg',
                                 recipient_email: '',
                                 layout: '',
@@ -162,8 +154,8 @@ export default function Form({ item }) {
                             },
                             {
                                 type: 'vision',
-                                title: 'VISÃO',
-                                content: 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.',
+                                title: 'VISÃƒÆ’O',
+                                content: 'Ser referÃƒÂªncia em loteamentos e empreendimentos imobiliÃƒÂ¡rios no Oeste do ParanÃƒÂ¡, reconhecida pela excelÃƒÂªncia, credibilidade e desenvolvimento sustentÃƒÂ¡vel.',
                                 image: '/reference-assets/about-plans.jpg',
                                 recipient_email: '',
                                 layout: '',
@@ -173,7 +165,7 @@ export default function Form({ item }) {
                             {
                                 type: 'values',
                                 title: 'VALORES',
-                                content: 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.',
+                                content: 'Nossos valores se refletem no compromisso com a qualidade, no respeito ÃƒÂ s pessoas, na transparÃƒÂªncia das relaÃƒÂ§ÃƒÂµes e na responsabilidade em cada empreendimento que desenvolvemos.',
                                 image: '/reference-assets/about-meeting.jpg',
                                 recipient_email: '',
                                 layout: '',
@@ -185,23 +177,31 @@ export default function Form({ item }) {
                 }
 
                 return [{
-                type: section.type || 'content',
-                label: section.data?.label || section.type || 'Conteúdo',
-                title: section.data?.title || '',
-                subtitle: section.data?.subtitle || '',
-                content: formatSectionContent(section),
-                image: section.data?.image || '',
-                button_label: section.data?.button_label || '',
-                button_url: section.data?.button_url || '',
-                recipient_email: section.data?.recipient_email || '',
-                layout: section.data?.layout || '',
-                sort_order: section.sort_order ?? index,
-                is_active: Boolean(section.is_active ?? true),
+                    type: section.type || 'content',
+                    label: section.data?.label || section.type || 'ConteÃƒÂºdo',
+                    title: section.data?.title || '',
+                    subtitle: section.data?.subtitle || '',
+                    content: formatSectionContent(section),
+                    image: section.data?.image || '',
+                    button_label: section.data?.button_label || '',
+                    button_url: section.data?.button_url || '',
+                    recipient_email: section.data?.recipient_email || '',
+                    layout: section.data?.layout || '',
+                    sort_order: section.sort_order ?? index,
+                    is_active: Boolean(section.is_active ?? true),
                 }];
             }).flat();
         }
 
-        return [createSection('content', 'Conteúdo')];
+        if (presets[item?.slug]?.length) {
+            return presets[item.slug].map((section, index) => ({
+                ...section,
+                sort_order: index,
+                is_active: true,
+            }));
+        }
+
+        return [createSection('content', 'ConteÃƒÂºdo')];
     }, [item]);
 
     const { data, setData, post, processing, errors } = useForm({
@@ -232,38 +232,38 @@ export default function Form({ item }) {
     const removeSection = (index) => setData('sections', data.sections.filter((_, sectionIndex) => sectionIndex !== index));
 
     const prettySectionName = (sectionType) => ({
-        hero: 'Seção / Hero',
-        filter: 'Seção / Filtro',
-        filters: 'Seção / Filtros',
-        numbers: 'Seção / Nossos números',
-        differentials: 'Seção / Diferenciais',
-        history: 'Seção / História',
-        content: 'Seção / Conteúdo',
-        mission: 'Seção / Missão',
-        vision: 'Seção / Visão',
-        values: 'Seção / Valores',
-        cta: 'Seção / CTA',
-        'contact-data': 'Seção / Dados de contato',
-        'contact-form': 'Seção / Formulário',
-        social: 'Seção / Redes sociais',
-    })[sectionType] || 'Seção';
+        hero: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / Hero',
+        filter: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / Filtro',
+        filters: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / Filtros',
+        numbers: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / Nossos nÃƒÆ’Ã‚Âºmeros',
+        differentials: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / Diferenciais',
+        history: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / HistÃƒÆ’Ã‚Â³ria',
+        content: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / ConteÃƒÆ’Ã‚Âºdo',
+        mission: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / MissÃƒÆ’Ã‚Â£o',
+        vision: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / VisÃƒÆ’Ã‚Â£o',
+        values: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / Valores',
+        cta: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / CTA',
+        'contact-data': 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / Dados de contato',
+        'contact-form': 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / FormulÃƒÆ’Ã‚Â¡rio',
+        social: 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / Redes sociais',
+    })[sectionType] || 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o';
 
     const sectionDescription = (sectionType) => ({
-        hero: 'Título principal e texto de abertura da página.',
+        hero: 'TÃƒÆ’Ã‚Â­tulo principal e texto de abertura da pÃƒÆ’Ã‚Â¡gina.',
         filter: 'Texto de apoio do filtro da Home.',
         filters: 'Texto de apoio da listagem.',
-        numbers: 'Blocos numéricos exibidos em destaque.',
+        numbers: 'Blocos numÃƒÆ’Ã‚Â©ricos exibidos em destaque.',
         differentials: 'Cards com os principais diferenciais.',
-        history: 'Conteúdo editorial com imagem e texto.',
-        content: 'Conteúdo complementar da página.',
-        mission: 'Card da missão da empresa.',
-        vision: 'Card da visão da empresa.',
+        history: 'ConteÃƒÆ’Ã‚Âºdo editorial com imagem e texto.',
+        content: 'ConteÃƒÆ’Ã‚Âºdo complementar da pÃƒÆ’Ã‚Â¡gina.',
+        mission: 'Card da missÃƒÆ’Ã‚Â£o da empresa.',
+        vision: 'Card da visÃƒÆ’Ã‚Â£o da empresa.',
         values: 'Card dos valores da empresa.',
-        cta: 'Chamada para ação com botão.',
-        'contact-data': 'Informações de endereço, telefone e e-mail.',
-        'contact-form': 'Texto do formulário e e-mail de destino.',
+        cta: 'Chamada para aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o com botÃƒÆ’Ã‚Â£o.',
+        'contact-data': 'InformaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de endereÃƒÆ’Ã‚Â§o, telefone e e-mail.',
+        'contact-form': 'Texto do formulÃƒÆ’Ã‚Â¡rio e e-mail de destino.',
         social: 'Links para redes sociais.',
-    })[sectionType] || 'Conteúdo desta seção.';
+    })[sectionType] || 'ConteÃƒÆ’Ã‚Âºdo desta seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o.';
 
     const renderStructuredFields = (section, index) => {
         if (!schema) return null;
@@ -279,10 +279,10 @@ export default function Form({ item }) {
                             <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
                         </div>
                         <div className="grid gap-4 tablet:grid-cols-2">
-                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                            <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
-                            <Field label="Texto introdutório" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                            <Field label="Label da seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                            <Field label="TÃƒÆ’Ã‚Â­tulo" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                            <Field label="SubtÃƒÆ’Ã‚Â­tulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                            <Field label="Texto introdutÃƒÆ’Ã‚Â³rio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                             <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
                         </div>
                     </div>
@@ -297,12 +297,12 @@ export default function Form({ item }) {
                             <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
                         </div>
                         <div className="grid gap-4 tablet:grid-cols-2">
-                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                            <Field label="Label da seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                            <Field label="TÃƒÆ’Ã‚Â­tulo" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                             <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                             <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
-                            {sectionType === 'cta' && <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
-                            {sectionType === 'cta' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
+                            {sectionType === 'cta' && <Field label="Texto do botÃƒÆ’Ã‚Â£o" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />}
+                            {sectionType === 'cta' && <Field label="Link do botÃƒÆ’Ã‚Â£o" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
                         </div>
                     </div>
                 );
@@ -317,7 +317,7 @@ export default function Form({ item }) {
                         </div>
                         <div className="grid gap-6 tablet:grid-cols-[1fr_0.9fr]">
                             <div className="space-y-4">
-                                <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                                <Field label="TÃƒÆ’Ã‚Â­tulo" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                                 <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                             </div>
                             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -347,7 +347,7 @@ export default function Form({ item }) {
                         </div>
                         <div className="grid gap-6 tablet:grid-cols-[1.1fr_0.9fr]">
                             <div className="space-y-4">
-                                <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                                <Field label="TÃƒÆ’Ã‚Â­tulo" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                                 <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                                 <div className="flex items-center gap-3">
                                     <label className="flex items-center gap-2 text-sm text-gray-600">
@@ -368,7 +368,7 @@ export default function Form({ item }) {
                                     <img src={imagePreview(section.image)} alt={section.title || ''} className="h-52 w-full object-cover" />
                                 </div>
                                 <Field label="Trocar imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
-                                <p className="text-xs text-gray-500">Use a imagem atual do card ou substitua pela URL de outra imagem já cadastrada.</p>
+                                <p className="text-xs text-gray-500">Use a imagem atual do card ou substitua pela URL de outra imagem jÃƒÆ’Ã‚Â¡ cadastrada.</p>
                             </div>
                         </div>
                     </div>
@@ -383,11 +383,11 @@ export default function Form({ item }) {
                             <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
                         </div>
                         <div className="grid gap-4 tablet:grid-cols-2">
-                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                            <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
-                            <Field label="Números" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
-                            <p className="tablet:col-span-2 text-xs text-gray-500">Use JSON com lista de itens, preservando os números atuais da página.</p>
+                            <Field label="Label da seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                            <Field label="TÃƒÆ’Ã‚Â­tulo" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                            <Field label="SubtÃƒÆ’Ã‚Â­tulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                            <Field label="NÃƒÆ’Ã‚Âºmeros" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                            <p className="tablet:col-span-2 text-xs text-gray-500">Use JSON com lista de itens, preservando os nÃƒÆ’Ã‚Âºmeros atuais da pÃƒÆ’Ã‚Â¡gina.</p>
                         </div>
                     </div>
                 );
@@ -411,10 +411,10 @@ export default function Form({ item }) {
                             <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">{prettySectionName(sectionType)}</p>
                             <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
                         </div>
-                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        <Field label="Label da seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
                         {rows.map((row, rowIndex) => (
                             <div key={rowIndex} className="grid gap-4 rounded-xl border border-gray-200 bg-white p-4 tablet:grid-cols-2">
-                                <Field label="Título" value={row[0] || ''} onChange={(event) => setRow(rowIndex, 0, event.target.value)} />
+                                <Field label="TÃƒÆ’Ã‚Â­tulo" value={row[0] || ''} onChange={(event) => setRow(rowIndex, 0, event.target.value)} />
                                 <Field label="Texto" as="textarea" rows="5" value={row[1] || ''} onChange={(event) => setRow(rowIndex, 1, event.target.value)} />
                             </div>
                         ))}
@@ -426,21 +426,21 @@ export default function Form({ item }) {
                 return (
                     <div className="grid gap-6 tablet:grid-cols-[1fr_0.9fr]">
                         <div className="space-y-4">
-                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                            <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                            <Field label="Label da seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                            <Field label="TÃƒÆ’Ã‚Â­tulo" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                            <Field label="SubtÃƒÆ’Ã‚Â­tulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
                             <Field label="Texto de apoio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
-                            <Field label="E-mail destinatário" value={section.recipient_email || ''} onChange={(event) => updateSection(index, 'recipient_email', event.target.value)} />
-                            <Field label="Texto do botão" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
+                            <Field label="E-mail destinatÃƒÆ’Ã‚Â¡rio" value={section.recipient_email || ''} onChange={(event) => updateSection(index, 'recipient_email', event.target.value)} />
+                            <Field label="Texto do botÃƒÆ’Ã‚Â£o" value={section.button_label} onChange={(event) => updateSection(index, 'button_label', event.target.value)} />
                         </div>
                         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                             <div className="border-b border-gray-100 px-4 py-3">
-                                <p className="text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Resumo do formulário</p>
-                                <p className="text-sm text-gray-600">Destinatário: {section.recipient_email || 'não definido'}</p>
+                                <p className="text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Resumo do formulÃƒÆ’Ã‚Â¡rio</p>
+                                <p className="text-sm text-gray-600">DestinatÃƒÆ’Ã‚Â¡rio: {section.recipient_email || 'nÃƒÆ’Ã‚Â£o definido'}</p>
                             </div>
                             <div className="p-4 text-sm text-gray-600">
                                 <p className="font-medium text-gray-900">{section.title || 'Fale com Nossa Equipe'}</p>
-                                <p className="mt-2 whitespace-pre-line">{section.content || 'Texto de apoio do formulário.'}</p>
+                                <p className="mt-2 whitespace-pre-line">{section.content || 'Texto de apoio do formulÃƒÆ’Ã‚Â¡rio.'}</p>
                             </div>
                         </div>
                     </div>
@@ -465,7 +465,7 @@ export default function Form({ item }) {
                             <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">{prettySectionName(sectionType)}</p>
                             <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
                         </div>
-                        <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                        <Field label="Label da seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
                         {links.map((row, linkIndex) => (
                             <div key={linkIndex} className="grid gap-4 rounded-xl border border-gray-200 bg-white p-4 tablet:grid-cols-2">
                                 <Field label="Nome" value={row[0] || ''} onChange={(event) => setLink(linkIndex, 0, event.target.value)} />
@@ -481,14 +481,14 @@ export default function Form({ item }) {
             return (
                 <div className="space-y-4">
                     <div className="rounded-xl border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">Seção / Cabeçalho</p>
-                        <p className="mt-1 text-sm text-gray-500">Apenas o texto da primeira seção pode ser alterado aqui.</p>
+                        <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o / CabeÃƒÆ’Ã‚Â§alho</p>
+                        <p className="mt-1 text-sm text-gray-500">Apenas o texto da primeira seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o pode ser alterado aqui.</p>
                     </div>
                     <div className="grid gap-6 tablet:grid-cols-[1fr_0.9fr]">
                         <div className="space-y-4">
-                            <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                            <Field label="Texto introdutório" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
+                            <Field label="Label da seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                            <Field label="TÃƒÆ’Ã‚Â­tulo" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                            <Field label="Texto introdutÃƒÆ’Ã‚Â³rio" as="textarea" rows="6" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                         </div>
                         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
@@ -512,12 +512,12 @@ export default function Form({ item }) {
     };
 
     return (
-        <AdminLayout title={editing ? `Editar página: ${item.title}` : 'Nova página'}>
+        <AdminLayout title={editing ? `Editar pÃƒÆ’Ã‚Â¡gina: ${item.title}` : 'Nova pÃƒÆ’Ã‚Â¡gina'}>
             <form onSubmit={submit} className="space-y-6">
                 <div className="flex flex-wrap gap-2">
                     {[
                         ['general', 'Geral'],
-                        ['sections', 'Seções'],
+                        ['sections', 'SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes'],
                         ['seo', 'SEO'],
                     ].map(([key, label]) => (
                         <button
@@ -535,10 +535,10 @@ export default function Form({ item }) {
                     <section className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                         <div>
                             <h2 className="text-lg font-medium text-gray-900">Dados gerais</h2>
-                            <p className="text-sm text-gray-500">Nome, slug, template e estado da página.</p>
+                            <p className="text-sm text-gray-500">Nome, slug, template e estado da pÃƒÆ’Ã‚Â¡gina.</p>
                         </div>
                         <div className="grid gap-5 tablet:grid-cols-2">
-                            <Field label="Título" value={data.title} onChange={(event) => setData('title', event.target.value)} error={errors.title} />
+                            <Field label="TÃƒÆ’Ã‚Â­tulo" value={data.title} onChange={(event) => setData('title', event.target.value)} error={errors.title} />
                             <Field label="Slug" value={data.slug} onChange={(event) => setData('slug', event.target.value)} error={errors.slug} />
                             <SelectField
                                 label="Template"
@@ -547,7 +547,7 @@ export default function Form({ item }) {
                                     { id: 'institutional', name: 'Institucional' },
                                     { id: 'listing', name: 'Listagem' },
                                     { id: 'contact', name: 'Contato' },
-                                    { id: 'page', name: 'Página livre' },
+                                    { id: 'page', name: 'PÃƒÆ’Ã‚Â¡gina livre' },
                                 ]}
                                 value={data.template}
                                 onChange={(event) => setData('template', event.target.value)}
@@ -564,11 +564,11 @@ export default function Form({ item }) {
                             />
                             {isStructured ? (
                                 <div className="tablet:col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                                    Esta é uma página estruturada. A edição principal acontece nas seções abaixo, não no HTML bruto.
+                                    Esta ÃƒÆ’Ã‚Â© uma pÃƒÆ’Ã‚Â¡gina estruturada. A ediÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o principal acontece nas seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes abaixo, nÃƒÆ’Ã‚Â£o no HTML bruto.
                                 </div>
                             ) : (
                                 <div className="tablet:col-span-2">
-                                    <Field label="Conteúdo" as="textarea" rows="14" value={data.content} onChange={(event) => setData('content', event.target.value)} />
+                                    <Field label="ConteÃƒÆ’Ã‚Âºdo" as="textarea" rows="14" value={data.content} onChange={(event) => setData('content', event.target.value)} />
                                 </div>
                             )}
                         </div>
@@ -579,10 +579,10 @@ export default function Form({ item }) {
                     <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div>
-                                <h2 className="text-lg font-medium text-gray-900">Seções da página</h2>
-                                <p className="text-sm text-gray-500">Cada bloco tem nome claro e controla uma parte específica do site.</p>
+                                <h2 className="text-lg font-medium text-gray-900">SeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes da pÃƒÆ’Ã‚Â¡gina</h2>
+                                <p className="text-sm text-gray-500">Cada bloco tem nome claro e controla uma parte especÃƒÆ’Ã‚Â­fica do site.</p>
                             </div>
-                            {canAddSections && <Button type="button" onClick={addSection}>Adicionar seção</Button>}
+                            {canAddSections && <Button type="button" onClick={addSection}>Adicionar seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</Button>}
                         </div>
 
                         <div className="space-y-5">
@@ -596,7 +596,7 @@ export default function Form({ item }) {
                                                     <p className="text-xs text-gray-500">{sectionDescription(section.type)}</p>
                                                 </div>
                                             ) : (
-                                                <Field label="Nome da seção" value={section.label || ''} onChange={(event) => updateSection(index, 'label', event.target.value)} />
+                                                <Field label="Nome da seÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o" value={section.label || ''} onChange={(event) => updateSection(index, 'label', event.target.value)} />
                                             )}
                                             {canAddSections && (
                                                 <SelectField
@@ -604,15 +604,15 @@ export default function Form({ item }) {
                                                     options={[
                                                         { id: 'hero', name: 'Hero' },
                                                         { id: 'filter', name: 'Filtro' },
-                                                        { id: 'numbers', name: 'Números' },
+                                                        { id: 'numbers', name: 'NÃƒÆ’Ã‚Âºmeros' },
                                                         { id: 'differentials', name: 'Diferenciais' },
-                                                        { id: 'history', name: 'História' },
+                                                        { id: 'history', name: 'HistÃƒÆ’Ã‚Â³ria' },
                                                         { id: 'institucional', name: 'Institucional' },
                                                         { id: 'cta', name: 'CTA' },
                                                         { id: 'contact-data', name: 'Dados de contato' },
-                                                        { id: 'contact-form', name: 'Formulário' },
+                                                        { id: 'contact-form', name: 'FormulÃƒÆ’Ã‚Â¡rio' },
                                                         { id: 'social', name: 'Redes sociais' },
-                                                        { id: 'content', name: 'Conteúdo' },
+                                                        { id: 'content', name: 'ConteÃƒÆ’Ã‚Âºdo' },
                                                     ]}
                                                     value={section.type}
                                                     onChange={(event) => updateSection(index, 'type', event.target.value)}
@@ -637,16 +637,16 @@ export default function Form({ item }) {
                                     {schema ? (
                                         <div className="space-y-4">
                                             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                                                Editor específico desta página estruturada. Só os campos reais do layout aparecem aqui.
+                                                Editor especÃƒÆ’Ã‚Â­fico desta pÃƒÆ’Ã‚Â¡gina estruturada. SÃƒÆ’Ã‚Â³ os campos reais do layout aparecem aqui.
                                             </div>
                                             {renderStructuredFields(section, index)}
                                         </div>
                                     ) : (
                                         <div className="grid gap-4 tablet:grid-cols-2">
-                                            <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
-                                            <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
+                                            <Field label="TÃƒÆ’Ã‚Â­tulo" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
+                                            <Field label="SubtÃƒÆ’Ã‚Â­tulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
                                             <Field label="Imagem" value={section.image} onChange={(event) => updateSection(index, 'image', event.target.value)} />
-                                            {section.type === 'hero' && <Field label="Link do botão" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
+                                            {section.type === 'hero' && <Field label="Link do botÃƒÆ’Ã‚Â£o" value={section.button_url} onChange={(event) => updateSection(index, 'button_url', event.target.value)} />}
                                             <div className="tablet:col-span-2">
                                                 <Field label="Texto" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
                                             </div>
@@ -660,13 +660,13 @@ export default function Form({ item }) {
 
                 {activeTab === 'seo' && (
                     <section className="grid gap-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm tablet:grid-cols-2">
-                        <Field label="Título SEO" value={data.seo_title} onChange={(event) => setData('seo_title', event.target.value)} />
-                        <Field label="Descrição SEO" as="textarea" value={data.seo_description} onChange={(event) => setData('seo_description', event.target.value)} />
+                        <Field label="TÃƒÆ’Ã‚Â­tulo SEO" value={data.seo_title} onChange={(event) => setData('seo_title', event.target.value)} />
+                        <Field label="DescriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o SEO" as="textarea" value={data.seo_description} onChange={(event) => setData('seo_description', event.target.value)} />
                     </section>
                 )}
 
                 <div className="flex flex-wrap gap-3">
-                    <Button type="submit" disabled={processing}>Salvar página</Button>
+                    <Button type="submit" disabled={processing}>Salvar pÃƒÆ’Ã‚Â¡gina</Button>
                     {editing && isStructured && <Link href={`/admin/pages/${item.slug}/edit`} className="brand-button inline-flex">Recarregar</Link>}
                 </div>
             </form>
