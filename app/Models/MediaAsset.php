@@ -19,8 +19,10 @@ class MediaAsset extends Model
 
     protected function url(): Attribute
     {
-        return Attribute::get(fn () => $this->disk === 'reference'
-            ? asset('reference-assets/'.ltrim($this->path, '/'))
-            : Storage::disk($this->disk)->url($this->path));
+        return Attribute::get(fn () => match ($this->disk) {
+            'reference' => asset('reference-assets/'.ltrim($this->path, '/')),
+            'external' => $this->path,
+            default => Storage::disk($this->disk)->url($this->path),
+        });
     }
 }

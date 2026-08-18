@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Models\MediaAsset;
 use App\Services\Media\MediaAssetService;
 use App\Support\ConstructionStageCatalog;
 use Illuminate\Database\Eloquent\Model;
@@ -18,14 +19,18 @@ class RealEstateContentService
         return DB::transaction(function () use ($item, $data) {
             $features = Arr::pull($data, 'feature_ids', []);
             $uploads = Arr::pull($data, 'gallery_images', []);
+            $videoUploads = Arr::pull($data, 'gallery_videos', []);
+            $videoUrls = Arr::pull($data, 'gallery_video_urls', []);
             $removeMedia = Arr::pull($data, 'remove_media_ids', []);
             $featuredMediaId = Arr::pull($data, 'featured_media_id');
+            $featuredImage = Arr::pull($data, 'featured_image');
             $aboutImage = Arr::pull($data, 'about_image');
             $promotionImage = Arr::pull($data, 'promotion_image');
             $floorPlans = Arr::pull($data, 'floor_plans');
             $stages = Arr::pull($data, 'construction_stages');
             $faqs = Arr::pull($data, 'faqs');
             $documents = Arr::pull($data, 'documents');
+            $promotions = Arr::pull($data, 'promotions');
             if (! Schema::hasColumn($item->getTable(), 'business_type_id')) {
                 Arr::pull($data, 'business_type_id');
             }
@@ -56,7 +61,11 @@ class RealEstateContentService
             if (is_array($floorPlans)) {
                 $item->floorPlans()->delete();
                 foreach (array_values($floorPlans) as $index => $row) {
-                    $item->floorPlans()->create([...Arr::only($row, ['media_asset_id', 'name', 'description', 'area', 'bedrooms', 'suites', 'bathrooms', 'parking_spaces', 'external_url']), 'sort_order' => $index]);
+                    $image = Arr::pull($row, 'image');
+                    if ($image) {
+                        $row['media_asset_id'] = $this->media->store($image, 'real-estate/floor-plans')->id;
+                    }
+                    $item->floorPlans()->create([...Arr::only($row, ['media_asset_id', 'name', 'description', 'area', 'bedrooms', 'suites', 'bathrooms', 'parking_spaces', 'external_url', 'is_active']), 'is_active' => $row['is_active'] ?? true, 'sort_order' => $index]);
                 }
             }
             if (is_array($stages)) {
@@ -100,14 +109,44 @@ class RealEstateContentService
                     ]);
                 }
             }
+            if (is_array($promotions) && method_exists($item, 'promotions')) {
+                $item->promotions()->delete();
+                foreach (array_values($promotions) as $index => $row) {
+                    $image = Arr::pull($row, 'image');
+                    if ($image) {
+                        $row['media_asset_id'] = $this->media->store($image, 'real-estate/promotions')->id;
+                    }
+                    $item->promotions()->create([
+                        ...Arr::only($row, ['media_asset_id', 'product_name', 'title', 'text', 'original_price', 'promotional_price', 'button_text', 'button_url', 'is_active']),
+                        'is_active' => $row['is_active'] ?? true,
+                        'sort_order' => $index,
+                    ]);
+                }
+            }
 
             if ($removeMedia) {
                 $item->mediaAssets()->detach($removeMedia);
+            }
+            if ($featuredImage) {
+                $asset = $this->media->store($featuredImage, 'real-estate/featured');
+                $item->mediaAssets()->syncWithoutDetaching([$asset->id => ['collection' => 'featured', 'sort_order' => 0, 'is_featured' => true]]);
+                $featuredMediaId = $asset->id;
             }
             foreach (array_values($uploads ?: []) as $index => $upload) {
                 $asset = $this->media->store($upload, 'real-estate');
                 $item->mediaAssets()->syncWithoutDetaching([$asset->id => ['collection' => 'gallery', 'sort_order' => $item->mediaAssets()->count() + $index, 'is_featured' => false]]);
                 $featuredMediaId ??= $asset->id;
+            }
+            foreach (array_values($videoUploads ?: []) as $index => $upload) {
+                $asset = $this->media->store($upload, 'real-estate/gallery-videos');
+                $item->mediaAssets()->syncWithoutDetaching([$asset->id => ['collection' => 'gallery', 'sort_order' => $item->mediaAssets()->count() + $index, 'is_featured' => false]]);
+            }
+            foreach (array_values(array_filter($videoUrls ?: [])) as $index => $url) {
+                $asset = MediaAsset::firstOrCreate(
+                    ['disk' => 'external', 'path' => $url],
+                    ['original_name' => basename((string) parse_url($url, PHP_URL_PATH)) ?: 'Vídeo externo', 'mime_type' => 'video/external'],
+                );
+                $item->mediaAssets()->syncWithoutDetaching([$asset->id => ['collection' => 'gallery', 'sort_order' => $item->mediaAssets()->count() + $index, 'is_featured' => false]]);
             }
             if ($featuredMediaId) {
                 foreach ($item->mediaAssets()->pluck('media_assets.id') as $mediaId) {

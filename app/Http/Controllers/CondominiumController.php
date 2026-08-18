@@ -36,7 +36,7 @@ class CondominiumController extends Controller
     {
         abort_unless($condominium->status === 'published', 404);
 
-        $condominium->load(['city.state', 'condominiumType', 'developmentStatus', 'properties', 'features', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']);
+        $condominium->load(['city.state', 'condominiumType', 'developmentStatus', 'properties', 'features', 'mediaAssets', 'promotionMedia', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages', 'seo']);
         $condominium->setRelation('constructionStages', ConstructionStageCatalog::applicableStages($condominium, $condominium->constructionStages));
 
         return Inertia::render('Public/Condominiums/Show', ['item' => $condominium]);

@@ -4,20 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class FloorPlan extends Model
+class CondominiumPromotion extends Model
 {
     protected $guarded = ['id'];
 
     protected function casts(): array
     {
-        return ['area' => 'decimal:2', 'is_active' => 'boolean'];
+        return [
+            'original_price' => 'decimal:2',
+            'promotional_price' => 'decimal:2',
+            'is_active' => 'boolean',
+        ];
     }
 
-    public function owner(): MorphTo
+    public function condominium(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(Condominium::class);
     }
 
     public function mediaAsset(): BelongsTo

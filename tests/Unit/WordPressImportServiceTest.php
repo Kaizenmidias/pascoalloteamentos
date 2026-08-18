@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Storage;
 use Mockery;
 use ReflectionMethod;
 use Tests\TestCase;
+use Illuminate\Http\UploadedFile;
+use RuntimeException;
 
 class WordPressImportServiceTest extends TestCase
 {
@@ -214,6 +216,19 @@ class WordPressImportServiceTest extends TestCase
         $ids = $this->invokePrivate($service, 'attachmentIdsFromUrls', [$meta, ['galeria_imoveis'], $dump]);
 
         $this->assertSame([901, 902], $ids);
+    }
+
+    public function test_heic_upload_fails_clearly_when_imagick_is_unavailable(): void
+    {
+        if (class_exists(\Imagick::class)) {
+            $this->markTestSkipped('Este teste valida especificamente o servidor sem Imagick.');
+        }
+        $file = UploadedFile::fake()->create('fachada.heic', 100, 'image/heic');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Imagick');
+
+        app(MediaAssetService::class)->store($file, 'testing');
     }
 
     private function makeImportService(): WordPressImportService

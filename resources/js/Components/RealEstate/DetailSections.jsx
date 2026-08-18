@@ -2,6 +2,7 @@ import Container from '../UI/Container';
 import Gallery from './Gallery';
 import ConstructionProgress from './ConstructionProgress';
 import Map from './Map';
+import Carousel from '../UI/Carousel';
 
 export const featuredMedia = (item) => item.media_assets?.find((asset) => asset.pivot?.is_featured) || item.media_assets?.[0];
 export const galleryMedia = (item) => item.media_assets?.filter((asset) => !asset.pivot?.collection || asset.pivot.collection === 'gallery') || [];
@@ -28,15 +29,15 @@ export function ProductHero({ item, eyebrow, facts = [] }) {
     </section>;
 }
 
-export function AboutSection({ item, label }) {
-    const image = item.about_media || featuredMedia(item);
+export function AboutSection({ item, label, useFeaturedImage = false }) {
+    const image = useFeaturedImage ? featuredMedia(item) : (item.about_media || featuredMedia(item));
     if (!item.about_title && !item.about_text) return null;
-    return <section className="py-[var(--section-space)]"><Container className="grid gap-10 desktop:grid-cols-2 desktop:items-center"><div><p className="eyebrow">{label}</p><h2 className="section-title mt-3">{item.about_title}</h2><p className="mt-6 whitespace-pre-line text-base font-light leading-8 text-muted">{item.about_text}</p></div>{image && <img src={image.url} alt={image.alt_text || item.about_title} className="aspect-[4/3] w-full rounded-card object-cover" />}</Container></section>;
+    return <section id="sobre" className="py-[var(--section-space)]"><Container className="grid gap-10 desktop:grid-cols-2 desktop:items-center"><div><p className="eyebrow">{label}</p><h2 className="section-title mt-3">{item.about_title}</h2><p className="mt-6 whitespace-pre-line text-base font-light leading-8 text-muted">{item.about_text}</p></div>{image && <img src={image.url} alt={image.alt_text || item.about_title} className="aspect-[4/3] w-full rounded-card object-cover" />}</Container></section>;
 }
 
 export function DifferentialsGrid({ items = [] }) {
     if (!items.length) return null;
-    return <section className="bg-surface py-[var(--section-space)]"><Container><p className="eyebrow">Diferenciais</p><h2 className="section-title mt-3">Projetado para superar expectativas</h2><div className="mt-10 grid gap-4 tablet:grid-cols-2 desktop:grid-cols-3">{items.map((item) => <article key={item.id} className="rounded-card bg-white p-6 shadow-card"><h3 className="text-lg font-medium text-ink">{item.name}</h3>{item.description && <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>}</article>)}</div></Container></section>;
+    return <section id="diferenciais" className="bg-surface py-[var(--section-space)]"><Container><p className="eyebrow">Diferenciais</p><h2 className="section-title mt-3">Projetado para superar expectativas</h2><div className="mt-10 grid gap-4 tablet:grid-cols-2 desktop:grid-cols-3">{items.map((item) => <article key={item.id} className="rounded-card bg-white p-6 shadow-card"><h3 className="text-lg font-medium text-ink">{item.icon && <span className="mr-2">{item.icon}</span>}{item.name}</h3>{item.description && <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>}</article>)}</div></Container></section>;
 }
 
 export function PromotionSection({ item, areaLabel = 'Área a partir de' }) {
@@ -48,12 +49,14 @@ export function PromotionSection({ item, areaLabel = 'Área a partir de' }) {
 export function ProductGallery({ item, title }) {
     const media = galleryMedia(item);
     if (!media.length) return null;
-    return <section className="py-[var(--section-space)]"><Container><p className="eyebrow">Galeria</p><h2 className="section-title mt-3">{title}</h2><div className="mt-10"><Gallery items={media} /></div></Container></section>;
+    return <section id="galeria" className="py-[var(--section-space)]"><Container><p className="eyebrow">Galeria</p><h2 className="section-title mt-3">{title}</h2><div className="mt-10"><Gallery items={media} /></div></Container></section>;
 }
 
-export function PlansSection({ item, title = 'Conheça as plantas disponíveis' }) {
-    if (!item.floor_plans?.length) return null;
-    return <section className="bg-surface py-[var(--section-space)]"><Container><p className="eyebrow">Plantas</p><h2 className="section-title mt-3">{title}</h2>{item.floor_plans_support_text && <p className="mt-5 max-w-3xl text-base leading-7 text-muted">{item.floor_plans_support_text}</p>}<div className="mt-10 grid gap-6 tablet:grid-cols-2 desktop:grid-cols-3">{item.floor_plans.map((plan) => <article key={plan.id} className="overflow-hidden rounded-card bg-white shadow-card">{plan.media_asset && <img src={plan.media_asset.url} alt={plan.name} className="aspect-[4/3] w-full object-cover" />}<div className="p-5"><h3 className="text-lg font-medium">{plan.name}</h3><div className="mt-3 flex flex-wrap gap-3 text-sm text-muted">{plan.area && <span>{Number(plan.area).toLocaleString('pt-BR')} m²</span>}{plan.bedrooms && <span>{plan.bedrooms} quartos</span>}{plan.suites && <span>{plan.suites} suítes</span>}{plan.parking_spaces && <span>{plan.parking_spaces} vagas</span>}</div>{plan.external_url && <a href={plan.external_url} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-sm font-medium text-brand">Abrir planta</a>}</div></article>)}</div></Container></section>;
+export function PlansSection({ item, title = 'Conheça as plantas disponíveis', carousel = false }) {
+    const plans = (item.floor_plans || []).filter((plan) => plan.is_active !== false);
+    if (!plans.length) return null;
+    const cards = plans.map((plan) => <article key={plan.id} className="h-full overflow-hidden rounded-card bg-white shadow-card">{plan.media_asset && <img src={plan.media_asset.url} alt={plan.name} className="aspect-[4/3] w-full object-cover" />}<div className="p-5"><h3 className="text-lg font-medium">{plan.name}</h3><div className="mt-3 flex flex-wrap gap-3 text-sm text-muted">{plan.area && <span>{Number(plan.area).toLocaleString('pt-BR')} m²</span>}{plan.bedrooms && <span>{plan.bedrooms} quartos</span>}{plan.bathrooms && <span>{plan.bathrooms} banheiros</span>}{plan.suites && <span>{plan.suites} suítes</span>}{plan.parking_spaces && <span>{plan.parking_spaces} vagas</span>}</div>{plan.external_url && <a href={plan.external_url} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-sm font-medium text-brand">Abrir planta</a>}</div></article>);
+    return <section id="plantas" className="bg-surface py-[var(--section-space)]"><Container><p className="eyebrow">Plantas</p><h2 className="section-title mt-3">{item.floor_plans_title || title}</h2>{item.floor_plans_support_text && <p className="mt-5 max-w-3xl text-base leading-7 text-muted">{item.floor_plans_support_text}</p>}{carousel ? <Carousel className="mt-10" label="Plantas disponíveis">{cards}</Carousel> : <div className="mt-10 grid gap-6 tablet:grid-cols-2 desktop:grid-cols-3">{cards}</div>}</Container></section>;
 }
 
 export function DocumentsSection({ documents = [] }) {
@@ -64,12 +67,12 @@ export function DocumentsSection({ documents = [] }) {
 
 export function LocationSection({ item }) {
     if (!item.address && !item.latitude && !item.longitude) return null;
-    return <section className="bg-surface py-[var(--section-space)]"><Container className="grid gap-10 desktop:grid-cols-[.8fr_1.2fr] desktop:items-center"><div><p className="eyebrow">Localização</p><h2 className="section-title mt-3">Localização estratégica para facilitar seu dia a dia</h2><p className="mt-5 text-base leading-7 text-muted">{[item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code].filter(Boolean).join(', ')}</p><WhatsAppCTA item={item} className="mt-7" /></div><div className="min-h-96 overflow-hidden rounded-card"><Map latitude={item.latitude} longitude={item.longitude} address={item.address} /></div></Container></section>;
+    return <section id="localizacao" className="bg-surface py-[var(--section-space)]"><Container className="grid gap-10 desktop:grid-cols-[.8fr_1.2fr] desktop:items-center"><div><p className="eyebrow">Localização</p><h2 className="section-title mt-3">Localização estratégica para facilitar seu dia a dia</h2><p className="mt-5 text-base leading-7 text-muted">{[item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code].filter(Boolean).join(', ')}</p><WhatsAppCTA item={item} className="mt-7" /></div><div className="min-h-96 overflow-hidden rounded-card"><Map latitude={item.latitude} longitude={item.longitude} address={item.address} /></div></Container></section>;
 }
 
 export function ProgressSection({ item }) {
     if (!item.construction_stages?.length) return null;
-    return <section className="py-[var(--section-space)]"><Container><p className="eyebrow">Andamento da obra</p><h2 className="section-title mt-3">Acompanhe nosso projeto em andamento</h2><div className="mt-10"><ConstructionProgress items={item.construction_stages} completionDate={item.expected_delivery_date} /></div></Container></section>;
+    return <section id="andamento" className="py-[var(--section-space)]"><Container><p className="eyebrow">Andamento da obra</p><h2 className="section-title mt-3">Acompanhe nosso projeto em andamento</h2><div className="mt-10"><ConstructionProgress items={item.construction_stages} completionDate={item.expected_delivery_date} /></div></Container></section>;
 }
 
 export function FAQSection({ items = [] }) {

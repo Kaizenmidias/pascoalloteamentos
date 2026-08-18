@@ -7,6 +7,7 @@ use App\Models\BusinessType;
 use App\Models\City;
 use App\Models\CondominiumType;
 use App\Models\DevelopmentStatus;
+use App\Models\Feature;
 use App\Models\PropertyType;
 use App\Models\State;
 use App\Models\SubdivisionType;
@@ -26,6 +27,7 @@ class ClassificationController extends Controller
         'subdivision-types' => ['label' => 'Tipos de loteamento', 'model' => SubdivisionType::class],
         'development-statuses' => ['label' => 'Estágios da obra', 'model' => DevelopmentStatus::class],
         'business-types' => ['label' => 'Tipos de negócio', 'model' => BusinessType::class],
+        'features' => ['label' => 'Diferenciais', 'model' => Feature::class],
         'states' => ['label' => 'Estados', 'model' => State::class],
         'cities' => ['label' => 'Cidades', 'model' => City::class],
     ];
@@ -100,7 +102,7 @@ class ClassificationController extends Controller
     {
         $table = (new $modelClass)->getTable();
 
-        return $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'slug' => [
                 'nullable',
@@ -110,7 +112,12 @@ class ClassificationController extends Controller
             ],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
             'is_active' => ['nullable', 'boolean'],
-        ]) + [
+        ];
+        if ($modelClass === Feature::class) {
+            $rules['icon'] = ['nullable', 'string', 'max:255'];
+        }
+
+        return $request->validate($rules) + [
             'slug' => Str::slug($request->string('slug')->toString() ?: $request->string('name')->toString()),
             'sort_order' => (int) $request->input('sort_order', 0),
             'is_active' => $request->boolean('is_active', true),

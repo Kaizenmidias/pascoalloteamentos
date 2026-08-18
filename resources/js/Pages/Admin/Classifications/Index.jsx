@@ -10,6 +10,7 @@ const emptyForm = {
     slug: '',
     sort_order: 0,
     is_active: true,
+    icon: '',
 };
 
 function GroupCard({ group }) {
@@ -34,6 +35,7 @@ function GroupCard({ group }) {
                 <Field label="Nome" value={data.name} onChange={(e) => setData('name', e.target.value)} error={errors.name} />
                 <Field label="Slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} error={errors.slug} />
                 <Field label="Ordem" type="number" min="0" value={data.sort_order} onChange={(e) => setData('sort_order', e.target.value)} error={errors.sort_order} />
+                {group.slug === 'features' && <Field label="Ícone (nome ou classe)" value={data.icon} onChange={(e) => setData('icon', e.target.value)} error={errors.icon} />}
                 <SelectField
                     label="Situação"
                     options={[
@@ -85,6 +87,7 @@ function QuickEdit({ group, item }) {
         slug: item.slug,
         sort_order: item.sort_order,
         is_active: Boolean(item.is_active),
+        icon: item.icon || '',
     });
 
     const submit = (e) => {
@@ -106,6 +109,7 @@ function QuickEdit({ group, item }) {
                 <span className="admin-label">Ordem</span>
                 <input className="admin-input w-24" type="number" min="0" value={data.sort_order} onChange={(e) => setData('sort_order', e.target.value)} />
             </label>
+            {group === 'features' && <label className="block"><span className="admin-label">Ícone</span><input className="admin-input w-40" value={data.icon} onChange={(e) => setData('icon', e.target.value)} /></label>}
             <Button type="submit" variant="secondary" disabled={processing}>Salvar</Button>
         </form>
     );

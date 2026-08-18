@@ -7,11 +7,15 @@ use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class MediaAssetService
 {
     public function store(UploadedFile $file, string $collection = 'uploads', string $disk = 'public'): MediaAsset
     {
+        if ($this->isHeic($file)) {
+            return $this->storeConvertedHeic($file, $collection, $disk);
+        }
         $checksum = hash_file('sha256', $file->getRealPath());
         if ($existing = MediaAsset::where('checksum', $checksum)->first()) {
             return $existing;
@@ -28,6 +32,51 @@ class MediaAssetService
                 throw $exception;
             }
         });
+    }
+
+    private function isHeic(UploadedFile $file): bool
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+        $mime = strtolower((string) $file->getMimeType());
+
+        return in_array($extension, ['heic', 'heif'], true)
+            || in_array($mime, ['image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence'], true);
+    }
+
+    private function storeConvertedHeic(UploadedFile $file, string $collection, string $disk): MediaAsset
+    {
+        if (! class_exists(\Imagick::class)) {
+            throw new RuntimeException('Upload HEIC requer a extensão PHP Imagick com suporte ao formato HEIC/HEIF.');
+        }
+
+        $temporary = tempnam(sys_get_temp_dir(), 'pascoal-heic-');
+        if ($temporary === false) {
+            throw new RuntimeException('Não foi possível criar o arquivo temporário para conversão HEIC.');
+        }
+        try {
+            $image = new \Imagick();
+            $image->readImage($file->getRealPath());
+            $image->setIteratorIndex(0);
+            $image->setImageFormat('webp');
+            $image->setImageCompressionQuality(88);
+            $image->stripImage();
+            if (! $image->writeImage($temporary)) {
+                throw new RuntimeException('Não foi possível converter o arquivo HEIC para WebP.');
+            }
+            $image->clear();
+
+            return $this->storePath($temporary, $collection, $disk, [
+                'original_name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'.webp',
+                'mime_type' => 'image/webp',
+                'metadata' => ['converted_from' => $file->getClientOriginalName(), 'source_mime' => $file->getMimeType()],
+            ]);
+        } catch (\Throwable $error) {
+            throw new RuntimeException('Falha ao converter HEIC: '.$error->getMessage(), previous: $error);
+        } finally {
+            if (is_file($temporary)) {
+                @unlink($temporary);
+            }
+        }
     }
 
     public function storePath(string $path, string $collection = 'uploads', string $disk = 'public', array $attributes = []): MediaAsset

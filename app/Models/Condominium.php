@@ -64,6 +64,11 @@ class Condominium extends Model
         return $this->hasMany(Property::class);
     }
 
+    public function promotions(): HasMany
+    {
+        return $this->hasMany(CondominiumPromotion::class)->orderBy('sort_order');
+    }
+
     public function features(): BelongsToMany
     {
         return $this->belongsToMany(Feature::class, 'condominium_feature')->withPivot('sort_order')->orderByPivot('sort_order');
