@@ -23,7 +23,7 @@ class CmsController extends Controller
 
     private const STRUCTURAL_PAGES = [
         ['title' => 'Home', 'slug' => 'home', 'template' => 'home', 'status' => 'published', 'path' => '/admin/pages/home', 'locked' => true],
-        ['title' => 'Sobre nÃƒÂ³s', 'slug' => 'sobre-nos', 'template' => 'institutional', 'status' => 'published', 'path' => '/admin/pages/sobre-nos/edit', 'locked' => true],
+        ['title' => 'Sobre nós', 'slug' => 'sobre-nos', 'template' => 'institutional', 'status' => 'published', 'path' => '/admin/pages/sobre-nos/edit', 'locked' => true],
         ['title' => 'CondomÃƒÂ­nios', 'slug' => 'condominios', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/condominios/edit', 'locked' => true],
         ['title' => 'Loteamentos', 'slug' => 'loteamentos', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/loteamentos/edit', 'locked' => true],
         ['title' => 'ImÃƒÂ³veis', 'slug' => 'imoveis', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/imoveis/edit', 'locked' => true],
@@ -362,9 +362,10 @@ class CmsController extends Controller
             'seo_description' => 'nullable|string|max:500',
             'sections' => ['nullable', 'array'],
             'sections.*.type' => ['required_with:sections', 'string', 'max:100'],
+            'sections.*.label' => ['nullable', 'string', 'max:255'],
             'sections.*.title' => ['nullable', 'string', 'max:255'],
             'sections.*.subtitle' => ['nullable', 'string', 'max:255'],
-            'sections.*.content' => ['nullable', 'string'],
+            'sections.*.content' => ['nullable'],
             'sections.*.image' => ['nullable', 'string', 'max:2048'],
             'sections.*.button_label' => ['nullable', 'string', 'max:255'],
             'sections.*.button_url' => ['nullable', 'string', 'max:255'],
@@ -386,7 +387,7 @@ class CmsController extends Controller
         $page->sections()->delete();
         foreach (array_values($sections) as $index => $section) {
             $content = $section['content'] ?? null;
-            if (in_array($section['type'] ?? 'content', ['institucional', 'contact-data', 'social', 'contact-form'], true) && is_string($content)) {
+            if (in_array($section['type'] ?? 'content', ['numbers', 'institucional', 'contact-data', 'social', 'contact-form'], true) && is_string($content)) {
                 $decoded = json_decode($content, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                     $content = $decoded;
@@ -396,6 +397,7 @@ class CmsController extends Controller
             $page->sections()->create([
                 'type' => (string) ($section['type'] ?? 'content'),
                 'data' => [
+                    'label' => $section['label'] ?? null,
                     'title' => $section['title'] ?? null,
                     'subtitle' => $section['subtitle'] ?? null,
                     'content' => $content,
@@ -459,12 +461,12 @@ class CmsController extends Controller
             'sobre-nos' => [
                 ['type' => 'hero', 'data' => ['label' => 'Sobre nós', 'title' => 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.', 'subtitle' => 'Pascoal Loteamentos', 'image' => '/reference-assets/hero-home.jpg']],
                 ['type' => 'history', 'data' => ['label' => 'Uma história', 'title' => 'Uma história construída com trabalho, confiança e visão de futuro.', 'content' => "A Pascoal Loteamentos nasceu em 2002, idealizada pelos irmãos Edson Pascoal e Hudson Paes Pascoal, com o propósito de desenvolver empreendimentos que transformam vidas e contribuem para o crescimento das cidades. Desde o início, cada projeto é conduzido com qualidade, planejamento e responsabilidade.\n\nAo longo de mais de 20 anos de atuação, a empresa consolidou sua presença na região, conquistando a confiança de clientes, investidores e parceiros por meio de um trabalho pautado na transparência, credibilidade e excelência em cada etapa do desenvolvimento imobiliário.\n\nHoje, seguimos construindo uma história sólida, desenvolvendo empreendimentos que geram oportunidades, valorização e qualidade de vida para milhares de famílias, sempre mantendo os valores que nos trouxeram até aqui e olhando para o futuro com a mesma dedicação do primeiro projeto.", 'image' => '/reference-assets/about-team.webp']],
-                ['type' => 'numbers', 'data' => ['label' => 'Nossos números', 'title' => 'Resultados que contam a nossa história', 'subtitle' => 'Indicadores institucionais da Pascoal.', 'content' => [['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'], ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'], ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presença consolidada.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.']]]],
-                ['type' => 'content', 'data' => ['title' => 'Nosso Propósito', 'content' => "Mais do que desenvolver loteamentos, construímos oportunidades. Sabemos que adquirir um terreno ou investir em um empreendimento é uma das decisões mais importantes da vida de uma família.\n\nPor isso, cada projeto nasce com planejamento, responsabilidade e uma visão de longo prazo, oferecendo infraestrutura completa e soluções que promovem qualidade de vida, segurança e valorização patrimonial.\n\nNosso compromisso é entregar muito mais do que um espaço urbano: queremos contribuir para que pessoas construam histórias, conquistem patrimônio e realizem sonhos.", 'image' => '/reference-assets/about-purpose.webp']],
+                ['type' => 'numbers', 'data' => ['label' => 'Nossos números', 'content' => [['prefix' => '+', 'value' => '20', 'suffix' => 'anos', 'description' => 'de experiência no mercado.'], ['prefix' => '', 'value' => '2', 'suffix' => 'cidades', 'description' => 'com empreendimentos desenvolvidos.'], ['prefix' => '', 'value' => '2', 'suffix' => 'distritos', 'description' => 'atendidos.']]]],
+                ['type' => 'purpose', 'data' => ['title' => 'Nosso Propósito', 'content' => "Mais do que desenvolver loteamentos, construímos oportunidades.\n\nSabemos que adquirir um terreno ou investir em um empreendimento é uma das decisões mais importantes da vida de uma família.\n\nPor isso, cada projeto nasce com planejamento, responsabilidade e uma visão de longo prazo, oferecendo infraestrutura completa e soluções que promovem qualidade de vida, segurança e valorização patrimonial.\n\nNosso compromisso é entregar muito mais do que um espaço urbano: queremos contribuir para que pessoas construam histórias, conquistem patrimônio e realizem sonhos.", 'image' => '/reference-assets/about-purpose.webp']],
                 ['type' => 'mission', 'data' => ['title' => 'Missão', 'content' => 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.', 'image' => '/reference-assets/blog-city.jpg']],
                 ['type' => 'vision', 'data' => ['title' => 'Visão', 'content' => 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.', 'image' => '/reference-assets/about-plans.jpg']],
                 ['type' => 'values', 'data' => ['title' => 'Valores', 'content' => 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.', 'image' => '/reference-assets/about-meeting.jpg']],
-                ['type' => 'differential', 'data' => ['title' => 'Nosso Diferencial', 'content' => "Cada empreendimento é desenvolvido pensando no futuro.\nDesde a escolha da localização até a entrega da infraestrutura, cada etapa é conduzida por uma equipe comprometida com a qualidade, segurança e valorização do investimento de nossos clientes.\n\nAcreditamos que bons empreendimentos não apenas transformam terrenos, mas impulsionam o crescimento urbano, movimentam a economia local e melhoram a qualidade de vida das pessoas.\n\nÉ essa visão que nos motiva diariamente a desenvolver projetos que deixem um legado positivo para as próximas gerações.", 'image' => '/reference-assets/about-team.webp']],
+                ['type' => 'differential', 'data' => ['title' => 'Nosso Diferencial', 'content' => "Cada empreendimento é desenvolvido pensando no futuro.\n\nDesde a escolha da localização até a entrega da infraestrutura, cada etapa é conduzida por uma equipe comprometida com a qualidade, segurança e valorização do investimento de nossos clientes.\n\nAcreditamos que bons empreendimentos não apenas transformam terrenos, mas impulsionam o crescimento urbano, movimentam a economia local e melhoram a qualidade de vida das pessoas.\n\nÉ essa visão que nos motiva diariamente a desenvolver projetos que deixem um legado positivo para as próximas gerações.", 'image' => '/reference-assets/about-team.webp']],
                 ['type' => 'cta', 'data' => ['title' => 'Vamos construir o próximo capítulo dessa história juntos.', 'content' => 'Se você procura um loteamento para morar, investir ou desenvolver seu patrimônio com segurança, conte com a experiência e a credibilidade da Pascoal Loteamentos.', 'button_label' => 'Conheça nossos empreendimentos', 'button_url' => '/imoveis']],
             ],
             'contato' => [

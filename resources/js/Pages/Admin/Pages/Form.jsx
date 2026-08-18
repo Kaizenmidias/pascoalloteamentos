@@ -30,9 +30,12 @@ const presets = {
     'sobre-nos': [
         baseSection('hero', 'Hero'),
         baseSection('history', 'História'),
+        baseSection('numbers', 'Nossos Números'),
+        baseSection('purpose', 'Nosso Propósito'),
         baseSection('mission', 'Missão'),
         baseSection('vision', 'Visão'),
         baseSection('values', 'Valores'),
+        baseSection('differential', 'Nosso Diferencial'),
         baseSection('cta', 'CTA'),
     ],
     condominios: [
@@ -135,7 +138,7 @@ const structuredSchemas = {
     'sobre-nos': {
         title: 'Sobre nós',
         description: 'Organize a apresentação institucional da empresa com blocos reais da página.',
-        sections: ['hero', 'history', 'history', 'numbers', 'content', 'mission', 'vision', 'values', 'content'],
+        sections: ['hero', 'history', 'numbers', 'purpose', 'mission', 'vision', 'values', 'differential', 'cta'],
     },
     contato: {
         title: 'Contato',
@@ -165,33 +168,36 @@ export default function Form({ item }) {
     const isStructured = structuredTemplates.has(item?.template) || Boolean(schema);
     const canAddSections = !schema;
     const initialSections = useMemo(() => {
-        if (presets[item?.slug]?.length) {
-            return presets[item.slug].map((section, index) => ({
-                ...section,
-                sort_order: index,
-                is_active: true,
-            }));
-        }
-
         if (item?.sections?.length) {
+            const explicitCardTypes = new Set(item.sections.filter((section) => ['mission', 'vision', 'values'].includes(section.type)).map((section) => section.type));
+            const explicitSectionTypes = new Set(item.sections.map((section) => section.type));
+            const seenAboutTypes = new Set();
+
             return item.sections.flatMap((section, index) => {
                 if (item?.slug === 'sobre-nos') {
                     const legacyInstitutional = section.type === 'institucional' || (section.type === 'history' && /miss[aã]o|vis[aã]o|valores/i.test(`${section.data?.label || ''} ${section.data?.title || ''}`));
 
                     if (legacyInstitutional && Array.isArray(section.data?.content)) {
-                        return section.data.content.slice(0, 3).map((block, blockIndex) => ({
-                            type: ['mission', 'vision', 'values'][blockIndex],
-                            title: block.title || ['MISSÃO', 'VISÃO', 'VALORES'][blockIndex],
-                            content: block.text || '',
-                            image: block.image || '',
-                            recipient_email: '',
-                            layout: '',
-                            sort_order: (section.sort_order ?? index) + (blockIndex * 0.01),
-                            is_active: Boolean(section.is_active ?? true),
-                        }));
+                        return section.data.content.slice(0, 3).flatMap((block, blockIndex) => {
+                            const cardType = ['mission', 'vision', 'values'][blockIndex];
+                            if (explicitCardTypes.has(cardType)) return [];
+
+                            return [{
+                                type: cardType,
+                                title: block.title || ['MISSÃO', 'VISÃO', 'VALORES'][blockIndex],
+                                content: block.text || '',
+                                image: block.image || '',
+                                recipient_email: '',
+                                layout: '',
+                                sort_order: (section.sort_order ?? index) + (blockIndex * 0.01),
+                                is_active: Boolean(section.is_active ?? true),
+                            }];
+                        });
                     }
 
                     if (legacyInstitutional && typeof section.data?.content === 'string') {
+                        if (explicitCardTypes.size) return [];
+
                         return [
                             {
                                 type: 'mission',
@@ -227,8 +233,21 @@ export default function Form({ item }) {
                     }
                 }
 
+                const sectionTitle = `${section.data?.title || ''}`.toLowerCase();
+                const normalizedType = item?.slug === 'sobre-nos' && section.type === 'content'
+                    ? (sectionTitle === 'nosso propósito' ? 'purpose' : sectionTitle === 'nosso diferencial' ? 'differential' : section.type)
+                    : section.type;
+
+                if (item?.slug === 'sobre-nos') {
+                    const canonicalTypes = new Set(['hero', 'history', 'numbers', 'purpose', 'mission', 'vision', 'values', 'differential', 'cta']);
+                    if (!canonicalTypes.has(normalizedType)) return [];
+                    if (section.type === 'content' && explicitSectionTypes.has(normalizedType)) return [];
+                    if (seenAboutTypes.has(normalizedType)) return [];
+                    seenAboutTypes.add(normalizedType);
+                }
+
                 return [{
-                type: section.type || 'content',
+                type: normalizedType || 'content',
                 label: section.data?.label || section.type || 'Conteúdo',
                 title: section.data?.title || '',
                 subtitle: section.data?.subtitle || '',
@@ -242,6 +261,14 @@ export default function Form({ item }) {
                 is_active: Boolean(section.is_active ?? true),
                 }];
             }).flat();
+        }
+
+        if (presets[item?.slug]?.length) {
+            return presets[item.slug].map((section, index) => ({
+                ...section,
+                sort_order: index,
+                is_active: true,
+            }));
         }
 
         return [createSection('content', 'Conteúdo')];
@@ -281,6 +308,8 @@ export default function Form({ item }) {
         numbers: 'Seção / Nossos números',
         differentials: 'Seção / Diferenciais',
         history: 'Seção / História',
+        purpose: 'Seção / Nosso Propósito',
+        differential: 'Seção / Nosso Diferencial',
         content: 'Seção / Conteúdo',
         mission: 'Seção / Missão',
         vision: 'Seção / Visão',
@@ -298,6 +327,8 @@ export default function Form({ item }) {
         numbers: 'Blocos numéricos exibidos em destaque.',
         differentials: 'Cards com os principais diferenciais.',
         history: 'Conteúdo editorial com imagem e texto.',
+        purpose: 'Propósito institucional com imagem e texto.',
+        differential: 'Diferenciais da empresa com imagem e texto.',
         content: 'Conteúdo complementar da página.',
         mission: 'Card da missão da empresa.',
         vision: 'Card da visão da empresa.',
@@ -312,7 +343,7 @@ export default function Form({ item }) {
         if (!schema) return null;
 
         if (item?.slug === 'sobre-nos') {
-            const sectionType = schema.sections[index];
+            const sectionType = section.type;
 
             if (sectionType === 'hero') {
                 return (
@@ -332,7 +363,7 @@ export default function Form({ item }) {
                 );
             }
 
-            if (sectionType === 'history' || sectionType === 'content' || sectionType === 'cta') {
+            if (['history', 'content', 'purpose', 'differential', 'cta'].includes(sectionType)) {
                 return (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-slate-200 bg-white p-4">
