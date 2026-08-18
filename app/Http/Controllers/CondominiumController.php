@@ -8,6 +8,7 @@ use App\Models\Condominium;
 use App\Models\CondominiumType;
 use App\Models\DevelopmentStatus;
 use App\Models\Page;
+use App\Support\ConstructionStageCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -35,6 +36,9 @@ class CondominiumController extends Controller
     {
         abort_unless($condominium->status === 'published', 404);
 
-        return Inertia::render('Public/Condominiums/Show', ['item' => $condominium->load(['city.state', 'condominiumType', 'developmentStatus', 'properties', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo'])]);
+        $condominium->load(['city.state', 'condominiumType', 'developmentStatus', 'properties', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']);
+        $condominium->setRelation('constructionStages', ConstructionStageCatalog::applicableStages($condominium, $condominium->constructionStages));
+
+        return Inertia::render('Public/Condominiums/Show', ['item' => $condominium]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Services\Media\MediaAssetService;
+use App\Support\ConstructionStageCatalog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -46,13 +47,24 @@ class RealEstateContentService
                 }
             }
             if (is_array($stages)) {
-                $item->constructionStages()->delete();
+                $existingStages = $item->constructionStages()->get();
                 foreach (array_values($stages) as $index => $row) {
-                    $item->constructionStages()->create([
+                    $definition = collect(ConstructionStageCatalog::definitionsFor($item))->firstWhere('code', $row['code'] ?? null);
+                    $stage = $definition ? $existingStages->first(
+                        fn ($existing) => ConstructionStageCatalog::matches($definition, (string) $existing->code, (string) $existing->name),
+                    ) : null;
+
+                    if (($row['progress_percent'] ?? '') === '' || ($row['progress_percent'] ?? null) === null) {
+                        $stage?->delete();
+                        continue;
+                    }
+
+                    $payload = [
                         ...Arr::only($row, ['name', 'code', 'progress_percent', 'reference_date', 'description']),
                         'sort_order' => $index,
-                        'is_public' => $row['is_public'] ?? true,
-                    ]);
+                        'is_public' => true,
+                    ];
+                    $stage ? $stage->update($payload) : $item->constructionStages()->create($payload);
                 }
             }
             if (is_array($faqs)) {

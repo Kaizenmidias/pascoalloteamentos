@@ -2,7 +2,7 @@ import OverallProgressBar from './OverallProgressBar';
 
 const clamp = (value) => Math.max(0, Math.min(100, Number(value) || 0));
 
-export default function ConstructionProgress({ items = [] }) {
+export default function ConstructionProgress({ items = [], completionDate = null }) {
     const publicItems = items.filter((item) => item.is_public !== false);
     if (!publicItems.length) return null;
 
@@ -20,7 +20,7 @@ export default function ConstructionProgress({ items = [] }) {
                     </div>;
                 })}
             </div>
-            <div className="mt-12 border-t border-line pt-7"><OverallProgressBar value={overall} /></div>
+            <div className="mt-12 border-t border-line pt-7"><OverallProgressBar value={overall} completionDate={completionDate} /></div>
         </div>
     );
 }

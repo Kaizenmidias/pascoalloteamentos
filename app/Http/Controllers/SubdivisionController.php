@@ -8,6 +8,7 @@ use App\Models\DevelopmentStatus;
 use App\Models\Page;
 use App\Models\Subdivision;
 use App\Models\SubdivisionType;
+use App\Support\ConstructionStageCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -35,6 +36,9 @@ class SubdivisionController extends Controller
     {
         abort_unless($subdivision->status === 'published', 404);
 
-        return Inertia::render('Public/Subdivisions/Show', ['item' => $subdivision->load(['city.state', 'subdivisionType', 'developmentStatus', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo'])]);
+        $subdivision->load(['city.state', 'subdivisionType', 'developmentStatus', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']);
+        $subdivision->setRelation('constructionStages', ConstructionStageCatalog::applicableStages($subdivision, $subdivision->constructionStages));
+
+        return Inertia::render('Public/Subdivisions/Show', ['item' => $subdivision]);
     }
 }

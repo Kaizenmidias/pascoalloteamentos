@@ -38,12 +38,12 @@ export default function Form({ item, options }) {
         floor_plans_support_text: item?.floor_plans_support_text || '',
         promotion_headline: item?.promotion_headline || '',
         promotion_url: item?.promotion_url || '',
-        expected_delivery_date: item?.expected_delivery_date || '',
+        expected_delivery_date: item?.expected_delivery_date ? String(item.expected_delivery_date).slice(0, 10) : '',
         status: item?.status || 'draft',
         featured: Boolean(item?.featured),
         price_on_request: Boolean(item?.price_on_request),
         feature_ids: item?.features?.map((f) => f.id) || [],
-        ...contentDefaults(item),
+        ...contentDefaults(item, options.stageDefinitions),
     });
     const submit = (e) => { e.preventDefault(); post(editing ? `/admin/condominiums/${item.slug}` : '/admin/condominiums', { forceFormData: true }); };
     return <AdminLayout title={editing ? 'Editar condomínio' : 'Novo condomínio'}><form onSubmit={submit} className="space-y-8">
@@ -56,7 +56,7 @@ export default function Form({ item, options }) {
             <Field label="Texto institucional" as="textarea" value={data.about_text} onChange={e => setData('about_text', e.target.value)} /><Field label="Apoio das plantas" as="textarea" value={data.floor_plans_support_text} onChange={e => setData('floor_plans_support_text', e.target.value)} />
             <Field label="Headline promocional" value={data.promotion_headline} onChange={e => setData('promotion_headline', e.target.value)} /><Field label="URL promocional" type="url" value={data.promotion_url} onChange={e => setData('promotion_url', e.target.value)} />
         </section>
-        <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-4">{[['starting_price', 'Preço inicial'], ['promotion_price', 'Preço promocional'], ['minimum_unit_area', 'Área mínima']].map(([key, label]) => <Field key={key} label={label} type="number" step="0.01" min="0" value={data[key]} onChange={e => setData(key, e.target.value)} error={errors[key]} />)}<Field label="Previsão de entrega" type="date" value={data.expected_delivery_date} onChange={e => setData('expected_delivery_date', e.target.value)} /></section>
+        <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-4">{[['starting_price', 'Preço inicial'], ['promotion_price', 'Preço promocional'], ['minimum_unit_area', 'Área mínima']].map(([key, label]) => <Field key={key} label={label} type="number" step="0.01" min="0" value={data[key]} onChange={e => setData(key, e.target.value)} error={errors[key]} />)}</section>
         <LocationFields states={options.states} initialCity={item?.city} cityId={data.city_id} onCityChange={(cityId) => setData('city_id', cityId)} error={errors.city_id} />
         <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={ids => setData('feature_ids', ids)} /></section><ContentManager data={data} setData={setData} item={item} />
         <section className="flex flex-wrap items-end gap-5 rounded-card bg-white p-6 shadow-card"><SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={e => setData('status', e.target.value)} /><SelectField label="Negócio" options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Locação' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={e => setData('commercial_purpose', e.target.value)} />{[['featured', 'Destaque'], ['price_on_request', 'Preço sob consulta']].map(([key, label]) => <label key={key} className="flex gap-2 pb-3"><input type="checkbox" checked={data[key]} onChange={e => setData(key, e.target.checked)} />{label}</label>)}<Button type="submit" disabled={processing}>Salvar condomínio</Button></section>

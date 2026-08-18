@@ -12,6 +12,7 @@ use App\Models\Feature;
 use App\Models\Subdivision;
 use App\Models\SubdivisionType;
 use App\Services\Admin\RealEstateContentService;
+use App\Support\ConstructionStageCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -52,6 +53,6 @@ class SubdivisionController extends Controller
 
     private function options(): array
     {
-        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::orderBy('sort_order')->get()];
+        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::orderBy('sort_order')->get(), 'stageDefinitions' => ConstructionStageCatalog::definitionsFor(Subdivision::class)];
     }
 }

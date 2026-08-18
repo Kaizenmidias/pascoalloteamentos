@@ -12,7 +12,7 @@ export default function EntityCard({ item, href }) {
     return (
         <article className="group min-w-0 overflow-hidden rounded-[18px] border border-line bg-white transition duration-300 hover:-translate-y-1 hover:shadow-card">
             <Link href={href} className="block">
-                {showProgress && <OverallProgressBar value={item.overall_progress} compact />}
+                {showProgress && <OverallProgressBar value={item.overall_progress} completionDate={item.expected_delivery_date} compact />}
                 <div className="relative aspect-[1.08] overflow-hidden bg-surface">
                     <ResponsiveImage src={image?.url} alt={image?.alt_text || item.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
                     <div className="absolute left-3 top-3 flex flex-wrap gap-1 text-[.625rem] font-medium uppercase">

@@ -246,7 +246,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                                 <p className="eyebrow">Andamento da obra</p>
                                 <h2 className="section-title mt-2">{progressTitleFor(entityType)}</h2>
                                 <div className="mt-8 rounded-[18px] border border-line bg-white p-6 shadow-card tablet:p-8">
-                                    <ConstructionProgress items={item.construction_stages} />
+                                    <ConstructionProgress items={item.construction_stages} completionDate={item.expected_delivery_date} />
                                 </div>
                             </Container>
                         </section>
