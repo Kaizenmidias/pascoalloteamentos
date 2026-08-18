@@ -21,8 +21,10 @@ export default function Form({ item, options }) {
         business_type_id: item?.business_type_id || '',
         city_id: item?.city_id || '',
         condominium_id: item?.condominium_id || '',
+        condominium_name: item?.condominium_name || '',
         excerpt: item?.excerpt || '',
         description: item?.description || '',
+        floor_plans_support_text: item?.floor_plans_support_text || '',
         address: item?.address || '',
         neighborhood: item?.neighborhood || '',
         postal_code: item?.postal_code || '',
@@ -54,6 +56,7 @@ export default function Form({ item, options }) {
         <AdminLayout title={editing ? 'Editar imóvel' : 'Novo imóvel'}>
             <form onSubmit={submit} className="space-y-6">
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-2">
+                    <div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Geral e identificação</h2><p className="mt-1 text-sm text-muted">Dados exibidos junto à galeria principal do imóvel.</p></div>
                     <Field label="Título" value={data.title} onChange={(e) => setData('title', e.target.value)} error={errors.title} />
                     <Field label="Slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} error={errors.slug} />
                     <Field label="Código de referência" value={data.reference_code} onChange={(e) => setData('reference_code', e.target.value)} error={errors.reference_code} />
@@ -61,9 +64,11 @@ export default function Form({ item, options }) {
                     <SelectField label="Estágio" options={options.statuses} value={data.development_status_id} onChange={(e) => setData('development_status_id', e.target.value)} />
                     <SelectField label="Tipo de negócio" options={options.businessTypes} value={data.business_type_id} onChange={(e) => setData('business_type_id', e.target.value)} />
                     <SelectField label="Condomínio relacionado" options={options.condominiums} labelKey="title" value={data.condominium_id} onChange={(e) => setData('condominium_id', e.target.value)} />
+                    <Field label="Nome do condomínio" value={data.condominium_name} onChange={(e) => setData('condominium_name', e.target.value)} />
                     <Field label="Status comercial" value={data.commercial_status} onChange={(e) => setData('commercial_status', e.target.value)} />
                     <Field label="Resumo para cards" as="textarea" value={data.excerpt} onChange={(e) => setData('excerpt', e.target.value)} />
                     <Field label="Descrição completa" as="textarea" value={data.description} onChange={(e) => setData('description', e.target.value)} />
+                    <Field label="Texto de apoio das plantas" as="textarea" value={data.floor_plans_support_text} onChange={(e) => setData('floor_plans_support_text', e.target.value)} />
                 </section>
                 <LocationFields states={options.states} initialCity={item?.city} cityId={data.city_id} onCityChange={(cityId) => setData('city_id', cityId)} error={errors.city_id} />
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-3">

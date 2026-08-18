@@ -34,6 +34,6 @@ class PropertyController extends Controller
     {
         abort_unless($property->status === 'published', 404);
 
-        return Inertia::render('Public/Properties/Show', ['item' => $property->load(['city.state', 'propertyType', 'developmentStatus', 'condominium', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo'])]);
+        return Inertia::render('Public/Properties/Show', ['item' => $property->load(['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo'])]);
     }
 }
