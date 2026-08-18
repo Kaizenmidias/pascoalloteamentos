@@ -11,6 +11,14 @@ const primaryLinks = [
     ['Contato', '/contato'],
 ];
 
+const pathnameFromUrl = (url = '/') => {
+    try {
+        return new URL(url, 'https://inertia.local').pathname.replace(/\/$/, '') || '/';
+    } catch {
+        return url.split(/[?#]/, 1)[0].replace(/\/$/, '') || '/';
+    }
+};
+
 function DropdownGroup({ label, href, items = [] }) {
     const [open, setOpen] = useState(false);
 
@@ -52,8 +60,9 @@ export default function SiteHeader() {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { url, props } = usePage();
+    const pathname = pathnameFromUrl(url);
     const lightPages = ['/sobre-nos', '/condominios', '/loteamentos', '/imoveis'];
-    const lightHeader = lightPages.some((path) => url === path || url.startsWith(`${path}/`));
+    const lightHeader = lightPages.some((path) => pathname === path || pathname.startsWith(`${path}/`));
     const realEstate = props.realEstate || {};
     const menuGroups = useMemo(() => ({
         condominios: realEstate.menuGroups?.condominiums || [],
@@ -69,14 +78,14 @@ export default function SiteHeader() {
     }, []);
 
     useEffect(() => {
-        const isHome = url === '/';
+        const isHome = pathname === '/';
         document.body.dataset.publicPage = isHome ? 'false' : 'true';
         document.body.dataset.scrolled = scrolled ? 'true' : 'false';
         return () => {
             delete document.body.dataset.publicPage;
             delete document.body.dataset.scrolled;
         };
-    }, [url, scrolled]);
+    }, [pathname, scrolled]);
 
     useEffect(() => setOpen(false), [url]);
     useEffect(() => { document.body.style.overflow = open ? 'hidden' : ''; return () => { document.body.style.overflow = ''; }; }, [open]);
@@ -89,11 +98,11 @@ export default function SiteHeader() {
                 </Link>
 
                 <nav className="hidden items-center gap-[1.4rem] desktop:flex" aria-label="Principal">
-                    {primaryLinks.slice(0, 2).map(([label, href]) => <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${url === href ? 'text-brand' : ''}`}>{label}</Link>)}
+                    {primaryLinks.slice(0, 2).map(([label, href]) => <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${pathname === href ? 'text-brand' : ''}`}>{label}</Link>)}
                     <DropdownGroup label="Condomínios" href="/condominios" items={menuGroups.condominios} />
                     <DropdownGroup label="Loteamentos" href="/loteamentos" items={menuGroups.loteamentos} />
                     <DropdownGroup label="Imóveis" href="/imoveis" items={menuGroups.imoveis} />
-                    {primaryLinks.slice(5).map(([label, href]) => <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${url === href ? 'text-brand' : ''}`}>{label}</Link>)}
+                    {primaryLinks.slice(5).map(([label, href]) => <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${pathname === href ? 'text-brand' : ''}`}>{label}</Link>)}
                 </nav>
 
                 <button type="button" className="relative z-10 grid h-11 w-11 place-items-center rounded-full desktop:hidden" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-menu">
