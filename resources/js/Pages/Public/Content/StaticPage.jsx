@@ -81,7 +81,7 @@ function SectionRenderer({ section, kind, reverse = false }) {
 
     if (type === 'hero') {
         return (
-            <section className="relative flex min-h-[600px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
+            <section className="relative flex min-h-[645px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
                 <img
                     src={data.image || (kind === 'contact' ? '/reference-assets/hero-contact.webp' : '/reference-assets/hero-home.jpg')}
                     alt=""
@@ -90,8 +90,8 @@ function SectionRenderer({ section, kind, reverse = false }) {
                 <div className="red-overlay absolute inset-0" />
                 <div className="relative z-10 mx-auto w-full max-w-[80rem]">
                     {data.subtitle && <p className="eyebrow mx-auto mb-3 text-white/80">{data.subtitle}</p>}
-                    <h1 className="mx-auto max-w-[80rem] text-[46px] font-light leading-[1.12] tracking-[-.015em]">{data.title}</h1>
-                    {data.content && <p className="mx-auto mt-5 max-w-[80rem] text-base font-light leading-7 text-white/90 desktop:text-lg">{data.content}</p>}
+                    <h1 className="mx-auto max-w-[80rem] text-[57px] font-light leading-[1.08] tracking-[-.015em] tablet:text-[46px] mobile:text-[24px]">{data.title}</h1>
+                    {data.content && <p className="mx-auto mt-5 max-w-[70%] text-[22px] font-extralight leading-[1.4] text-white/90 tablet:max-w-[80rem] tablet:text-[18px] mobile:max-w-none mobile:text-base">{data.content}</p>}
                 </div>
             </section>
         );
@@ -110,8 +110,12 @@ function SectionRenderer({ section, kind, reverse = false }) {
                     )}
                     <div className={reverse ? 'desktop:order-1' : 'desktop:order-2'}>
                         {!['purpose', 'differential'].includes(type) && data.label && <p className="eyebrow">{data.label}</p>}
-                        {data.title && <h2 className="section-title mt-2">{data.title}</h2>}
-                        {data.content && <p className="mt-5 whitespace-pre-line text-base leading-7 text-muted">{data.content}</p>}
+                        {data.title && (
+                            <h2 className={`section-title mt-2 ${type === 'history' ? 'text-[42px] leading-[1.1] tablet:text-[36px] mobile:text-[28px]' : ''}`}>
+                                {data.title}
+                            </h2>
+                        )}
+                        {data.content && <p className={`mt-5 whitespace-pre-line text-[18px] leading-8 text-muted ${type === 'purpose' || type === 'differential' ? 'desktop:max-w-[92%]' : ''}`}>{data.content}</p>}
                     </div>
                 </Container>
             </section>
@@ -132,7 +136,7 @@ function SectionRenderer({ section, kind, reverse = false }) {
                     <div className="mt-10 grid gap-4 tablet:grid-cols-2 desktop:grid-cols-4">
                         {items.map((item) => (
                             <article key={item.title} className="flex h-full flex-col rounded-card border border-line bg-white p-6 text-center shadow-sm">
-                                <strong className="text-[2rem] font-light leading-none text-brand">{item.value}</strong>
+                                <strong className="text-[36px] font-light leading-none text-brand">{item.value}</strong>
                                 <p className="mt-3 text-base font-medium text-ink">{item.title}</p>
                                 <p className="mt-2 text-base leading-7 text-muted">{item.description}</p>
                             </article>
@@ -153,9 +157,9 @@ function SectionRenderer({ section, kind, reverse = false }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition duration-500 ease-out" />
                 <div className="absolute inset-x-0 bottom-0 z-10 p-6 tablet:p-7">
-                    <span className="text-sm font-medium uppercase tracking-[0.08em] text-white">{data.title || data.label || ''}</span>
+                    <span className="text-[20px] font-medium uppercase tracking-[0.08em] text-white">{data.title || data.label || ''}</span>
                     <div className="mt-3 h-px w-10 bg-brand" />
-                    <p className="mt-4 max-w-[22rem] text-base leading-7 text-white/90">{data.content}</p>
+                    <p className="mt-4 max-w-[22rem] text-[18px] leading-7 text-white/90">{data.content}</p>
                 </div>
             </article>
         );
@@ -226,8 +230,8 @@ function SectionRenderer({ section, kind, reverse = false }) {
         return (
             <section className="bg-surface py-16 text-center">
                 <Container>
-                    {data.title && <h2 className="mx-auto max-w-2xl text-3xl font-normal text-brand">{data.title}</h2>}
-                    {data.content && <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted">{data.content}</p>}
+                    {data.title && <h2 className="mx-auto max-w-[59%] text-[46px] font-light leading-[1.12] text-brand tablet:max-w-2xl tablet:text-3xl mobile:max-w-none mobile:text-[27px]">{data.title}</h2>}
+                    {data.content && <p className="mx-auto mt-4 max-w-[76%] text-[20px] font-light leading-8 text-muted tablet:max-w-2xl tablet:text-base mobile:max-w-none mobile:text-base">{data.content}</p>}
                     {data.button_label && data.button_url && (
                         <Link href={data.button_url} className="brand-button mt-6 inline-flex">
                             {data.button_label}
@@ -303,8 +307,8 @@ function About({ page }) {
                     <Container className="max-w-[76rem]">
                         <div className="grid gap-10 desktop:grid-cols-2 desktop:items-center">
                             <div>
-                                <h2 className="section-title mt-2">Nosso Diferencial</h2>
-                                <p className="mt-5 text-base leading-7 text-muted">
+                                <h2 className="section-title mt-2 text-[42px] leading-[1.1] tablet:text-[36px] mobile:text-[28px]">Nosso Diferencial</h2>
+                                <p className="mt-5 whitespace-pre-line text-[18px] leading-8 text-muted">
                                     Cada empreendimento é desenvolvido pensando no futuro.
                                     Desde a escolha da localização até a entrega da infraestrutura, cada etapa é conduzida por uma equipe comprometida com a qualidade, segurança e valorização do investimento de nossos clientes.
 
@@ -324,8 +328,8 @@ function About({ page }) {
             )}
             <section className="bg-surface py-16 text-center">
                 <Container>
-                    <h2 className="mx-auto max-w-2xl text-3xl font-normal text-brand">Vamos construir o próximo capítulo dessa história juntos.</h2>
-                    <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted">
+                    <h2 className="mx-auto max-w-[59%] text-[46px] font-light leading-[1.12] text-brand tablet:max-w-2xl tablet:text-3xl mobile:max-w-none mobile:text-[27px]">Vamos construir o próximo capítulo dessa história juntos.</h2>
+                    <p className="mx-auto mt-4 max-w-[76%] text-[20px] font-light leading-8 text-muted tablet:max-w-2xl tablet:text-base mobile:max-w-none mobile:text-base">
                         Se você procura um loteamento para morar, investir ou desenvolver seu patrimônio com segurança, conte com a experiência e a credibilidade da Pascoal Loteamentos.
                     </p>
                     <a href="/imoveis" className="brand-button mt-6 inline-flex">
