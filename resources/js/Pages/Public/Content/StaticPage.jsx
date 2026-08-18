@@ -7,56 +7,56 @@ import LeadForm from '../../../Components/RealEstate/LeadForm';
 const fallbackAbout = [
     {
         type: 'history',
-        label: 'HistÃ³ria',
-        title: 'Uma histÃ³ria construÃ­da com trabalho, confianÃ§a e visÃ£o de futuro.',
-        content: 'A Pascoal Loteamentos nasceu em 2002, idealizada pelos irmÃ£os Edson Pascoal e Hudson Paes Pascoal, com o propÃ³sito de desenvolver empreendimentos que transformam vidas e contribuem para o crescimento das cidades. Desde o inÃ­cio, cada projeto Ã© conduzido com qualidade, planejamento e responsabilidade.\n\nAo longo de mais de 20 anos de atuaÃ§Ã£o, a empresa consolidou sua presenÃ§a na regiÃ£o, conquistando a confianÃ§a de clientes, investidores e parceiros por meio de um trabalho pautado na transparÃªncia, credibilidade e excelÃªncia em cada etapa do desenvolvimento imobiliÃ¡rio.\n\nHoje, seguimos construindo uma histÃ³ria sÃ³lida, desenvolvendo empreendimentos que geram oportunidades, valorizaÃ§Ã£o e qualidade de vida para milhares de famÃ­lias, sempre mantendo os valores que nos trouxeram atÃ© aqui e olhando para o futuro com a mesma dedicaÃ§Ã£o do primeiro projeto.',
+        label: 'História',
+        title: 'Uma história construída com trabalho, confiança e visão de futuro.',
+        content: 'A Pascoal Loteamentos nasceu em 2002, idealizada pelos irmãos Edson Pascoal e Hudson Paes Pascoal, com o propósito de desenvolver empreendimentos que transformam vidas e contribuem para o crescimento das cidades. Desde o início, cada projeto é conduzido com qualidade, planejamento e responsabilidade.\n\nAo longo de mais de 20 anos de atuação, a empresa consolidou sua presença na região, conquistando a confiança de clientes, investidores e parceiros por meio de um trabalho pautado na transparência, credibilidade e excelência em cada etapa do desenvolvimento imobiliário.\n\nHoje, seguimos construindo uma história sólida, desenvolvendo empreendimentos que geram oportunidades, valorização e qualidade de vida para milhares de famílias, sempre mantendo os valores que nos trouxeram até aqui e olhando para o futuro com a mesma dedicação do primeiro projeto.',
         image: '/reference-assets/about-team.webp',
     },
     {
         type: 'numbers',
-        label: 'Nossos nÃºmeros',
-        title: 'Resultados que contam a nossa histÃ³ria',
+        label: 'Nossos números',
+        title: 'Resultados que contam a nossa história',
         subtitle: 'Indicadores institucionais da Pascoal.',
         content: [
-            { prefix: '+', value: '20', suffix: 'anos', description: 'de experiÃªncia no mercado.' },
+            { prefix: '+', value: '20', suffix: 'anos', description: 'de experiência no mercado.' },
             { prefix: '', value: '2', suffix: 'cidades', description: 'com empreendimentos desenvolvidos.' },
             { prefix: '', value: '2', suffix: 'distritos', description: 'atendidos.' },
         ],
     },
     {
         type: 'purpose',
-        title: 'Nosso PropÃ³sito',
-        content: 'Mais do que desenvolver loteamentos, construÃ­mos oportunidades.\nSabemos que adquirir um terreno ou investir em um empreendimento Ã© uma das decisÃµes mais importantes da vida de uma famÃ­lia.\n\nPor isso, cada projeto nasce com planejamento, responsabilidade e uma visÃ£o de longo prazo, oferecendo infraestrutura completa e soluÃ§Ãµes que promovem qualidade de vida, seguranÃ§a e valorizaÃ§Ã£o patrimonial.\n\nNosso compromisso Ã© entregar muito mais do que um espaÃ§o urbano: queremos contribuir para que pessoas construam histÃ³rias, conquistem patrimÃ´nio e realizem sonhos.',
+        title: 'Nosso Propósito',
+        content: 'Mais do que desenvolver loteamentos, construímos oportunidades.\nSabemos que adquirir um terreno ou investir em um empreendimento é uma das decisões mais importantes da vida de uma família.\n\nPor isso, cada projeto nasce com planejamento, responsabilidade e uma visão de longo prazo, oferecendo infraestrutura completa e soluções que promovem qualidade de vida, segurança e valorização patrimonial.\n\nNosso compromisso é entregar muito mais do que um espaço urbano: queremos contribuir para que pessoas construam histórias, conquistem patrimônio e realizem sonhos.',
     },
     {
         type: 'mission',
-        title: 'MissÃ£o',
-        content: 'Desenvolver empreendimentos planejados com qualidade, seguranÃ§a e infraestrutura completa, proporcionando valorizaÃ§Ã£o, bem-estar e qualidade de vida aos nossos clientes.',
+        title: 'Missão',
+        content: 'Desenvolver empreendimentos planejados com qualidade, segurança e infraestrutura completa, proporcionando valorização, bem-estar e qualidade de vida aos nossos clientes.',
         image: '/reference-assets/blog-city.jpg',
     },
     {
         type: 'vision',
-        title: 'VisÃ£o',
-        content: 'Ser referÃªncia em loteamentos e empreendimentos imobiliÃ¡rios no Oeste do ParanÃ¡, reconhecida pela excelÃªncia, credibilidade e desenvolvimento sustentÃ¡vel.',
+        title: 'Visão',
+        content: 'Ser referência em loteamentos e empreendimentos imobiliários no Oeste do Paraná, reconhecida pela excelência, credibilidade e desenvolvimento sustentável.',
         image: '/reference-assets/about-plans.jpg',
     },
     {
         type: 'values',
         title: 'Valores',
-        content: 'Nossos valores se refletem no compromisso com a qualidade, no respeito Ã s pessoas, na transparÃªncia das relaÃ§Ãµes e na responsabilidade em cada empreendimento que desenvolvemos.',
+        content: 'Nossos valores se refletem no compromisso com a qualidade, no respeito às pessoas, na transparência das relações e na responsabilidade em cada empreendimento que desenvolvemos.',
         image: '/reference-assets/about-meeting.jpg',
     },
     {
         type: 'differential',
         title: 'Nosso Diferencial',
-        content: 'Cada empreendimento Ã© desenvolvido pensando no futuro.\nDesde a escolha da localizaÃ§Ã£o atÃ© a entrega da infraestrutura, cada etapa Ã© conduzida por uma equipe comprometida com a qualidade, seguranÃ§a e valorizaÃ§Ã£o do investimento de nossos clientes.\n\nAcreditamos que bons empreendimentos nÃ£o apenas transformam terrenos, mas impulsionam o crescimento urbano, movimentam a economia local e melhoram a qualidade de vida das pessoas.\n\nÃ‰ essa visÃ£o que nos motiva diariamente a desenvolver projetos que deixem um legado positivo para as prÃ³ximas geraÃ§Ãµes.',
+        content: 'Cada empreendimento é desenvolvido pensando no futuro.\nDesde a escolha da localização até a entrega da infraestrutura, cada etapa é conduzida por uma equipe comprometida com a qualidade, segurança e valorização do investimento de nossos clientes.\n\nAcreditamos que bons empreendimentos não apenas transformam terrenos, mas impulsionam o crescimento urbano, movimentam a economia local e melhoram a qualidade de vida das pessoas.\n\nÉ essa visão que nos motiva diariamente a desenvolver projetos que deixem um legado positivo para as próximas gerações.',
         image: '/reference-assets/about-team.webp',
     },
     {
         type: 'cta',
-        title: 'Vamos construir o prÃ³ximo capÃ­tulo dessa histÃ³ria juntos.',
-        content: 'Se vocÃª procura um loteamento para morar, investir ou desenvolver seu patrimÃ´nio com seguranÃ§a, conte com a experiÃªncia e a credibilidade da Pascoal Loteamentos.',
-        button_label: 'ConheÃ§a nossos empreendimentos',
+        title: 'Vamos construir o próximo capítulo dessa história juntos.',
+        content: 'Se você procura um loteamento para morar, investir ou desenvolver seu patrimônio com segurança, conte com a experiência e a credibilidade da Pascoal Loteamentos.',
+        button_label: 'Conheça nossos empreendimentos',
         button_url: '/imoveis',
     },
 ];
@@ -65,14 +65,15 @@ const fallbackContact = [
     {
         type: 'hero',
         label: 'Hero',
-        title: 'Estamos prontos para ajudar vocÃª a encontrar o empreendimento ideal.',
-        content: 'Nossa equipe estÃ¡ Ã  disposiÃ§Ã£o para esclarecer dÃºvidas, apresentar oportunidades e oferecer o suporte necessÃ¡rio para que vocÃª faÃ§a um investimento com seguranÃ§a e tranquilidade.',
+        title: 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.',
+        content: 'Nossa equipe está à disposição para esclarecer dúvidas, apresentar oportunidades e oferecer o suporte necessário para que você faça um investimento com segurança e tranquilidade.',
         image: '/reference-assets/hero-contact.webp',
     },
 ];
 
 function SectionRenderer({ section, kind, reverse = false }) {
     if (!section) return null;
+
     const type = section.type || 'content';
     const data = section.data || section;
 
@@ -122,7 +123,23 @@ function SectionRenderer({ section, kind, reverse = false }) {
     }
 
     if (type === 'numbers') {
-        const items = Array.isArray(data.content) ? data.content : [];
+        const items = (() => {
+            if (Array.isArray(data.content)) return data.content;
+            if (typeof data.content === 'string') {
+                try {
+                    const parsed = JSON.parse(data.content);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch {
+                    return [];
+                }
+            }
+            return [];
+        })().slice(0, 3).map((item) => ({
+            prefix: item?.prefix ?? '',
+            value: item?.value ?? '',
+            suffix: item?.suffix ?? item?.title ?? '',
+            description: item?.description ?? '',
+        }));
 
         return (
             <section className="bg-white py-12 tablet:py-14">
@@ -130,9 +147,11 @@ function SectionRenderer({ section, kind, reverse = false }) {
                     <div className="mx-auto rounded-[18px] bg-[#f7f7f7] px-8 py-10 tablet:px-12 tablet:py-12 desktop:px-16">
                         <div className="grid gap-10 text-center desktop:grid-cols-3 desktop:gap-10">
                             {items.map((item) => (
-                                <article key={item.title} className="flex h-full flex-col items-center justify-center">
+                                <article key={`${item.prefix}-${item.value}-${item.suffix}-${item.description}`} className="flex h-full flex-col items-center justify-center">
                                     <div className="text-[28px] font-light leading-none text-ink tablet:text-[34px] desktop:text-[36px]">
-                                        {item.value}
+                                        {item.prefix && <span>{item.prefix} </span>}
+                                        <span>{item.value}</span>
+                                        {item.suffix && <span> {item.suffix}</span>}
                                     </div>
                                     <p className="mt-3 max-w-[18rem] text-sm font-light leading-6 text-muted tablet:text-base">
                                         {item.description}
@@ -275,7 +294,7 @@ function normalizeAboutSections(sections) {
 
             return blocks.slice(0, 3).map((block, index) => ({
                 type: ['mission', 'vision', 'values'][index],
-                title: block.title || ['MissÃ£o', 'VisÃ£o', 'Valores'][index],
+                title: block.title || ['Missão', 'Visão', 'Valores'][index],
                 content: block.text || '',
                 image: block.image || '',
                 sort_order: (section.sort_order ?? 0) + (index * 0.01),
@@ -320,12 +339,12 @@ function About({ page }) {
                             <div>
                                 <h2 className="section-title mt-2 text-[42px] leading-[1.1] tablet:text-[36px] mobile:text-[28px]">Nosso Diferencial</h2>
                                 <p className="mt-5 whitespace-pre-line text-[18px] leading-8 text-muted">
-                                    Cada empreendimento Ã© desenvolvido pensando no futuro.
-                                    Desde a escolha da localizaÃ§Ã£o atÃ© a entrega da infraestrutura, cada etapa Ã© conduzida por uma equipe comprometida com a qualidade, seguranÃ§a e valorizaÃ§Ã£o do investimento de nossos clientes.
+                                    Cada empreendimento é desenvolvido pensando no futuro.
+                                    Desde a escolha da localização até a entrega da infraestrutura, cada etapa é conduzida por uma equipe comprometida com a qualidade, segurança e valorização do investimento de nossos clientes.
 
-                                    Acreditamos que bons empreendimentos nÃ£o apenas transformam terrenos, mas impulsionam o crescimento urbano, movimentam a economia local e melhoram a qualidade de vida das pessoas.
+                                    Acreditamos que bons empreendimentos não apenas transformam terrenos, mas impulsionam o crescimento urbano, movimentam a economia local e melhoram a qualidade de vida das pessoas.
 
-                                    Ã‰ essa visÃ£o que nos motiva diariamente a desenvolver projetos que deixem um legado positivo para as prÃ³ximas geraÃ§Ãµes.
+                                    É essa visão que nos motiva diariamente a desenvolver projetos que deixem um legado positivo para as próximas gerações.
                                 </p>
                             </div>
                             <img
@@ -339,12 +358,12 @@ function About({ page }) {
             )}
             <section className="bg-surface py-16 text-center">
                 <Container>
-                    <h2 className="mx-auto max-w-[59%] text-[46px] font-light leading-[1.12] text-brand tablet:max-w-2xl tablet:text-3xl mobile:max-w-none mobile:text-[27px]">Vamos construir o prÃ³ximo capÃ­tulo dessa histÃ³ria juntos.</h2>
+                    <h2 className="mx-auto max-w-[59%] text-[46px] font-light leading-[1.12] text-brand tablet:max-w-2xl tablet:text-3xl mobile:max-w-none mobile:text-[27px]">Vamos construir o próximo capítulo dessa história juntos.</h2>
                     <p className="mx-auto mt-4 max-w-[76%] text-[20px] font-light leading-8 text-muted tablet:max-w-2xl tablet:text-base mobile:max-w-none mobile:text-base">
-                        Se vocÃª procura um loteamento para morar, investir ou desenvolver seu patrimÃ´nio com seguranÃ§a, conte com a experiÃªncia e a credibilidade da Pascoal Loteamentos.
+                        Se você procura um loteamento para morar, investir ou desenvolver seu patrimônio com segurança, conte com a experiência e a credibilidade da Pascoal Loteamentos.
                     </p>
                     <a href="/imoveis" className="brand-button mt-6 inline-flex">
-                        ConheÃ§a nossos empreendimentos
+                        Conheça nossos empreendimentos
                     </a>
                 </Container>
             </section>
@@ -365,9 +384,9 @@ function Contact({ page }) {
                     <h2 className="section-title text-center">Perguntas Frequentes</h2>
                     <div className="mt-8">
                         {[
-                            ['Como posso agendar uma visita?', 'Entre em contato pelo telefone, WhatsApp ou preencha o formulÃ¡rio desta pÃ¡gina. Nossa equipe agendarÃ¡ o melhor horÃ¡rio para vocÃª.'],
-                            ['Posso obter informaÃ§Ãµes sobre financiamentos?', 'Sim. Nossa equipe pode orientar sobre as opÃ§Ãµes disponÃ­veis.'],
-                            ['VocÃªs atendem apenas Toledo?', 'Atuamos em Toledo e outras cidades da regiÃ£o.'],
+                            ['Como posso agendar uma visita?', 'Entre em contato pelo telefone, WhatsApp ou preencha o formulário desta página. Nossa equipe agendará o melhor horário para você.'],
+                            ['Posso obter informações sobre financiamentos?', 'Sim. Nossa equipe pode orientar sobre as opções disponíveis.'],
+                            ['Vocês atendem apenas Toledo?', 'Atuamos em Toledo e outras cidades da região.'],
                         ].map(([question, answer]) => (
                             <details key={question} className="border-b border-line py-5">
                                 <summary className="cursor-pointer text-sm font-medium text-ink">{question}</summary>
@@ -386,7 +405,7 @@ export default function StaticPage({ title, kind, page }) {
         <PublicLayout>
             <SeoHead
                 title={page?.seo?.title || title}
-                description={page?.seo?.description || (kind === 'about' ? 'ConheÃ§a a histÃ³ria da Pascoal Loteamentos.' : 'Entre em contato com a Pascoal Loteamentos.')}
+                description={page?.seo?.description || (kind === 'about' ? 'Conheça a história da Pascoal Loteamentos.' : 'Entre em contato com a Pascoal Loteamentos.')}
             />
             {kind === 'about' ? <About page={page} /> : <Contact page={page} />}
         </PublicLayout>
