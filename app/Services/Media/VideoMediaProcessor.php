@@ -3,6 +3,7 @@
 namespace App\Services\Media;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -10,6 +11,16 @@ class VideoMediaProcessor
 {
     public function process(UploadedFile $file): array
     {
+        if (! function_exists('proc_open')) {
+            Log::error('Processamento de video indisponivel: proc_open esta desabilitado.', [
+                'disabled_functions' => ini_get('disable_functions'),
+                'ffmpeg' => config('media.ffmpeg'),
+                'ffprobe' => config('media.ffprobe'),
+            ]);
+
+            throw new RuntimeException("N\u{00e3}o foi poss\u{00ed}vel processar o v\u{00ed}deo. O servi\u{00e7}o de processamento de m\u{00ed}dia n\u{00e3}o est\u{00e1} dispon\u{00ed}vel no servidor.");
+        }
+
         $probe = $this->probe($file->getRealPath());
         $video = collect($probe['streams'] ?? [])->firstWhere('codec_type', 'video');
         if (! is_array($video)) {

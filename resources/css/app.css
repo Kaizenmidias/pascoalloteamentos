@@ -31,8 +31,8 @@
 :root {
     --site-content: 80rem;
     --site-header: 89.375rem;
-    --section-space: clamp(4.5rem, 8vw, 7.5rem);
-    --gutter: clamp(1.25rem, 4vw, 2rem);
+    --section-space: clamp(5rem, 7vw, 7.5rem);
+    --gutter: clamp(1.125rem, 3vw, 2.5rem);
     color: var(--color-text);
     font-family: var(--font-sans);
     font-synthesis: none;
@@ -49,8 +49,8 @@ img { display: block; max-width: 100%; }
 @layer components {
     .site-container { width: min(calc(100% - (2 * var(--gutter))), var(--site-content)); margin-inline: auto; }
     .eyebrow { color: var(--color-brand); font-size: clamp(.9rem, 1.25vw, 1.25rem); font-weight: 300; letter-spacing: .015em; line-height: 1.2; text-transform: uppercase; }
-    .section-title { color: var(--color-ink); font-size: clamp(1.85rem, 3.1vw, 2.75rem); font-weight: 300; line-height: 1.14; letter-spacing: -.018em; }
-    .brand-button { position: relative; display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--color-brand-dark); border-radius: .4375rem; background: var(--color-brand); padding: .75rem 1.75rem; color: #fff !important; font-size: .75rem; font-weight: 500; letter-spacing: .015em; text-transform: uppercase; transition: transform .2s ease, background .2s ease, border-color .2s ease; transform-origin: center; }
+    .section-title { color: var(--color-ink); font-size: clamp(2rem, 3.35vw, 3.5rem); font-weight: 300; line-height: 1.12; letter-spacing: -.02em; }
+    .brand-button { position: relative; display: inline-flex; min-height: 3rem; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--color-brand-dark); border-radius: .5rem; background: var(--color-brand); padding: .875rem 2rem; color: #fff !important; font-size: .8125rem; font-weight: 500; letter-spacing: .015em; text-transform: uppercase; transition: transform .2s ease, background .2s ease, border-color .2s ease; transform-origin: center; }
     .brand-button::before { content: ''; position: absolute; top: 7%; left: -25%; display: block; width: 24%; height: 86%; opacity: 0; background: #fff; box-shadow: 0 0 24px 10px rgb(255 255 255 / .7); transform: skewX(-20deg); pointer-events: none; }
     .brand-button:visited { color: #fff !important; }
     body[data-public-page='true'] .brand-button { background: var(--color-brand-deep); border-color: #5d090c; }
@@ -66,6 +66,13 @@ img { display: block; max-width: 100%; }
     .hero-overlay { background: linear-gradient(90deg, rgb(0 0 0 / .62), rgb(0 0 0 / .34) 52%, rgb(0 0 0 / .5)); }
     .red-overlay { background: rgb(141 7 12 / .78); }
     .glass-card { border: 1px solid rgb(255 255 255 / .2); background: rgb(255 255 255 / .96); box-shadow: 0 12px 32px rgb(0 0 0 / .14); }
+}
+
+@media (min-width: 80rem) {
+    .public-site .text-xs { font-size: .875rem; line-height: 1.35rem; }
+    .public-site .text-sm { font-size: 1rem; line-height: 1.65rem; }
+    .public-site .text-base { font-size: 1.0625rem; line-height: 1.8rem; }
+    .public-site .admin-input { min-height: 3.25rem; padding: .875rem 1.125rem; font-size: 1rem; }
 }
 
 @keyframes sh02 {

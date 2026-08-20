@@ -14,13 +14,13 @@ export function WhatsAppCTA({ item, label = 'Falar no WhatsApp', className = '' 
 
 export function ProductHero({ item, eyebrow, facts = [] }) {
     const image = featuredMedia(item);
-    return <section className="relative flex min-h-[620px] items-end overflow-hidden bg-ink pt-32 text-white">
+    return <section className="relative flex min-h-[680px] items-end overflow-hidden bg-ink pt-36 text-white">
         {image && <img src={image.url} alt={image.alt_text || item.title} className="absolute inset-0 h-full w-full object-cover" />}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/20" />
         <Container className="relative z-10 pb-16">
             <div className="max-w-3xl">
                 <div className="mb-6 flex flex-wrap gap-2 text-xs font-medium uppercase"><span className="rounded-full bg-brand px-4 py-2">{item.city?.name || eyebrow}</span>{item.development_status?.name && <span className="rounded-full bg-white/90 px-4 py-2 text-ink">{item.development_status.name}</span>}</div>
-                <p className="eyebrow text-white/75">{eyebrow}</p><h1 className="mt-3 text-4xl font-normal leading-tight tablet:text-6xl">{item.title}</h1>
+                <p className="eyebrow text-white/75">{eyebrow}</p><h1 className="mt-3 text-[2.5rem] font-normal leading-[1.08] tablet:text-[3.75rem] desktop:text-[4.25rem]">{item.title}</h1>
                 {item.excerpt && <p className="mt-6 max-w-2xl text-lg font-light leading-8 text-white/85">{item.excerpt}</p>}
                 <WhatsAppCTA item={item} className="mt-8" />
             </div>

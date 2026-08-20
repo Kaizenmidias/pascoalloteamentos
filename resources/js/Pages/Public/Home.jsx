@@ -31,7 +31,7 @@ function HomeHero({ slides = [], hero = {} }) {
                 <div className="hero-overlay absolute inset-0" />
                 <div className="relative z-10 mx-auto flex min-h-[75svh] max-w-[80rem] items-center px-5 pt-20 text-center">
                     <div className="mx-auto max-w-[980px]">
-                        <h1 className="mx-auto max-w-[1000px] text-[2.125rem] font-light leading-[1.08] tracking-[-.02em] tablet:text-[3rem] desktop:text-[3.9375rem]">{hero.title || defaultHero.title}</h1>
+                        <h1 className="mx-auto max-w-[1120px] text-[2.125rem] font-light leading-[1.06] tracking-[-.025em] tablet:text-[3.25rem] desktop:text-[clamp(3.75rem,4.1vw,4.25rem)]">{hero.title || defaultHero.title}</h1>
                         <p className="mx-auto mt-5 max-w-[760px] text-[1.125rem] font-light leading-[1.45] text-white/90 desktop:text-[1.4375rem]">{hero.description || defaultHero.description}</p>
                     </div>
                 </div>
@@ -99,7 +99,7 @@ export default function Home({ featuredItems = [], homeEntities = [], posts = []
                     <div className="text-center">
                         <p className="eyebrow">Diferenciais</p>
                         <h2 className="section-title mt-2">Excelência em cada detalhe.</h2>
-                        <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-muted">Projetos exclusivos pensados para unir qualidade, valorização e bem-estar em cada detalhe.</p>
+                        <p className="mx-auto mt-5 max-w-4xl text-base leading-8 text-muted">Projetos exclusivos pensados para unir qualidade, valorização e bem-estar em cada detalhe.</p>
                     </div>
                     <div className="mt-8 grid gap-2 tablet:grid-cols-2 desktop:grid-cols-3">{(safeDifferentials.length ? safeDifferentials : [
                         ['Arquitetura autoral', 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.'],

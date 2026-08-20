@@ -24,7 +24,7 @@ function DropdownGroup({ label, href, items = [] }) {
 
     return (
         <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-            <Link href={href} className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand">
+            <Link href={href} className="inline-flex items-center gap-1 text-[.8125rem] font-medium uppercase tracking-[.01em] transition hover:text-brand">
                 {label}
                 <span className="text-[10px]">▾</span>
             </Link>
@@ -93,17 +93,17 @@ export default function SiteHeader() {
 
     return (
         <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${lightHeader || scrolled || open ? 'bg-white text-ink shadow-header' : 'bg-transparent text-white'}`}>
-            <div className="mx-auto flex h-[86px] max-w-[89.375rem] items-center justify-between px-5 desktop:px-8">
+            <div className="mx-auto flex h-[92px] max-w-[89.375rem] items-center justify-between px-5 desktop:px-10">
                 <Link href="/" className="relative z-10" aria-label="Pascoal Loteamentos">
-                    <img src="/reference-assets/logo.png" alt="Pascoal Loteamentos" className={`h-auto w-[145px] transition ${(lightHeader || scrolled || open) ? '' : 'brightness-0 invert'}`} />
+                    <img src="/reference-assets/logo.png" alt="Pascoal Loteamentos" className={`h-auto w-[158px] transition ${(lightHeader || scrolled || open) ? '' : 'brightness-0 invert'}`} />
                 </Link>
 
-                <nav className="hidden items-center gap-[1.4rem] desktop:flex" aria-label="Principal">
-                    {primaryLinks.slice(0, 2).map(([label, href]) => <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${pathname === href ? 'text-brand' : ''}`}>{label}</Link>)}
+                <nav className="hidden items-center gap-[1.65rem] desktop:flex" aria-label="Principal">
+                    {primaryLinks.slice(0, 2).map(([label, href]) => <Link key={href} href={href} className={`text-[.8125rem] font-medium uppercase tracking-[.01em] transition hover:text-brand ${pathname === href ? 'text-brand' : ''}`}>{label}</Link>)}
                     <DropdownGroup label="Condomínios" href="/condominios" items={menuGroups.condominios} />
                     <DropdownGroup label="Loteamentos" href="/loteamentos" items={menuGroups.loteamentos} />
                     <DropdownGroup label="Imóveis" href="/imoveis" items={menuGroups.imoveis} />
-                    {primaryLinks.slice(5).map(([label, href]) => <Link key={href} href={href} className={`text-xs font-medium uppercase tracking-[.01em] transition hover:text-brand ${pathname === href ? 'text-brand' : ''}`}>{label}</Link>)}
+                    {primaryLinks.slice(5).map(([label, href]) => <Link key={href} href={href} className={`text-[.8125rem] font-medium uppercase tracking-[.01em] transition hover:text-brand ${pathname === href ? 'text-brand' : ''}`}>{label}</Link>)}
                 </nav>
 
                 <button type="button" className="relative z-10 grid h-11 w-11 place-items-center rounded-full desktop:hidden" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-menu">
@@ -117,7 +117,7 @@ export default function SiteHeader() {
             </div>
 
             {open && (
-                <nav id="mobile-menu" className="fixed inset-0 top-[86px] overflow-y-auto bg-white px-6 py-8 text-ink desktop:hidden" aria-label="Menu móvel">
+                <nav id="mobile-menu" className="fixed inset-0 top-[92px] overflow-y-auto bg-white px-6 py-8 text-ink desktop:hidden" aria-label="Menu móvel">
                     {primaryLinks.slice(0, 2).map(([label, href]) => <Link key={href} href={href} className="block border-b border-line py-4 text-lg font-light uppercase">{label}</Link>)}
                     <MobileGroup label="Condomínios" href="/condominios" items={menuGroups.condominios} />
                     <MobileGroup label="Loteamentos" href="/loteamentos" items={menuGroups.loteamentos} />

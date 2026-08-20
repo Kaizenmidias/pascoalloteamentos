@@ -15,9 +15,9 @@ const fixedFaqs = [
     ['Quais documentos receberei na compra?', 'A documentacao correspondente a modalidade de aquisicao e entregue com transparencia em todas as etapas.'],
 ];
 
-const SectionContainer = ({ children, className = '' }) => <Container className={`max-w-[920px] ${className}`}>{children}</Container>;
-const Eyebrow = ({ children }) => <p className="text-[.68rem] font-normal uppercase tracking-[.04em] text-brand tablet:text-xs">{children}</p>;
-const SectionTitle = ({ children, className = '' }) => <h2 className={`mt-2 text-[1.8rem] font-light leading-[1.08] tracking-[-.02em] text-ink tablet:text-[2.35rem] ${className}`}>{children}</h2>;
+const SectionContainer = ({ children, className = '' }) => <Container className={`max-w-[1120px] ${className}`}>{children}</Container>;
+const Eyebrow = ({ children }) => <p className="text-xs font-normal uppercase tracking-[.04em] text-brand tablet:text-sm">{children}</p>;
+const SectionTitle = ({ children, className = '' }) => <h2 className={`mt-3 text-[2rem] font-light leading-[1.08] tracking-[-.02em] text-ink tablet:text-[2.75rem] desktop:text-[3.15rem] ${className}`}>{children}</h2>;
 
 function CondominiumHero({ item, image, globalWhatsapp }) {
     const whatsapp = String(item.whatsapp_contact || globalWhatsapp || '').replace(/\D/g, '');
@@ -27,8 +27,8 @@ function CondominiumHero({ item, image, globalWhatsapp }) {
         <SectionContainer className="relative z-10">
             <div className="max-w-[510px]">
                 <div className="mb-4 flex flex-wrap gap-1.5 text-[.62rem] font-medium uppercase"><span className="rounded-sm bg-brand px-3 py-1.5">{item.city?.name || 'Condom\u00ednio'}</span>{item.development_status?.name && <span className="rounded-sm bg-white px-3 py-1.5 text-ink">{item.development_status.name}</span>}</div>
-                <h1 className="max-w-[440px] text-[2.55rem] font-light leading-[.98] tracking-[-.035em] tablet:text-[3.05rem]">{item.title}</h1>
-                {item.excerpt && <p className="mt-5 max-w-[500px] text-sm font-light leading-[1.65] text-white/90 tablet:text-[.96rem]">{item.excerpt}</p>}
+                <h1 className="max-w-[560px] text-[2.55rem] font-light leading-[.98] tracking-[-.035em] tablet:text-[3.5rem] desktop:text-[3.75rem]">{item.title}</h1>
+                {item.excerpt && <p className="mt-6 max-w-[600px] text-base font-light leading-[1.7] text-white/90 tablet:text-lg">{item.excerpt}</p>}
                 {whatsapp && <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" className="brand-button mt-6 gap-2"><svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current"><path d="M12 2a9.7 9.7 0 0 0-8.4 14.6L2.3 21.7l5.2-1.3A9.7 9.7 0 1 0 12 2Zm0 17.5a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-3.1.8.8-3-.2-.3A7.7 7.7 0 1 1 12 19.5Zm4.2-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1l-.7.9c-.1.2-.3.2-.5.1-1.4-.7-2.4-1.3-3.4-3-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1.1 1.9-.8 3 .4 2.2 2 4.2 4.1 5.5 1.6 1 4.1 1.9 5.5.7.4-.4.7-1 .8-1.6 0-.2 0-.4-.2-.5l-.9-.6Z" /></svg>Falar no WhatsApp</a>}
             </div>
         </SectionContainer>
