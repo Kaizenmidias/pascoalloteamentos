@@ -60,6 +60,7 @@ img { display: block; max-width: 100%; }
     .rich-public-content a { color: var(--color-brand); text-decoration: underline; text-underline-offset: 3px; }
     .rich-public-content img { border-radius: .75rem; height: auto; margin-inline: auto; max-width: 100%; }
     .rich-public-content figcaption { font-size: .8rem; margin-top: .5rem; text-align: center; }
+    .public-site main a.relative.text-white h3 { color: #fff; }
     .brand-button { position: relative; display: inline-flex; min-height: 3rem; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--color-brand-dark); border-radius: .5rem; background: var(--color-brand); padding: .875rem 2rem; color: #fff !important; font-size: .8125rem; font-weight: 500; letter-spacing: .015em; text-transform: uppercase; transition: transform .2s ease, background .2s ease, border-color .2s ease; transform-origin: center; }
     .brand-button::before { content: ''; position: absolute; top: 7%; left: -25%; display: block; width: 24%; height: 86%; opacity: 0; background: #fff; box-shadow: 0 0 24px 10px rgb(255 255 255 / .7); transform: skewX(-20deg); pointer-events: none; }
     .brand-button:visited { color: #fff !important; }
