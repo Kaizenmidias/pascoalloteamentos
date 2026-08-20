@@ -12,7 +12,6 @@ export default function LeadForm({ entityType, entityId, title = 'Tenho interess
             <label className="block"><span className="sr-only">Mensagem</span><textarea className="admin-input min-h-28 bg-surface" value={data.message} onChange={(event) => setData('message', event.target.value)} placeholder="Mensagem" /></label>
             <label className="flex gap-2 text-[.65rem] text-muted"><input type="checkbox" checked={data.consent} onChange={(event) => setData('consent', event.target.checked)} required /> Autorizo o uso dos dados para retorno do contato.</label>
             <button type="submit" disabled={processing} className="brand-button w-full">Enviar</button>
-            {entityType && <a href="https://wa.me/5545999999999" className="brand-button w-full">Falar no WhatsApp</a>}
         </form>
     );
 }

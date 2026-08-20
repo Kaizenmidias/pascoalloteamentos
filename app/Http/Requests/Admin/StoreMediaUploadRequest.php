@@ -28,8 +28,8 @@ class StoreMediaUploadRequest extends FormRequest
         $limit = round(config('media.max_upload_kb') / 1024);
 
         return [
-            'file.max' => "O arquivo ultrapassa o limite de {$limit} MB configurado pela aplica\u00e7\u00e3o.",
-            'file.mimetypes' => 'Formato n\u00e3o permitido. Envie JPG, JPEG, PNG, WebP, HEIC, HEIF, MP4 ou MOV.',
+            'file.max' => "O arquivo ultrapassa o limite de {$limit} MB configurado pela aplicação.",
+            'file.mimetypes' => 'Formato não permitido. Envie JPG, JPEG, PNG, WebP, HEIC, HEIF, MP4 ou MOV.',
         ];
     }
 }

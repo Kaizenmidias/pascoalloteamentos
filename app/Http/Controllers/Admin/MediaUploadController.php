@@ -23,7 +23,7 @@ class MediaUploadController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'N\u00e3o foi poss\u00edvel processar a m\u00eddia. '.$exception->getMessage(),
+                'message' => 'Não foi possível processar a mídia. '.$exception->getMessage(),
             ], 422);
         }
 

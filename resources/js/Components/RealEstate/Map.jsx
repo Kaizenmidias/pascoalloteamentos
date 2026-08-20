@@ -1,8 +1,8 @@
-export default function Map({ latitude, longitude, address = '', title = 'Localiza\u00e7\u00e3o' }) {
+export default function Map({ latitude, longitude, address = '', title = 'Localização' }) {
     const hasCoordinates = latitude != null && longitude != null && latitude !== '' && longitude !== '';
 
     if (!hasCoordinates && !address) {
-        return <div className="grid min-h-80 place-items-center rounded-card bg-surface text-sm text-muted">Localiza\u00e7\u00e3o dispon\u00edvel sob consulta.</div>;
+        return <div className="grid min-h-80 place-items-center rounded-card bg-surface text-sm text-muted">Localização disponível sob consulta.</div>;
     }
 
     const url = hasCoordinates

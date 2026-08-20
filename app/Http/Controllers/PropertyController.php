@@ -8,6 +8,7 @@ use App\Models\DevelopmentStatus;
 use App\Models\Page;
 use App\Models\Property;
 use App\Models\PropertyType;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -34,6 +35,10 @@ class PropertyController extends Controller
     {
         abort_unless($property->status === 'published', 404);
 
-        return Inertia::render('Public/Properties/Show', ['item' => $property->load(['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo'])]);
+        $globalWhatsapp = Schema::hasTable('site_settings')
+            ? SiteSetting::query()->where('key', 'whatsapp')->first()?->value
+            : null;
+
+        return Inertia::render('Public/Properties/Show', ['item' => $property->load(['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'seo']), 'globalWhatsapp' => $globalWhatsapp]);
     }
 }
