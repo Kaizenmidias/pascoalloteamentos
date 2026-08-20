@@ -16,7 +16,7 @@ class StoreSubdivisionRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:255'], 'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('subdivisions')],
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('subdivisions')],
             'subdivision_type_id' => ['nullable', 'exists:subdivision_types,id'], 'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
@@ -33,5 +33,13 @@ class StoreSubdivisionRequest extends FormRequest
             'promotions.*.media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'], 'promotions.*.image' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif', 'max:25600'], 'promotions.*.is_active' => ['nullable', 'boolean'],
             ...$this->contentRules(),
         ];
+
+        foreach (array_keys($rules) as $key) {
+            if (str_starts_with($key, 'faqs') || str_starts_with($key, 'floor_plans')) {
+                unset($rules[$key]);
+            }
+        }
+
+        return $rules;
     }
 }

@@ -18,11 +18,12 @@ const text = {
     address: 'Endere\u00e7o',
     business: 'Tipo de neg\u00f3cio',
 };
+const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function Form({ item, options }) {
     const editing = Boolean(item);
     const featuredImage = item?.media_assets?.find((asset) => asset.pivot?.is_featured);
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, transform, post, processing, errors } = useForm({
         _method: editing ? 'put' : undefined,
         title: item?.title || '', slug: item?.slug || '', reference_code: item?.reference_code || '',
         subdivision_type_id: item?.subdivision_type_id || '', development_status_id: item?.development_status_id || '',
@@ -44,15 +45,30 @@ export default function Form({ item, options }) {
 
     const submit = (event) => {
         event.preventDefault();
-        post(editing ? `/admin/subdivisions/${item.slug}` : '/admin/subdivisions', { forceFormData: true });
+        transform((payload) => {
+            const { faqs, floor_plans, ...cleanPayload } = payload;
+            return cleanPayload;
+        });
+        post(editing ? `/admin/subdivisions/${item.slug}` : '/admin/subdivisions', {
+            forceFormData: true,
+            preserveScroll: true,
+            onError: () => requestAnimationFrame(() => {
+                const message = document.querySelector('[data-subdivision-form] [data-validation-error]');
+                message?.closest('label')?.querySelector('input, select, textarea')?.focus();
+                message?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }),
+        });
     };
 
+    const hasErrors = Object.keys(errors).length > 0;
+
     return <AdminLayout title={editing ? `Editar ${text.subdivision}` : `Novo ${text.subdivision}`}>
-        <form onSubmit={submit} className="space-y-8">
+        <form onSubmit={submit} className="space-y-8" data-subdivision-form>
+            {hasErrors && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><strong className="block font-medium">Revise os campos destacados antes de salvar.</strong><ul className="mt-2 list-disc space-y-1 pl-5">{Object.entries(errors).map(([key, message]) => <li key={key} data-validation-error>{message}</li>)}</ul></div>}
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Se&ccedil;&atilde;o inicial</p><h2 className="mt-2 text-lg font-medium text-ink">Hero do {text.subdivision}</h2><p className="mt-1 text-sm text-muted">Estes campos formam a abertura da p&aacute;gina. Estado e cidade s&atilde;o selecionados no bloco seguinte.</p></div>
                 <div className="tablet:col-span-2"><span className="admin-label">Imagem principal</span><p className="mb-3 text-xs text-muted">Envie a imagem no bloco de upload individual e clique em &quot;Definir capa&quot;. Ela ser&aacute; usada no card, Hero e Sobre o loteamento.</p>{featuredImage?.url && <img src={featuredImage.url} alt="" className="mb-4 aspect-video w-full max-w-xl rounded-card object-cover" />}</div>
-                <Field label={text.title} value={data.title} onChange={(event) => setData('title', event.target.value)} error={errors.title} />
+                <Field label={text.title} value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: current.slug || slugify(title) })); }} error={errors.title} />
                 <SelectField label="Status da obra" options={options.statuses} value={data.development_status_id} onChange={(event) => setData('development_status_id', event.target.value)} />
                 <div className="tablet:col-span-2"><Field label={text.initialText} as="textarea" value={data.excerpt} onChange={(event) => setData('excerpt', event.target.value)} /></div>
                 <Field label={'WhatsApp espec\u00edfico (opcional)'} value={data.whatsapp_contact} onChange={(event) => setData('whatsapp_contact', event.target.value)} />

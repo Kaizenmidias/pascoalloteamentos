@@ -112,7 +112,7 @@ class RealEstateContentService
                     ]);
                 }
             }
-            if (is_array($promotions) && method_exists($item, 'promotions')) {
+            if (is_array($promotions) && method_exists($item, 'promotions') && Schema::hasTable($item->promotions()->getRelated()->getTable())) {
                 $item->promotions()->delete();
                 foreach (array_values($promotions) as $index => $row) {
                     $image = Arr::pull($row, 'image');
