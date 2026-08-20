@@ -41,7 +41,7 @@ class SubdivisionController extends Controller
 
     public function edit(Subdivision $subdivision): Response
     {
-        return Inertia::render('Admin/Subdivisions/Form', ['item' => $subdivision->load(['city.state', 'features.iconMedia', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']), 'options' => $this->options()]);
+        return Inertia::render('Admin/Subdivisions/Form', ['item' => $subdivision->load(['city.state', 'features.iconMedia', 'mediaAssets', 'promotions.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'seo']), 'options' => $this->options()]);
     }
 
     public function update(UpdateSubdivisionRequest $request, Subdivision $subdivision): RedirectResponse

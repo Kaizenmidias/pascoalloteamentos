@@ -38,6 +38,8 @@ export default function Form({ item, options }) {
         status: item?.status || 'draft', featured: Boolean(item?.featured), price_on_request: Boolean(item?.price_on_request),
         feature_ids: item?.features?.map((feature) => feature.id) || [], promotions: item?.promotions || [], uploaded_media_ids: [],
         ...contentDefaults(item, options.stageDefinitions),
+        floor_plans: undefined,
+        faqs: undefined,
     });
 
     const submit = (event) => {
@@ -88,7 +90,7 @@ export default function Form({ item, options }) {
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <PromotionManager rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
             <AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} />
-            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showSpecialImages={false} /></div>
+            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showPlans={false} showSpecialImages={false} showFaqs={false} /></div>
 
             <section className="flex flex-wrap items-end gap-5 rounded-card bg-white p-6 shadow-card"><SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={(event) => setData('status', event.target.value)} /><SelectField label={'Neg\u00f3cio'} options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Loca\u00e7\u00e3o' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={(event) => setData('commercial_purpose', event.target.value)} />{[['featured', 'Destaque'], ['price_on_request', 'Pre\u00e7o sob consulta']].map(([key, label]) => <label key={key} className="flex gap-2 pb-3"><input type="checkbox" checked={data[key]} onChange={(event) => setData(key, event.target.checked)} />{label}</label>)}<Button type="submit" disabled={processing}>Salvar {text.subdivision}</Button></section>
         </form>
