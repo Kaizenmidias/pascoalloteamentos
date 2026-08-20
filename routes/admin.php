@@ -39,7 +39,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         Route::get('posts/{post}/edit', [CmsController::class, 'editPost'])->name('posts.edit');
         Route::put('posts/{post}', [CmsController::class, 'updatePost'])->name('posts.update');
         Route::delete('posts/{post}', [CmsController::class, 'destroyPost'])->name('posts.destroy');
+        Route::get('categories', [CmsController::class, 'categories'])->name('categories.index');
         Route::post('categories', [CmsController::class, 'storeCategory'])->name('categories.store');
+        Route::put('categories/{category}', [CmsController::class, 'updateCategory'])->name('categories.update');
+        Route::delete('categories/{category}', [CmsController::class, 'destroyCategory'])->name('categories.destroy');
     });
     Route::get('leads', [CmsController::class, 'leads'])->name('leads.index');
     Route::patch('leads/{lead}', [CmsController::class, 'updateLead'])->name('leads.update');

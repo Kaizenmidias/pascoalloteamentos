@@ -41,7 +41,15 @@ export default function AdminLayout({ title, children }) {
                             ].map(([label, href]) => <Link key={href} href={href} className={`block rounded-l-lg px-4 py-2.5 ${active(href) ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}>{label}</Link>)}
                         </div>
                     </details>
-                    <Link href="/admin/blog/posts" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/blog/posts') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>✎</Icon>Blog</Link>
+                    <details open className="group">
+                        <summary className="flex cursor-pointer list-none items-center gap-3 px-6 py-3 text-white/70 transition hover:bg-white/5 hover:text-white"><Icon>✎</Icon><span className="flex-1">Blog</span><span className="text-xs transition group-open:rotate-180">⌄</span></summary>
+                        <div className="pb-2 pl-14">
+                            {[
+                                ['Posts', '/admin/blog/posts'],
+                                ['Categorias', '/admin/blog/categories'],
+                            ].map(([label, href]) => <Link key={href} href={href} className={`block rounded-l-lg px-4 py-2.5 ${active(href) ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}>{label}</Link>)}
+                        </div>
+                    </details>
                     <Link href="/admin/leads" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/leads') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>✉</Icon>Leads</Link>
                     <Link href="/admin/settings" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/settings') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⚙</Icon>Configurações</Link>
                     <Link href="/admin/integrations" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/integrations') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⌘</Icon>Integrações</Link>

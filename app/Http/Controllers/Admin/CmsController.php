@@ -172,14 +172,44 @@ class CmsController extends Controller
 
     public function storeCategory(Request $request): RedirectResponse
     {
+        $request->merge(['slug' => Str::slug($request->input('slug') ?: $request->input('name'))]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'alpha_dash:ascii', 'max:255', 'unique:blog_categories'],
+            'slug' => ['required', 'alpha_dash:ascii', 'max:255', 'unique:blog_categories'],
         ]);
 
-        BlogCategory::create(['name' => $data['name'], 'slug' => $data['slug'] ?: Str::slug($data['name'])]);
+        BlogCategory::create($data);
 
         return back()->with('success', 'Categoria criada.');
+    }
+
+    public function categories(): Response
+    {
+        return Inertia::render('Admin/Blog/Categories', [
+            'categories' => BlogCategory::query()->withCount('posts')->orderBy('name')->get(),
+        ]);
+    }
+
+    public function updateCategory(Request $request, BlogCategory $category): RedirectResponse
+    {
+        $request->merge(['slug' => Str::slug($request->input('slug') ?: $request->input('name'))]);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('blog_categories')->ignore($category)],
+        ]);
+        $category->update($data);
+
+        return back()->with('success', 'Categoria atualizada.');
+    }
+
+    public function destroyCategory(BlogCategory $category): RedirectResponse
+    {
+        if ($category->posts()->exists()) {
+            return back()->with('error', 'A categoria possui posts relacionados e nao pode ser excluida.');
+        }
+        $category->delete();
+
+        return back()->with('success', 'Categoria removida.');
     }
 
     public function leads(): Response

@@ -35,7 +35,7 @@ class ClassificationController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/Classifications/Index', [
-            'groups' => collect(self::GROUPS)->map(fn ($group, $slug) => [
+            'groups' => collect(self::GROUPS)->except(['states', 'cities'])->map(fn ($group, $slug) => [
                 'slug' => $slug,
                 'label' => $group['label'],
                 'items' => $this->itemsFor($group['model']),
