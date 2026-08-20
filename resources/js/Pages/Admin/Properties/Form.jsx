@@ -1,17 +1,18 @@
 import { useForm } from '@inertiajs/react';
 import AdminLayout from '../../../Components/Layout/AdminLayout';
 import ContentManager, { contentDefaults } from '../../../Components/Admin/ContentManager';
-import Button from '../../../Components/UI/Button';
 import FeatureChoices from '../../../Components/Forms/FeatureChoices';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import LocationFields from '../../../Components/Forms/LocationFields';
 import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
+import { ProductFormLayout, PublicationCard, SidebarMediaIntro } from '../../../Components/Admin/ProductFormUI';
 
 const numericFields = [['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['rent_price', 'Preço de locação'], ['condominium_fee', 'Condomínio'], ['iptu', 'IPTU'], ['usable_area', 'Área útil'], ['total_area', 'Área total'], ['built_area', 'Área construída'], ['land_area', 'Área do terreno'], ['bedrooms', 'Quartos'], ['suites', 'Suítes'], ['bathrooms', 'Banheiros'], ['lavatories', 'Lavabos'], ['parking_spaces', 'Vagas'], ['rooms', 'Salas']];
 
 export default function Form({ item, options }) {
     const editing = Boolean(item);
+    const featuredImage = item?.media_assets?.find((asset) => asset.pivot?.is_featured);
     const { data, setData, post, processing, errors } = useForm({
         _method: editing ? 'put' : undefined,
         title: item?.title || '',
@@ -56,7 +57,7 @@ export default function Form({ item, options }) {
 
     return (
         <AdminLayout title={editing ? 'Editar imóvel' : 'Novo imóvel'}>
-            <form onSubmit={submit} className="space-y-6">
+            <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel="Salvar imóvel" sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"], ["furnished", "Mobiliado"], ["accepts_financing", "Aceita financiamento"], ["accepts_exchange", "Aceita permuta"], ["is_new", "Imóvel novo"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card e na galeria principal do imóvel." /><div className="[&>section]:p-5"><AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /></div></>}>
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-2">
                     <div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Geral e identificação</h2><p className="mt-1 text-sm text-muted">Dados exibidos junto à galeria principal do imóvel.</p></div>
                     <Field label="Título" value={data.title} onChange={(e) => setData('title', e.target.value)} error={errors.title} />
@@ -89,15 +90,8 @@ export default function Form({ item, options }) {
                 <section className="rounded-xl border border-line bg-white p-6 shadow-sm">
                     <FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} />
                 </section>
-                <AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} />
                 <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showStages={false} /></div>
-                <section className="flex flex-wrap items-end gap-5 rounded-xl border border-line bg-white p-6 shadow-sm">
-                    <SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={(e) => setData('status', e.target.value)} />
-                    <SelectField label="Negócio" options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Locação' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={(e) => setData('commercial_purpose', e.target.value)} />
-                    {[['featured', 'Destaque'], ['price_on_request', 'Preço sob consulta'], ['furnished', 'Mobiliado'], ['accepts_financing', 'Aceita financiamento'], ['accepts_exchange', 'Aceita permuta'], ['is_new', 'Imóvel novo']].map(([key, label]) => <label key={key} className="flex gap-2 pb-3"><input type="checkbox" checked={data[key]} onChange={(e) => setData(key, e.target.checked)} />{label}</label>)}
-                    <Button type="submit" disabled={processing}>Salvar imóvel</Button>
-                </section>
-            </form>
+            </ProductFormLayout>
         </AdminLayout>
     );
 }

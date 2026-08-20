@@ -1,6 +1,5 @@
 import { useForm } from '@inertiajs/react';
 import AdminLayout from '../../../Components/Layout/AdminLayout';
-import Button from '../../../Components/UI/Button';
 import FeatureChoices from '../../../Components/Forms/FeatureChoices';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
@@ -9,6 +8,7 @@ import LocationFields from '../../../Components/Forms/LocationFields';
 import PromotionManager from '../../../Components/Admin/CondominiumPromotions';
 import Map from '../../../Components/RealEstate/Map';
 import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
+import { ProductFormLayout, PublicationCard, SidebarMediaIntro } from '../../../Components/Admin/ProductFormUI';
 
 const text = {
     subdivision: 'loteamento',
@@ -70,21 +70,17 @@ export default function Form({ item, options }) {
             forceFormData: true,
             preserveScroll: true,
             onError: () => requestAnimationFrame(() => {
-                const message = document.querySelector('[data-subdivision-form] [data-validation-error]');
+                const message = document.querySelector('[data-product-form] [role="alert"]');
                 message?.closest('label')?.querySelector('input, select, textarea')?.focus();
                 message?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }),
         });
     };
 
-    const hasErrors = Object.keys(errors).length > 0;
-
     return <AdminLayout title={editing ? `Editar ${text.subdivision}` : `Novo ${text.subdivision}`}>
-        <form onSubmit={submit} className="space-y-8" data-subdivision-form>
-            {hasErrors && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><strong className="block font-medium">Revise os campos destacados antes de salvar.</strong><ul className="mt-2 list-disc space-y-1 pl-5">{Object.entries(errors).map(([key, message]) => <li key={key} data-validation-error><strong>{errorLabel(key)}:</strong> {friendlyError(key, message)}</li>)}</ul></div>}
+        <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel={`Salvar ${text.subdivision}`} sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card, Hero e seção Sobre o loteamento." /><div className="[&>section]:p-5"><AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /></div></>}>
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Se&ccedil;&atilde;o inicial</p><h2 className="mt-2 text-lg font-medium text-ink">Hero do {text.subdivision}</h2><p className="mt-1 text-sm text-muted">Estes campos formam a abertura da p&aacute;gina. Estado e cidade s&atilde;o selecionados no bloco seguinte.</p></div>
-                <div className="tablet:col-span-2"><span className="admin-label">Imagem principal</span><p className="mb-3 text-xs text-muted">Envie a imagem no bloco de upload individual e clique em &quot;Definir capa&quot;. Ela ser&aacute; usada no card, Hero e Sobre o loteamento.</p>{featuredImage?.url && <img src={featuredImage.url} alt="" className="mb-4 aspect-video w-full max-w-xl rounded-card object-cover" />}</div>
                 <Field label={text.title} value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: current.slug || slugify(title) })); }} error={friendlyError('title', errors.title)} />
                 <SelectField label="Status da obra" options={options.statuses} value={data.development_status_id} onChange={(event) => setData('development_status_id', event.target.value)} error={friendlyError('development_status_id', errors.development_status_id)} />
                 <div className="tablet:col-span-2"><Field label={text.initialText} as="textarea" value={data.excerpt} onChange={(event) => setData('excerpt', event.target.value)} /></div>
@@ -121,10 +117,8 @@ export default function Form({ item, options }) {
 
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <PromotionManager rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
-            <AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} />
             <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showPlans={false} showSpecialImages={false} showFaqs={false} showDocuments={false} /></div>
 
-            <section className="flex flex-wrap items-end gap-5 rounded-card bg-white p-6 shadow-card"><SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={(event) => setData('status', event.target.value)} error={friendlyError('status', errors.status)} /><SelectField label={'Neg\u00f3cio'} options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Loca\u00e7\u00e3o' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={(event) => setData('commercial_purpose', event.target.value)} />{[['featured', 'Destaque'], ['price_on_request', 'Pre\u00e7o sob consulta']].map(([key, label]) => <label key={key} className="flex gap-2 pb-3"><input type="checkbox" checked={data[key]} onChange={(event) => setData(key, event.target.checked)} />{label}</label>)}<Button type="submit" disabled={processing}>Salvar {text.subdivision}</Button></section>
-        </form>
+        </ProductFormLayout>
     </AdminLayout>;
 }
