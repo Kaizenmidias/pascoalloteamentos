@@ -53,6 +53,6 @@ class CondominiumController extends Controller
 
     private function options(): array
     {
-        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::where('is_active', true)->where(fn ($query) => $query->whereNull('scope')->orWhere('scope', 'condominium'))->orderBy('sort_order')->get(), 'stageDefinitions' => ConstructionStageCatalog::definitionsFor(Condominium::class)];
+        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::with('iconMedia')->where('is_active', true)->where(fn ($query) => $query->whereNull('scope')->orWhere('scope', 'condominium'))->orderBy('sort_order')->get(), 'stageDefinitions' => ConstructionStageCatalog::definitionsFor(Condominium::class)];
     }
 }

@@ -5,6 +5,7 @@ import SeoHead from '../../../Components/SEO/SeoHead';
 import ConstructionProgress from '../../../Components/RealEstate/ConstructionProgress';
 import Map from '../../../Components/RealEstate/Map';
 import { featuredMedia, galleryMedia, WhatsAppCTA } from '../../../Components/RealEstate/DetailSections';
+import FeatureIcon from '../../../Components/RealEstate/FeatureIcon';
 
 const fixedFaqs = [
     ['O empreendimento possui toda a infraestrutura necessaria?', 'Sim. Os condominios sao planejados com infraestrutura completa, areas de lazer, seguranca e conforto.'],
@@ -43,12 +44,12 @@ function InternalMenu() {
 
 function About({ item, image }) {
     if (!item.about_title && !item.about_text) return null;
-    return <section id="sobre" className="scroll-mt-28 py-24 tablet:py-28"><SectionContainer className="grid gap-10 tablet:grid-cols-[.88fr_1.12fr] tablet:items-center"><div><Eyebrow>Sobre o empreendimento</Eyebrow><SectionTitle>{item.about_title}</SectionTitle>{item.about_text && <p className="mt-5 whitespace-pre-line text-sm font-light leading-[1.75] text-muted">{item.about_text}</p>}</div>{image && <img src={image.url} alt={image.alt_text || item.about_title || item.title} className="aspect-[1.45/1] w-full rounded-xl object-cover" />}</SectionContainer></section>;
+    return <section id="sobre" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.88fr_1.12fr] tablet:items-center"><div><Eyebrow>Sobre o empreendimento</Eyebrow><SectionTitle>{item.about_title}</SectionTitle>{item.about_text && <p className="mt-5 whitespace-pre-line text-sm font-light leading-[1.75] text-muted">{item.about_text}</p>}</div>{image && <img src={image.url} alt={image.alt_text || item.about_title || item.title} className="aspect-[1.45/1] w-full rounded-xl object-cover" />}</SectionContainer></section>;
 }
 
 function Features({ items = [] }) {
     if (!items.length) return null;
-    return <section id="diferenciais" className="scroll-mt-28 pb-24"><SectionContainer><Eyebrow>Diferenciais</Eyebrow><SectionTitle>Projetado para superar expectativas</SectionTitle><div className="mt-7 grid grid-cols-2 gap-3 tablet:grid-cols-4 desktop:grid-cols-5">{items.map((feature) => <article key={feature.id} className="grid min-h-28 place-items-center rounded-xl border border-line bg-white p-4 text-center shadow-[0_5px_18px_rgba(17,17,17,.055)]"><div><span className="mx-auto mb-3 grid min-h-7 place-items-center text-xl text-brand">{feature.icon || '+'}</span><h3 className="text-[.68rem] font-light leading-[1.3] text-ink">{feature.name}</h3></div></article>)}</div></SectionContainer></section>;
+    return <section id="diferenciais" className="scroll-mt-28 pb-14 tablet:pb-16"><SectionContainer><Eyebrow>Diferenciais</Eyebrow><SectionTitle>Projetado para superar expectativas</SectionTitle><div className="mt-7 grid grid-cols-2 gap-3 tablet:grid-cols-4 desktop:grid-cols-5">{items.map((feature) => <article key={feature.id} className="grid min-h-28 place-items-center rounded-xl border border-line bg-white p-4 text-center shadow-[0_5px_18px_rgba(17,17,17,.055)]"><div><span className="mx-auto mb-3 grid min-h-9 place-items-center text-xl text-brand"><FeatureIcon feature={feature} className="size-9" /></span><h3 className="text-[.68rem] font-light leading-[1.3] text-ink">{feature.name}</h3></div></article>)}</div></SectionContainer></section>;
 }
 
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : null;
@@ -59,7 +60,7 @@ function PromotionCard({ promotion }) {
 
 function Promotions({ promotions }) {
     if (!promotions.length) return null;
-    return <section id="promocoes" className="scroll-mt-28 pb-24"><SectionContainer>{promotions.length === 1 ? <PromotionCard promotion={promotions[0]} /> : <Carousel label="Promocoes" itemClassName="w-[94%] tablet:w-[86%]">{promotions.map((promotion) => <PromotionCard key={promotion.id} promotion={promotion} />)}</Carousel>}</SectionContainer></section>;
+    return <section id="promocoes" className="scroll-mt-28 pb-14 tablet:pb-16"><SectionContainer>{promotions.length === 1 ? <PromotionCard promotion={promotions[0]} /> : <Carousel label="Promocoes" itemClassName="w-[94%] tablet:w-[86%]">{promotions.map((promotion) => <PromotionCard key={promotion.id} promotion={promotion} />)}</Carousel>}</SectionContainer></section>;
 }
 
 function GalleryItem({ asset }) {
@@ -69,7 +70,7 @@ function GalleryItem({ asset }) {
 
 function GallerySection({ items }) {
     if (!items.length) return null;
-    return <section id="galeria" className="scroll-mt-28 bg-surface py-20"><SectionContainer><Eyebrow>Galeria</Eyebrow><SectionTitle>Conhe&ccedil;a cada detalhe do empreendimento</SectionTitle><Carousel label="Galeria do condominio" className="mt-7" itemClassName="w-[82%] tablet:w-[calc((100%-2.5rem)/3)]">{items.map((asset) => <GalleryItem key={asset.id} asset={asset} />)}</Carousel></SectionContainer></section>;
+    return <section id="galeria" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><Eyebrow>Galeria</Eyebrow><SectionTitle>Conhe&ccedil;a cada detalhe do empreendimento</SectionTitle><Carousel label="Galeria do condominio" className="mt-7" itemClassName="w-[82%] tablet:w-[calc((100%-2.5rem)/3)]">{items.map((asset) => <GalleryItem key={asset.id} asset={asset} />)}</Carousel></SectionContainer></section>;
 }
 
 function PlanCard({ plan }) {
@@ -79,22 +80,22 @@ function PlanCard({ plan }) {
 function Plans({ item }) {
     const plans = (item.floor_plans || []).filter((plan) => plan.is_active !== false);
     if (!plans.length) return null;
-    return <section id="plantas" className="scroll-mt-28 py-24"><SectionContainer className="grid gap-10 tablet:grid-cols-[.9fr_1.1fr] tablet:items-center"><div><Eyebrow>Plantas</Eyebrow><SectionTitle>{item.floor_plans_title || 'Conhe\u00e7a as plantas dispon\u00edveis'}</SectionTitle>{item.floor_plans_support_text && <p className="mt-5 text-sm font-light leading-7 text-muted">{item.floor_plans_support_text}</p>}</div><Carousel label="Plantas disponiveis" itemClassName="w-[94%]">{plans.map((plan) => <PlanCard key={plan.id} plan={plan} />)}</Carousel></SectionContainer></section>;
+    return <section id="plantas" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.9fr_1.1fr] tablet:items-center"><div><Eyebrow>Plantas</Eyebrow><SectionTitle>{item.floor_plans_title || 'Conhe\u00e7a as plantas dispon\u00edveis'}</SectionTitle>{item.floor_plans_support_text && <p className="mt-5 text-sm font-light leading-7 text-muted">{item.floor_plans_support_text}</p>}</div><Carousel label="Plantas disponiveis" itemClassName="w-[94%]">{plans.map((plan) => <PlanCard key={plan.id} plan={plan} />)}</Carousel></SectionContainer></section>;
 }
 
 function Location({ item }) {
     if (!item.address && item.latitude == null && item.longitude == null) return null;
     const address = [item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code].filter(Boolean).join(', ');
-    return <section id="localizacao" className="scroll-mt-28 bg-surface py-24"><SectionContainer className="grid gap-10 tablet:grid-cols-[.9fr_1.1fr] tablet:items-center"><div><Eyebrow>Localiza&ccedil;&atilde;o</Eyebrow><SectionTitle>Localiza&ccedil;&atilde;o estrat&eacute;gica para facilitar seu dia a dia</SectionTitle>{address && <p className="mt-5 text-sm font-light leading-7 text-muted">{address}</p>}<WhatsAppCTA item={item} className="mt-6" /></div><div className="overflow-hidden rounded-xl [&_iframe]:min-h-[360px]"><Map latitude={item.latitude} longitude={item.longitude} address={address} title={`Localizacao de ${item.title}`} /></div></SectionContainer></section>;
+    return <section id="localizacao" className="scroll-mt-28 bg-surface py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.9fr_1.1fr] tablet:items-center"><div><Eyebrow>Localiza&ccedil;&atilde;o</Eyebrow><SectionTitle>Localiza&ccedil;&atilde;o estrat&eacute;gica para facilitar seu dia a dia</SectionTitle>{address && <p className="mt-5 text-sm font-light leading-7 text-muted">{address}</p>}<WhatsAppCTA item={item} className="mt-6" /></div><div className="overflow-hidden rounded-xl [&_iframe]:min-h-[360px]"><Map latitude={item.latitude} longitude={item.longitude} address={address} title={`Localizacao de ${item.title}`} /></div></SectionContainer></section>;
 }
 
 function Progress({ item }) {
     if (!item.construction_stages?.length) return null;
-    return <section id="andamento" className="scroll-mt-28 py-24"><SectionContainer><Eyebrow>Andamento da obra</Eyebrow><SectionTitle>Acompanhe nosso projeto em andamento</SectionTitle><div className="mt-8 rounded-xl border border-line bg-white p-6 shadow-[0_6px_22px_rgba(17,17,17,.05)] tablet:p-8"><ConstructionProgress items={item.construction_stages} completionDate={item.expected_delivery_date} /></div></SectionContainer></section>;
+    return <section id="andamento" className="scroll-mt-28 py-14 tablet:py-16"><SectionContainer><Eyebrow>Andamento da obra</Eyebrow><SectionTitle>Acompanhe nosso projeto em andamento</SectionTitle><div className="mt-8 rounded-xl border border-line bg-white p-6 shadow-[0_6px_22px_rgba(17,17,17,.05)] tablet:p-8"><ConstructionProgress items={item.construction_stages} completionDate={item.expected_delivery_date} /></div></SectionContainer></section>;
 }
 
 function Faq() {
-    return <section id="faq" className="scroll-mt-28 bg-surface py-20"><SectionContainer><div className="text-center"><Eyebrow>Perguntas frequentes</Eyebrow><SectionTitle>Esclare&ccedil;a suas principais d&uacute;vidas</SectionTitle></div><div className="mt-10 grid gap-x-12 tablet:grid-cols-2">{fixedFaqs.map(([question, answer]) => <details key={question} className="group border-b border-line"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-normal text-ink"><span>{question}</span><span className="text-lg text-brand group-open:rotate-45">+</span></summary><p className="pb-5 text-xs font-light leading-6 text-muted">{answer}</p></details>)}</div></SectionContainer></section>;
+    return <section id="faq" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><div className="text-center"><Eyebrow>Perguntas frequentes</Eyebrow><SectionTitle>Esclare&ccedil;a suas principais d&uacute;vidas</SectionTitle></div><div className="mt-10 grid gap-x-12 tablet:grid-cols-2">{fixedFaqs.map(([question, answer]) => <details key={question} className="group border-b border-line"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-normal text-ink"><span>{question}</span><span className="text-lg text-brand group-open:rotate-45">+</span></summary><p className="pb-5 text-xs font-light leading-6 text-muted">{answer}</p></details>)}</div></SectionContainer></section>;
 }
 
 export default function Show({ item, globalWhatsapp }) {
@@ -102,5 +103,5 @@ export default function Show({ item, globalWhatsapp }) {
     const gallery = galleryMedia(item);
     let promotions = (item.promotions || []).filter((promotion) => promotion.is_active !== false && promotion.title);
     if (!promotions.length && (item.promotion_headline || item.promotion_price)) promotions = [{ id: 'legacy', product_name: item.title, title: item.promotion_headline || item.title, original_price: item.starting_price, promotional_price: item.promotion_price, button_text: 'Conhecer o condominio', button_url: item.promotion_url, media_asset: item.promotion_media }];
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><CondominiumHero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu /><About item={item} image={image} /><Features items={item.features} /><Promotions promotions={promotions} /><GallerySection items={gallery} /><Plans item={item} /><Location item={item} />{image && <section aria-label="Imagem do empreendimento" className="h-[300px] tablet:h-[410px] desktop:h-[500px]"><img src={image.url} alt="" className="h-full w-full object-cover" /></section>}<Progress item={item} /><Faq /></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><CondominiumHero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu /><About item={item} image={image} /><Features items={item.features} /><Promotions promotions={promotions} /><GallerySection items={gallery} /><Plans item={item} /><Location item={item} />{image && <section aria-label="Imagem do empreendimento" className="relative h-[300px] bg-cover bg-center bg-no-repeat [background-attachment:scroll] tablet:h-[400px] desktop:h-[500px] desktop:[background-attachment:fixed]" style={{ backgroundImage: `url(${image.url})` }}><div className="absolute inset-0 bg-black/30" /></section>}<Progress item={item} /><Faq /></PublicLayout>;
 }

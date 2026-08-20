@@ -21,6 +21,39 @@ class WordPressImportServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_feature_preview_uses_real_icon_attachment_and_preserves_condominium_relationships(): void
+    {
+        $dump = new WordPressDump('/tmp/dump.sql', 'wp_');
+        $dump->posts = [
+            ['ID' => 10, 'post_type' => 'diferenciais', 'post_title' => 'Playground', 'post_name' => 'playground', 'post_status' => 'publish', 'menu_order' => 2],
+            ['ID' => 20, 'post_type' => 'condominios', 'post_title' => 'Condominio', 'post_name' => 'condominio', 'post_status' => 'publish'],
+        ];
+        $dump->attachments = [
+            ['ID' => 11, 'guid' => 'https://legacy.test/wp-content/uploads/playground.png'],
+        ];
+        $dump->postmeta = [
+            ['post_id' => 10, 'meta_key' => 'icone', 'meta_value' => '11'],
+            ['post_id' => 20, 'meta_key' => 'diferenciais', 'meta_value' => 'a:1:{i:0;s:2:"10";}'],
+        ];
+
+        $parser = $this->createMock(WordPressDumpParser::class);
+        $parser->method('parse')->willReturn($dump);
+        $service = new WordPressImportService(
+            $parser,
+            new LegacyRecordClassifier(),
+            $this->createMock(ImportCheckpointRepository::class),
+            $this->createMock(MediaAssetService::class),
+        );
+
+        $preview = $service->previewFeatures('/tmp/dump.sql', 'wp_');
+
+        $this->assertSame(1, $preview['count']);
+        $this->assertSame(1, $preview['icons']);
+        $this->assertSame(1, $preview['relationships']);
+        $this->assertSame(11, $preview['features'][0]['icon_attachment_id']);
+        $this->assertSame('https://legacy.test/wp-content/uploads/playground.png', $preview['features'][0]['icon_url']);
+    }
+
     public function test_preview_marks_only_published_entities_as_importable_and_keeps_pending_safe(): void
     {
         $dump = new WordPressDump('/tmp/dump.sql', 'wp_');

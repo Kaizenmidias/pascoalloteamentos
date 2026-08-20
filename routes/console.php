@@ -3,6 +3,7 @@
 use App\Import\WordPress\WordPressImportService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Str;
 
 $renderRows = function (array $rows): array {
     return array_map(
@@ -182,6 +183,34 @@ Artisan::command('wordpress:import {entity?} {--execute} {--force}', function (W
 
     return self::SUCCESS;
 })->purpose('Imports the legacy WordPress data when explicitly executed');
+
+Artisan::command('wordpress:sync-features {--execute}', function (WordPressImportService $service) {
+    $path = config('wordpress.sql_path');
+    $prefix = config('wordpress.table_prefix');
+    $preview = $service->previewFeatures($path, $prefix);
+
+    $this->info('WordPress feature catalog');
+    $this->line('Features found: '.$preview['count']);
+    $this->line('Features with icon attachment: '.$preview['icons']);
+    $this->line('Condominium relationship groups: '.$preview['relationships']);
+    $this->table(
+        ['Legacy ID', 'Name', 'Slug', 'Status', 'Icon attachment'],
+        array_map(fn (array $row) => [$row['id'], $row['title'], $row['slug'], $row['status'], $row['icon_attachment_id'] ?: '-'], $preview['features'])
+    );
+
+    if (! $this->option('execute')) {
+        $this->warn('Dry-run only. Use --execute to persist features and relationships.');
+        return self::SUCCESS;
+    }
+
+    $stats = $service->syncFeatures($path, $prefix);
+    $this->info('Feature synchronization finished.');
+    foreach ($stats as $label => $count) {
+        $this->line(Str::headline($label).': '.$count);
+    }
+
+    return $stats['failed'] > 0 ? self::FAILURE : self::SUCCESS;
+})->purpose('Previews or safely synchronizes legacy WordPress features');
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

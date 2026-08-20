@@ -87,6 +87,142 @@ class WordPressImportService
         return $result;
     }
 
+    public function previewFeatures(string $path, string $prefix): array
+    {
+        $dump = $this->parser->parse($path, $prefix);
+        $rows = $this->legacyFeatureRows($dump);
+
+        return [
+            'features' => $rows,
+            'count' => count($rows),
+            'icons' => count(array_filter($rows, fn (array $row) => $row['icon_attachment_id'] !== null)),
+            'relationships' => count($this->legacyFeatureRelationships($dump)),
+        ];
+    }
+
+    public function syncFeatures(string $path, string $prefix): array
+    {
+        $dump = $this->parser->parse($path, $prefix);
+        $stats = ['found' => 0, 'created' => 0, 'updated' => 0, 'merged' => 0, 'icons' => 0, 'missing_icons' => 0, 'relationships' => 0, 'missing_condominiums' => 0, 'failed' => 0];
+        $featureMap = [];
+
+        foreach ($this->legacyFeatureRows($dump) as $row) {
+            $stats['found']++;
+            try {
+                DB::transaction(function () use ($dump, $row, &$featureMap, &$stats) {
+                    $feature = Feature::query()
+                        ->where(fn ($query) => $query
+                            ->where(['legacy_source' => 'wordpress', 'legacy_id' => $row['id']])
+                            ->orWhere('slug', $row['slug']))
+                        ->first();
+
+                    if (! $feature) {
+                        $feature = Feature::all()->first(fn (Feature $candidate) => Str::slug($candidate->name) === Str::slug($row['title']));
+                    }
+
+                    $isNew = ! $feature;
+                    $feature ??= new Feature;
+                    $legacyIds = array_values(array_unique([
+                        ...($feature->legacy_metadata['legacy_ids'] ?? []),
+                        $row['id'],
+                    ]));
+                    $merged = ! $isNew && $feature->legacy_id && (int) $feature->legacy_id !== $row['id'];
+
+                    $feature->name = $feature->name ?: $row['title'];
+                    $feature->slug = $feature->slug ?: $row['slug'];
+                    $feature->scope ??= 'condominium';
+                    $feature->is_active = true;
+                    $feature->sort_order = $feature->sort_order ?: $row['sort_order'];
+                    $feature->legacy_source ??= 'wordpress';
+                    $feature->legacy_id ??= $row['id'];
+                    $feature->legacy_metadata = array_merge($feature->legacy_metadata ?? [], [
+                        'legacy_ids' => $legacyIds,
+                        'post_status' => $row['status'],
+                        'icon_attachment_id' => $row['icon_attachment_id'],
+                    ]);
+
+                    if ($row['icon_attachment_id']) {
+                        $attachment = collect($dump->attachments)->firstWhere('ID', $row['icon_attachment_id']);
+                        $media = $attachment ? $this->ensureMediaAsset($attachment, $this->postMetaMap($dump, $row['icon_attachment_id'])) : null;
+                        if ($media) {
+                            $feature->icon_media_asset_id = $media->id;
+                            $stats['icons']++;
+                        } else {
+                            $feature->icon ??= $row['icon_url'];
+                            $stats['missing_icons']++;
+                        }
+                    }
+
+                    $feature->save();
+                    $featureMap[$row['id']] = $feature->id;
+                    $stats[$isNew ? 'created' : 'updated']++;
+                    $stats['merged'] += $merged ? 1 : 0;
+                });
+            } catch (\Throwable $error) {
+                $stats['failed']++;
+            }
+        }
+
+        foreach ($this->legacyFeatureRelationships($dump) as $relationship) {
+            $condominium = Condominium::query()->where(['legacy_source' => 'wordpress', 'legacy_id' => $relationship['condominium_id']])->first();
+            if (! $condominium) {
+                $stats['missing_condominiums']++;
+                continue;
+            }
+            $sync = [];
+            foreach ($relationship['feature_ids'] as $index => $legacyFeatureId) {
+                if (isset($featureMap[$legacyFeatureId])) {
+                    $sync[$featureMap[$legacyFeatureId]] = ['sort_order' => $index];
+                }
+            }
+            if ($sync) {
+                $condominium->features()->syncWithoutDetaching($sync);
+                $stats['relationships'] += count($sync);
+            }
+        }
+
+        return $stats;
+    }
+
+    private function legacyFeatureRows(WordPressDump $dump): array
+    {
+        return collect($dump->posts)
+            ->filter(fn (array $post) => ($post['post_type'] ?? '') === 'diferenciais')
+            ->map(function (array $post) use ($dump) {
+                $meta = $this->postMetaMap($dump, (int) $post['ID']);
+                $iconId = is_numeric($meta['icone'] ?? null) ? (int) $meta['icone'] : null;
+                $attachment = $iconId ? collect($dump->attachments)->firstWhere('ID', $iconId) : null;
+
+                return [
+                    'id' => (int) $post['ID'],
+                    'title' => (string) $post['post_title'],
+                    'slug' => (string) ($post['post_name'] ?: Str::slug($post['post_title'])),
+                    'status' => (string) ($post['post_status'] ?? ''),
+                    'sort_order' => (int) ($post['menu_order'] ?? 0),
+                    'icon_attachment_id' => $iconId,
+                    'icon_url' => $attachment['guid'] ?? null,
+                ];
+            })
+            ->sortBy([['sort_order', 'asc'], ['title', 'asc']])
+            ->values()
+            ->all();
+    }
+
+    private function legacyFeatureRelationships(WordPressDump $dump): array
+    {
+        return collect($dump->posts)
+            ->filter(fn (array $post) => ($post['post_type'] ?? '') === 'condominios')
+            ->map(function (array $post) use ($dump) {
+                $value = $this->postMetaMap($dump, (int) $post['ID'])['diferenciais'] ?? [];
+                $ids = collect(is_array($value) ? $value : [$value])->flatten()->filter(fn ($id) => is_numeric($id))->map(fn ($id) => (int) $id)->unique()->values()->all();
+
+                return ['condominium_id' => (int) $post['ID'], 'feature_ids' => $ids];
+            })
+            ->filter(fn (array $row) => $row['feature_ids'] !== [])
+            ->values()
+            ->all();
+    }
+
     private function classifyPosts(WordPressDump $dump): array
     {
         $classified = ['properties' => [], 'condominiums' => [], 'subdivisions' => [], 'pending' => []];
