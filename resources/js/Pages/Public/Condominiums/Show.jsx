@@ -19,16 +19,17 @@ const SectionContainer = ({ children, className = '' }) => <Container className=
 const Eyebrow = ({ children }) => <p className="text-[.68rem] font-normal uppercase tracking-[.04em] text-brand tablet:text-xs">{children}</p>;
 const SectionTitle = ({ children, className = '' }) => <h2 className={`mt-2 text-[1.8rem] font-light leading-[1.08] tracking-[-.02em] text-ink tablet:text-[2.35rem] ${className}`}>{children}</h2>;
 
-function CondominiumHero({ item, image }) {
-    return <section className="relative flex min-h-[570px] items-center overflow-hidden bg-ink pb-24 pt-32 text-white tablet:min-h-[620px]">
+function CondominiumHero({ item, image, globalWhatsapp }) {
+    const whatsapp = String(item.whatsapp_contact || globalWhatsapp || '').replace(/\D/g, '');
+    return <section className="relative flex min-h-[570px] items-center overflow-hidden bg-ink pb-24 pt-32 text-white tablet:min-h-[590px]">
         {image && <img src={image.url} alt={image.alt_text || item.title} className="absolute inset-0 h-full w-full object-cover" />}
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.78)_0%,rgba(0,0,0,.58)_42%,rgba(0,0,0,.2)_78%,rgba(0,0,0,.36)_100%)]" />
         <SectionContainer className="relative z-10">
             <div className="max-w-[510px]">
                 <div className="mb-4 flex flex-wrap gap-1.5 text-[.62rem] font-medium uppercase"><span className="rounded-sm bg-brand px-3 py-1.5">{item.city?.name || 'Condom\u00ednio'}</span>{item.development_status?.name && <span className="rounded-sm bg-white px-3 py-1.5 text-ink">{item.development_status.name}</span>}</div>
-                <h1 className="max-w-[470px] text-[2.65rem] font-light leading-[.96] tracking-[-.035em] tablet:text-[3.45rem]">{item.title}</h1>
+                <h1 className="max-w-[440px] text-[2.55rem] font-light leading-[.98] tracking-[-.035em] tablet:text-[3.05rem]">{item.title}</h1>
                 {item.excerpt && <p className="mt-5 max-w-[500px] text-sm font-light leading-[1.65] text-white/90 tablet:text-[.96rem]">{item.excerpt}</p>}
-                <WhatsAppCTA item={item} label="Falar no WhatsApp" className="mt-6" />
+                {whatsapp && <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" className="brand-button mt-6 gap-2"><svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current"><path d="M12 2a9.7 9.7 0 0 0-8.4 14.6L2.3 21.7l5.2-1.3A9.7 9.7 0 1 0 12 2Zm0 17.5a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-3.1.8.8-3-.2-.3A7.7 7.7 0 1 1 12 19.5Zm4.2-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1l-.7.9c-.1.2-.3.2-.5.1-1.4-.7-2.4-1.3-3.4-3-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1.1 1.9-.8 3 .4 2.2 2 4.2 4.1 5.5 1.6 1 4.1 1.9 5.5.7.4-.4.7-1 .8-1.6 0-.2 0-.4-.2-.5l-.9-.6Z" /></svg>Falar no WhatsApp</a>}
             </div>
         </SectionContainer>
     </section>;
@@ -36,7 +37,8 @@ function CondominiumHero({ item, image }) {
 
 function InternalMenu() {
     const links = [['sobre', 'Empreendimento'], ['diferenciais', 'Diferenciais'], ['galeria', 'Galeria'], ['plantas', 'Plantas'], ['localizacao', 'Localiza\u00e7\u00e3o'], ['andamento', 'Andamento da obra'], ['faq', 'FAQ']];
-    return <SectionContainer className="relative z-30 -mt-12"><nav aria-label="Secoes do condominio" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_12px_34px_rgba(0,0,0,.12)] [scrollbar-width:none]">{links.map(([id, label], index) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted last:border-r-0 hover:text-brand"><span><i className="mx-auto mb-2 grid size-6 place-items-center rounded-full border border-brand/35 not-italic text-brand">{index + 1}</i>{label}</span></a>)}</nav></SectionContainer>;
+    const paths = ['M4 20V8l8-4 8 4v12M9 20v-6h6v6', 'm12 3 2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4L7.5 16l.9-5L4.8 8.2l5-.7L12 3Z', 'M3 5h18v14H3zM3 15l5-5 4 4 3-3 6 6', 'M4 4h16v16H4zM8 4v16M4 10h16', 'M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11Zm0-8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z', 'M4 19V9m5 10V5m5 14v-7m5 7V3', 'M9.5 9a2.7 2.7 0 1 1 4.2 2.2c-1 .7-1.7 1.1-1.7 2.3M12 18h.01M4 4h16v16H4z'];
+    return <SectionContainer className="relative z-30 -mt-12"><nav aria-label="Secoes do condominio" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label], index) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><svg viewBox="0 0 24 24" aria-hidden="true" className="mx-auto mb-2 size-6 fill-none stroke-brand stroke-[1.35]" strokeLinecap="round" strokeLinejoin="round"><path d={paths[index]} /></svg>{label}</span></a>)}</nav></SectionContainer>;
 }
 
 function About({ item, image }) {
@@ -95,10 +97,10 @@ function Faq() {
     return <section id="faq" className="scroll-mt-28 bg-surface py-20"><SectionContainer><div className="text-center"><Eyebrow>Perguntas frequentes</Eyebrow><SectionTitle>Esclare&ccedil;a suas principais d&uacute;vidas</SectionTitle></div><div className="mt-10 grid gap-x-12 tablet:grid-cols-2">{fixedFaqs.map(([question, answer]) => <details key={question} className="group border-b border-line"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-normal text-ink"><span>{question}</span><span className="text-lg text-brand group-open:rotate-45">+</span></summary><p className="pb-5 text-xs font-light leading-6 text-muted">{answer}</p></details>)}</div></SectionContainer></section>;
 }
 
-export default function Show({ item }) {
+export default function Show({ item, globalWhatsapp }) {
     const image = featuredMedia(item);
     const gallery = galleryMedia(item);
     let promotions = (item.promotions || []).filter((promotion) => promotion.is_active !== false && promotion.title);
     if (!promotions.length && (item.promotion_headline || item.promotion_price)) promotions = [{ id: 'legacy', product_name: item.title, title: item.promotion_headline || item.title, original_price: item.starting_price, promotional_price: item.promotion_price, button_text: 'Conhecer o condominio', button_url: item.promotion_url, media_asset: item.promotion_media }];
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><CondominiumHero item={item} image={image} /><InternalMenu /><About item={item} image={image} /><Features items={item.features} /><Promotions promotions={promotions} /><GallerySection items={gallery} /><Plans item={item} /><Location item={item} />{image && <section aria-label="Imagem do empreendimento" className="h-[300px] tablet:h-[410px] desktop:h-[500px]"><img src={image.url} alt="" className="h-full w-full object-cover" /></section>}<Progress item={item} /><Faq /></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><CondominiumHero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu /><About item={item} image={image} /><Features items={item.features} /><Promotions promotions={promotions} /><GallerySection items={gallery} /><Plans item={item} /><Location item={item} />{image && <section aria-label="Imagem do empreendimento" className="h-[300px] tablet:h-[410px] desktop:h-[500px]"><img src={image.url} alt="" className="h-full w-full object-cover" /></section>}<Progress item={item} /><Faq /></PublicLayout>;
 }

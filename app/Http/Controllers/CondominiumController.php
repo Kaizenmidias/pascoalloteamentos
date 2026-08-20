@@ -8,6 +8,7 @@ use App\Models\Condominium;
 use App\Models\CondominiumType;
 use App\Models\DevelopmentStatus;
 use App\Models\Page;
+use App\Models\SiteSetting;
 use App\Support\ConstructionStageCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -39,6 +40,10 @@ class CondominiumController extends Controller
         $condominium->load(['city.state', 'condominiumType', 'developmentStatus', 'properties', 'features', 'mediaAssets', 'promotionMedia', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages', 'seo']);
         $condominium->setRelation('constructionStages', ConstructionStageCatalog::applicableStages($condominium, $condominium->constructionStages));
 
-        return Inertia::render('Public/Condominiums/Show', ['item' => $condominium]);
+        $globalWhatsapp = Schema::hasTable('site_settings')
+            ? SiteSetting::query()->where('key', 'whatsapp')->first()?->value
+            : null;
+
+        return Inertia::render('Public/Condominiums/Show', ['item' => $condominium, 'globalWhatsapp' => $globalWhatsapp]);
     }
 }
