@@ -39,6 +39,6 @@ class PropertyController extends Controller
             ? SiteSetting::query()->where('key', 'whatsapp')->first()?->value
             : null;
 
-        return Inertia::render('Public/Properties/Show', ['item' => $property->load(['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'seo']), 'globalWhatsapp' => $globalWhatsapp]);
+        return Inertia::render('Public/Properties/Show', ['item' => $property->load(['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'documents.mediaAsset', 'seo']), 'globalWhatsapp' => $globalWhatsapp]);
     }
 }

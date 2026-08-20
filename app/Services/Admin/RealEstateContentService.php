@@ -34,6 +34,10 @@ class RealEstateContentService
             $faqs = Arr::pull($data, 'faqs');
             $documents = Arr::pull($data, 'documents');
             $promotions = Arr::pull($data, 'promotions');
+            $hasPropertyPlanUrl = Arr::has($data, 'property_plan_url');
+            $propertyPlanUrl = Arr::pull($data, 'property_plan_url');
+            $propertyPlanPdf = Arr::pull($data, 'property_plan_pdf');
+            $removePropertyPlanPdf = (bool) Arr::pull($data, 'remove_property_plan_pdf', false);
             if (! Schema::hasColumn($item->getTable(), 'business_type_id')) {
                 Arr::pull($data, 'business_type_id');
             }
@@ -110,6 +114,27 @@ class RealEstateContentService
                         'is_public' => $row['is_public'] ?? true,
                         'sort_order' => $index,
                     ]);
+                }
+            }
+            if ($item->getTable() === 'properties') {
+                $plan = $item->floorPlans()->first();
+                if ($hasPropertyPlanUrl) {
+                    if ($plan) {
+                        $plan->update(['external_url' => $propertyPlanUrl ?: null, 'is_active' => true]);
+                    } elseif ($propertyPlanUrl) {
+                        $item->floorPlans()->create(['name' => 'Planta do imóvel', 'external_url' => $propertyPlanUrl, 'is_active' => true, 'sort_order' => 0]);
+                    }
+                }
+
+                $planDocument = $item->documents()->where('kind', 'property_plan')->first()
+                    ?? $item->documents()->whereHas('mediaAsset', fn ($query) => $query->where('mime_type', 'application/pdf'))->first();
+                if ($removePropertyPlanPdf) {
+                    $planDocument?->delete();
+                }
+                if ($propertyPlanPdf) {
+                    $asset = $this->media->store($propertyPlanPdf, 'real-estate/property-plans');
+                    $payload = ['media_asset_id' => $asset->id, 'title' => 'Planta do imóvel', 'kind' => 'property_plan', 'is_public' => true, 'sort_order' => 0];
+                    $planDocument ? $planDocument->update($payload) : $item->documents()->create($payload);
                 }
             }
             if (is_array($promotions) && method_exists($item, 'promotions') && Schema::hasTable($item->promotions()->getRelated()->getTable())) {

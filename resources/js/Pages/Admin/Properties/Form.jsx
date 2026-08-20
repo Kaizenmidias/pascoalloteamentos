@@ -1,19 +1,20 @@
 import { useForm } from '@inertiajs/react';
 import AdminLayout from '../../../Components/Layout/AdminLayout';
-import ContentManager, { contentDefaults } from '../../../Components/Admin/ContentManager';
+import { contentDefaults } from '../../../Components/Admin/ContentManager';
 import FeatureChoices from '../../../Components/Forms/FeatureChoices';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import LocationFields from '../../../Components/Forms/LocationFields';
 import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
-import { ProductFormLayout, PublicationCard, SeoCard, SidebarMediaIntro } from '../../../Components/Admin/ProductFormUI';
+import { ProductFormLayout, ProductCard, PublicationCard, SeoCard } from '../../../Components/Admin/ProductFormUI';
 
 const numericFields = [['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['rent_price', 'Preço de locação'], ['condominium_fee', 'Condomínio'], ['iptu', 'IPTU'], ['usable_area', 'Área útil'], ['total_area', 'Área total'], ['built_area', 'Área construída'], ['land_area', 'Área do terreno'], ['bedrooms', 'Quartos'], ['suites', 'Suítes'], ['bathrooms', 'Banheiros'], ['lavatories', 'Lavabos'], ['parking_spaces', 'Vagas'], ['rooms', 'Salas']];
 
 export default function Form({ item, options }) {
     const editing = Boolean(item);
-    const featuredImage = item?.media_assets?.find((asset) => asset.pivot?.is_featured);
-    const { data, setData, post, processing, errors } = useForm({
+    const legacyPlan = item?.floor_plans?.[0];
+    const legacyPlanDocument = item?.documents?.find((document) => document.kind === 'property_plan') || item?.documents?.find((document) => document.media_asset?.mime_type === 'application/pdf');
+    const { data, setData, transform, post, processing, errors } = useForm({
         _method: editing ? 'put' : undefined,
         title: item?.title || '',
         slug: item?.slug || '',
@@ -26,7 +27,6 @@ export default function Form({ item, options }) {
         condominium_name: item?.condominium_name || '',
         excerpt: item?.excerpt || '',
         description: item?.description || '',
-        floor_plans_support_text: item?.floor_plans_support_text || '',
         address: item?.address || '',
         neighborhood: item?.neighborhood || '',
         postal_code: item?.postal_code || '',
@@ -48,16 +48,20 @@ export default function Form({ item, options }) {
         uploaded_media_ids: [],
         ...Object.fromEntries(numericFields.map(([key]) => [key, item?.[key] || ''])),
         ...contentDefaults(item),
+        property_plan_url: legacyPlan?.external_url || '',
+        property_plan_pdf: null,
+        remove_property_plan_pdf: false,
     });
 
     const submit = (event) => {
         event.preventDefault();
+        transform(({ floor_plans, documents, construction_stages, faqs, floor_plans_support_text, about_image, promotion_image, featured_image, gallery_images, gallery_videos, gallery_video_urls, ...payload }) => payload);
         post(editing ? `/admin/properties/${item.slug}` : '/admin/properties', { forceFormData: true });
     };
 
     return (
         <AdminLayout title={editing ? 'Editar imóvel' : 'Novo imóvel'}>
-            <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel="Salvar imóvel" sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"], ["furnished", "Mobiliado"], ["accepts_financing", "Aceita financiamento"], ["accepts_exchange", "Aceita permuta"], ["is_new", "Imóvel novo"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card e na galeria principal do imóvel." /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
+            <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel="Salvar imóvel" sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"], ["furnished", "Mobiliado"], ["accepts_financing", "Aceita financiamento"], ["accepts_exchange", "Aceita permuta"], ["is_new", "Imóvel novo"]]} /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-2">
                     <div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Geral e identificação</h2><p className="mt-1 text-sm text-muted">Dados exibidos junto à galeria principal do imóvel.</p></div>
                     <Field label="Título" value={data.title} onChange={(e) => setData('title', e.target.value)} error={errors.title} />
@@ -71,7 +75,6 @@ export default function Form({ item, options }) {
                     <Field label="Status comercial" value={data.commercial_status} onChange={(e) => setData('commercial_status', e.target.value)} />
                     <Field label="Resumo para cards" as="textarea" value={data.excerpt} onChange={(e) => setData('excerpt', e.target.value)} />
                     <Field label="Descrição completa" as="textarea" value={data.description} onChange={(e) => setData('description', e.target.value)} />
-                    <Field label="Texto de apoio das plantas" as="textarea" value={data.floor_plans_support_text} onChange={(e) => setData('floor_plans_support_text', e.target.value)} />
                 </section>
                 <LocationFields states={options.states} initialCity={item?.city} cityId={data.city_id} onCityChange={(cityId) => setData('city_id', cityId)} error={errors.city_id} />
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-3">
@@ -90,7 +93,7 @@ export default function Form({ item, options }) {
                 <section className="rounded-xl border border-line bg-white p-6 shadow-sm">
                     <FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} />
                 </section>
-                <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showStages={false} showSeo={false} /></div>
+                <ProductCard title="Planta do imóvel" description="Envie um PDF ou informe uma URL. Se ambos existirem, o PDF terá prioridade."><div className="grid gap-4 tablet:grid-cols-2"><label><span className="admin-label">PDF da planta</span><input className="admin-input" type="file" accept="application/pdf,.pdf" onChange={(event) => { setData('property_plan_pdf', event.target.files?.[0] || null); setData('remove_property_plan_pdf', false); }} />{errors.property_plan_pdf && <span className="mt-1 block text-xs text-red-700">{errors.property_plan_pdf}</span>}</label><Field label="URL da planta" type="url" value={data.property_plan_url} onChange={(event) => setData('property_plan_url', event.target.value)} error={errors.property_plan_url} />{legacyPlanDocument?.media_asset?.url && !data.remove_property_plan_pdf && <div className="tablet:col-span-2 flex items-center justify-between rounded-lg border border-line p-3 text-sm"><a href={legacyPlanDocument.media_asset.url} target="_blank" rel="noreferrer" className="text-brand">Ver PDF atual</a><button type="button" onClick={() => { setData('remove_property_plan_pdf', true); setData('property_plan_pdf', null); }} className="text-red-700">Remover PDF</button></div>}</div></ProductCard>
             </ProductFormLayout>
         </AdminLayout>
     );

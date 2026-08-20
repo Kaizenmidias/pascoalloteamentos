@@ -16,7 +16,7 @@ class StorePropertyRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:255'], 'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('properties')],
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('properties')], 'property_type_id' => ['nullable', 'exists:property_types,id'],
             'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
@@ -31,6 +31,18 @@ class StorePropertyRequest extends FormRequest
             'furnished' => ['boolean'], 'accepts_financing' => ['boolean'], 'accepts_exchange' => ['boolean'], 'is_new' => ['boolean'], 'commercial_purpose' => ['required', Rule::in(['sale', 'rent', 'season'])], 'commercial_status' => ['nullable', 'string', 'max:30'], 'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
             'featured' => ['boolean'], 'published_at' => ['nullable', 'date'], 'feature_ids' => ['array'], 'feature_ids.*' => ['integer', 'exists:features,id'],
             ...$this->contentRules(),
+        ];
+
+        foreach (array_keys($rules) as $key) {
+            if (str_starts_with($key, 'floor_plans') || str_starts_with($key, 'documents') || in_array($key, ['about_image', 'promotion_image', 'featured_image', 'gallery_images', 'gallery_images.*', 'gallery_videos', 'gallery_videos.*', 'gallery_video_urls', 'gallery_video_urls.*'], true)) {
+                unset($rules[$key]);
+            }
+        }
+
+        return [...$rules,
+            'property_plan_url' => ['nullable', 'url', 'max:2048'],
+            'property_plan_pdf' => ['nullable', 'file', 'mimetypes:application/pdf', 'max:25600'],
+            'remove_property_plan_pdf' => ['nullable', 'boolean'],
         ];
     }
 }
