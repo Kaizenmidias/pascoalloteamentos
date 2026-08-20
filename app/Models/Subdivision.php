@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subdivision extends Model
@@ -59,5 +60,10 @@ class Subdivision extends Model
     public function features(): BelongsToMany
     {
         return $this->belongsToMany(Feature::class, 'subdivision_feature')->withPivot('sort_order')->orderByPivot('sort_order');
+    }
+
+    public function promotions(): HasMany
+    {
+        return $this->hasMany(SubdivisionPromotion::class)->orderBy('sort_order');
     }
 }

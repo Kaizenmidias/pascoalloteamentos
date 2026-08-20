@@ -6,6 +6,8 @@ import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import ContentManager, { contentDefaults } from '../../../Components/Admin/ContentManager';
 import LocationFields from '../../../Components/Forms/LocationFields';
+import CondominiumPromotions from '../../../Components/Admin/CondominiumPromotions';
+import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
 
 export default function Form({ item, options }) {
     const editing = Boolean(item);
@@ -45,6 +47,8 @@ export default function Form({ item, options }) {
         featured: Boolean(item?.featured),
         price_on_request: Boolean(item?.price_on_request),
         feature_ids: item?.features?.map((f) => f.id) || [],
+        promotions: item?.promotions || [],
+        uploaded_media_ids: [],
         ...contentDefaults(item, options.stageDefinitions),
     });
     const submit = (e) => { e.preventDefault(); post(editing ? `/admin/subdivisions/${item.slug}` : '/admin/subdivisions', { forceFormData: true }); };
@@ -63,7 +67,10 @@ export default function Form({ item, options }) {
         <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-4">{[['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['minimum_lot_area', 'Área mínima'], ['maximum_lot_area', 'Área máxima'], ['total_lots', 'Total de lotes'], ['available_lots', 'Lotes disponíveis']].map(([key, label]) => <Field key={key} label={label} type="number" step="0.01" min="0" value={data[key]} onChange={e => setData(key, e.target.value)} error={errors[key]} />)}</section>
         <LocationFields states={options.states} initialCity={item?.city} cityId={data.city_id} onCityChange={(cityId) => setData('city_id', cityId)} error={errors.city_id} />
         <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-3"><div className="tablet:col-span-3"><h2 className="text-lg font-medium text-ink">Endereço e mapa</h2></div><Field label="Número" value={data.address_number} onChange={e => setData('address_number', e.target.value)} /><Field label="Bairro" value={data.neighborhood} onChange={e => setData('neighborhood', e.target.value)} /><Field label="CEP" value={data.postal_code} onChange={e => setData('postal_code', e.target.value)} /><Field label="Latitude" type="number" step="any" value={data.latitude} onChange={e => setData('latitude', e.target.value)} /><Field label="Longitude" type="number" step="any" value={data.longitude} onChange={e => setData('longitude', e.target.value)} /></section>
-        <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={ids => setData('feature_ids', ids)} /></section><ContentManager data={data} setData={setData} item={item} />
+        <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={ids => setData('feature_ids', ids)} /></section>
+        <CondominiumPromotions rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
+        <AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} />
+        <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showSpecialImages={false} /></div>
         <section className="flex flex-wrap items-end gap-5 rounded-card bg-white p-6 shadow-card"><SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={e => setData('status', e.target.value)} /><SelectField label="Negócio" options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Locação' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={e => setData('commercial_purpose', e.target.value)} />{[['featured', 'Destaque'], ['price_on_request', 'Preço sob consulta']].map(([key, label]) => <label key={key} className="flex gap-2 pb-3"><input type="checkbox" checked={data[key]} onChange={e => setData(key, e.target.checked)} />{label}</label>)}<Button type="submit" disabled={processing}>Salvar loteamento</Button></section>
     </form></AdminLayout>;
 }

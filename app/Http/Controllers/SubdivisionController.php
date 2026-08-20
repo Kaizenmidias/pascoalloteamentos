@@ -6,6 +6,7 @@ use App\Models\City;
 use App\Models\BusinessType;
 use App\Models\DevelopmentStatus;
 use App\Models\Page;
+use App\Models\SiteSetting;
 use App\Models\Subdivision;
 use App\Models\SubdivisionType;
 use App\Support\ConstructionStageCatalog;
@@ -36,9 +37,13 @@ class SubdivisionController extends Controller
     {
         abort_unless($subdivision->status === 'published', 404);
 
-        $subdivision->load(['city.state', 'subdivisionType', 'developmentStatus', 'features', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']);
+        $subdivision->load(['city.state', 'subdivisionType', 'developmentStatus', 'features.iconMedia', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']);
         $subdivision->setRelation('constructionStages', ConstructionStageCatalog::applicableStages($subdivision, $subdivision->constructionStages));
 
-        return Inertia::render('Public/Subdivisions/Show', ['item' => $subdivision]);
+        $globalWhatsapp = Schema::hasTable('site_settings')
+            ? SiteSetting::query()->where('key', 'whatsapp')->first()?->value
+            : null;
+
+        return Inertia::render('Public/Subdivisions/Show', ['item' => $subdivision, 'globalWhatsapp' => $globalWhatsapp]);
     }
 }

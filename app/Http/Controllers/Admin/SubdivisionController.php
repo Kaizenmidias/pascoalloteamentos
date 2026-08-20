@@ -41,7 +41,7 @@ class SubdivisionController extends Controller
 
     public function edit(Subdivision $subdivision): Response
     {
-        return Inertia::render('Admin/Subdivisions/Form', ['item' => $subdivision->load(['city.state', 'features', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']), 'options' => $this->options()]);
+        return Inertia::render('Admin/Subdivisions/Form', ['item' => $subdivision->load(['city.state', 'features.iconMedia', 'mediaAssets', 'aboutMedia', 'promotionMedia', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'faqs', 'seo']), 'options' => $this->options()]);
     }
 
     public function update(UpdateSubdivisionRequest $request, Subdivision $subdivision): RedirectResponse
@@ -53,6 +53,6 @@ class SubdivisionController extends Controller
 
     private function options(): array
     {
-        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::orderBy('sort_order')->get(), 'stageDefinitions' => ConstructionStageCatalog::definitionsFor(Subdivision::class)];
+        return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::with('iconMedia')->where('is_active', true)->where(fn ($query) => $query->whereNull('scope')->orWhereIn('scope', ['subdivision', 'condominium']))->orderBy('sort_order')->get(), 'stageDefinitions' => ConstructionStageCatalog::definitionsFor(Subdivision::class)];
     }
 }
