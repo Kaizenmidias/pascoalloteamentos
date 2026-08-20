@@ -6,7 +6,7 @@ import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import LocationFields from '../../../Components/Forms/LocationFields';
 import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
-import { ProductFormLayout, PublicationCard, SidebarMediaIntro } from '../../../Components/Admin/ProductFormUI';
+import { ProductFormLayout, PublicationCard, SeoCard, SidebarMediaIntro } from '../../../Components/Admin/ProductFormUI';
 
 const numericFields = [['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['rent_price', 'Preço de locação'], ['condominium_fee', 'Condomínio'], ['iptu', 'IPTU'], ['usable_area', 'Área útil'], ['total_area', 'Área total'], ['built_area', 'Área construída'], ['land_area', 'Área do terreno'], ['bedrooms', 'Quartos'], ['suites', 'Suítes'], ['bathrooms', 'Banheiros'], ['lavatories', 'Lavabos'], ['parking_spaces', 'Vagas'], ['rooms', 'Salas']];
 
@@ -57,7 +57,7 @@ export default function Form({ item, options }) {
 
     return (
         <AdminLayout title={editing ? 'Editar imóvel' : 'Novo imóvel'}>
-            <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel="Salvar imóvel" sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"], ["furnished", "Mobiliado"], ["accepts_financing", "Aceita financiamento"], ["accepts_exchange", "Aceita permuta"], ["is_new", "Imóvel novo"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card e na galeria principal do imóvel." /><div className="[&>section]:p-5"><AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /></div></>}>
+            <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel="Salvar imóvel" sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"], ["furnished", "Mobiliado"], ["accepts_financing", "Aceita financiamento"], ["accepts_exchange", "Aceita permuta"], ["is_new", "Imóvel novo"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card e na galeria principal do imóvel." /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-2">
                     <div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Geral e identificação</h2><p className="mt-1 text-sm text-muted">Dados exibidos junto à galeria principal do imóvel.</p></div>
                     <Field label="Título" value={data.title} onChange={(e) => setData('title', e.target.value)} error={errors.title} />
@@ -90,7 +90,7 @@ export default function Form({ item, options }) {
                 <section className="rounded-xl border border-line bg-white p-6 shadow-sm">
                     <FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} />
                 </section>
-                <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showStages={false} /></div>
+                <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showStages={false} showSeo={false} /></div>
             </ProductFormLayout>
         </AdminLayout>
     );

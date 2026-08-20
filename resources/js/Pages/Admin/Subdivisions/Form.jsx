@@ -8,7 +8,7 @@ import LocationFields from '../../../Components/Forms/LocationFields';
 import PromotionManager from '../../../Components/Admin/CondominiumPromotions';
 import Map from '../../../Components/RealEstate/Map';
 import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
-import { ProductFormLayout, PublicationCard, SidebarMediaIntro } from '../../../Components/Admin/ProductFormUI';
+import { ProductFormLayout, PublicationCard, SeoCard, SidebarMediaIntro } from '../../../Components/Admin/ProductFormUI';
 
 const text = {
     subdivision: 'loteamento',
@@ -78,7 +78,7 @@ export default function Form({ item, options }) {
     };
 
     return <AdminLayout title={editing ? `Editar ${text.subdivision}` : `Novo ${text.subdivision}`}>
-        <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel={`Salvar ${text.subdivision}`} sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card, Hero e seção Sobre o loteamento." /><div className="[&>section]:p-5"><AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /></div></>}>
+        <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel={`Salvar ${text.subdivision}`} sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card, Hero e seção Sobre o loteamento." /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Se&ccedil;&atilde;o inicial</p><h2 className="mt-2 text-lg font-medium text-ink">Hero do {text.subdivision}</h2><p className="mt-1 text-sm text-muted">Estes campos formam a abertura da p&aacute;gina. Estado e cidade s&atilde;o selecionados no bloco seguinte.</p></div>
                 <Field label={text.title} value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: current.slug || slugify(title) })); }} error={friendlyError('title', errors.title)} />
@@ -117,7 +117,7 @@ export default function Form({ item, options }) {
 
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <PromotionManager rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
-            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showPlans={false} showSpecialImages={false} showFaqs={false} showDocuments={false} /></div>
+            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showPlans={false} showSpecialImages={false} showFaqs={false} showDocuments={false} showSeo={false} /></div>
 
         </ProductFormLayout>
     </AdminLayout>;
