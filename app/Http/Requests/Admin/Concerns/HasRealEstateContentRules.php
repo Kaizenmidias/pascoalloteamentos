@@ -12,6 +12,8 @@ trait HasRealEstateContentRules
             'gallery_media.*' => ['nullable', 'file', 'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif,image/heic-sequence,image/heif-sequence,video/mp4,video/quicktime', 'max:524288'],
             'media_order' => ['nullable', 'array'],
             'media_order.*' => ['integer', 'exists:media_assets,id'],
+            'uploaded_media_ids' => ['nullable', 'array', 'max:30'],
+            'uploaded_media_ids.*' => ['integer', 'exists:media_assets,id'],
             'remove_media_ids' => ['nullable', 'array'],
             'remove_media_ids.*' => ['integer', 'exists:media_assets,id'],
             'featured_media_id' => ['nullable', 'integer', 'exists:media_assets,id'],

@@ -31,6 +31,10 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'appName' => config('app.name'),
+            'mediaUpload' => [
+                'url' => config('media.upload_url') ?: null,
+                'maxKb' => config('media.max_upload_kb'),
+            ],
             'realEstate' => [
                 'propertyTypes' => $propertyTypes,
                 'condominiumTypes' => $condominiumTypes,

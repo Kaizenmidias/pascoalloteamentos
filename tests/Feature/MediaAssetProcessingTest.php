@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Condominium;
 use App\Models\MediaAsset;
+use App\Models\User;
 use App\Services\Media\MediaAssetService;
 use App\Services\Media\VideoMediaProcessor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -62,5 +63,37 @@ class MediaAssetProcessingTest extends TestCase
     {
         $asset = MediaAsset::create(['disk' => 'external', 'path' => 'https://example.com/old.jpg', 'mime_type' => 'image/jpeg']);
         $this->assertSame('image', $asset->type);
+    }
+
+    public function test_media_upload_endpoint_requires_authentication(): void
+    {
+        $this->postJson('/admin/media-uploads', [
+            'file' => UploadedFile::fake()->image('fachada.jpg'),
+        ])->assertUnauthorized();
+    }
+
+    public function test_uploaded_media_id_is_attached_without_resending_the_file(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+
+        $response = $this->actingAs($user)->postJson('/admin/media-uploads', [
+            'file' => UploadedFile::fake()->image('fachada.jpg'),
+        ])->assertCreated();
+        $mediaId = $response->json('media.id');
+
+        $this->actingAs($user)->post('/admin/condominiums', [
+            'title' => 'Condominio com upload separado',
+            'slug' => 'condominio-upload-separado',
+            'status' => 'draft',
+            'featured' => false,
+            'price_on_request' => false,
+            'uploaded_media_ids' => [$mediaId],
+            'media_order' => [$mediaId],
+            'featured_media_id' => $mediaId,
+        ])->assertRedirect();
+
+        $condominium = Condominium::where('slug', 'condominio-upload-separado')->firstOrFail();
+        $this->assertSame([$mediaId], $condominium->mediaAssets()->pluck('media_assets.id')->all());
     }
 }

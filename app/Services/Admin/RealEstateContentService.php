@@ -24,6 +24,7 @@ class RealEstateContentService
             $videoUrls = Arr::pull($data, 'gallery_video_urls', []);
             $removeMedia = Arr::pull($data, 'remove_media_ids', []);
             $mediaOrder = Arr::pull($data, 'media_order', []);
+            $uploadedMediaIds = Arr::pull($data, 'uploaded_media_ids', []);
             $featuredMediaId = Arr::pull($data, 'featured_media_id');
             $featuredImage = Arr::pull($data, 'featured_image');
             $aboutImage = Arr::pull($data, 'about_image');
@@ -128,6 +129,15 @@ class RealEstateContentService
 
             if ($removeMedia) {
                 $item->mediaAssets()->detach($removeMedia);
+            }
+            foreach (array_values(array_unique($uploadedMediaIds ?: [])) as $index => $mediaId) {
+                $orderedIndex = array_search($mediaId, $mediaOrder, true);
+                $item->mediaAssets()->syncWithoutDetaching([$mediaId => [
+                    'collection' => 'gallery',
+                    'sort_order' => $orderedIndex !== false ? $orderedIndex : $item->mediaAssets()->count() + $index,
+                    'is_featured' => false,
+                ]]);
+                $featuredMediaId ??= MediaAsset::query()->whereKey($mediaId)->where(fn ($query) => $query->whereNull('media_type')->orWhere('media_type', '!=', 'video'))->value('id');
             }
             foreach (array_values($mediaOrder ?: []) as $index => $mediaId) {
                 $item->mediaAssets()->updateExistingPivot($mediaId, ['sort_order' => $index]);

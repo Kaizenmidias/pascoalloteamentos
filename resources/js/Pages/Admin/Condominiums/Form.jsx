@@ -8,6 +8,7 @@ import ContentManager, { contentDefaults } from '../../../Components/Admin/Conte
 import LocationFields from '../../../Components/Forms/LocationFields';
 import CondominiumPromotions from '../../../Components/Admin/CondominiumPromotions';
 import Map from '../../../Components/RealEstate/Map';
+import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
 
 const text = {
     condominium: 'condom\u00ednio',
@@ -38,6 +39,7 @@ export default function Form({ item, options }) {
         expected_delivery_date: item?.expected_delivery_date ? String(item.expected_delivery_date).slice(0, 10) : '',
         status: item?.status || 'draft', featured: Boolean(item?.featured), price_on_request: Boolean(item?.price_on_request),
         feature_ids: item?.features?.map((feature) => feature.id) || [], promotions: item?.promotions || [],
+        uploaded_media_ids: [],
         ...contentDefaults(item, options.stageDefinitions),
     });
 
@@ -50,7 +52,7 @@ export default function Form({ item, options }) {
         <form onSubmit={submit} className="space-y-8">
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">{text.section}</p><h2 className="mt-2 text-lg font-medium text-ink">Hero do {text.condominium}</h2><p className="mt-1 text-sm text-muted">Estes campos formam a abertura da p&aacute;gina. Estado e cidade s&atilde;o selecionados no bloco seguinte.</p></div>
-                <label className="tablet:col-span-2"><span className="admin-label">Imagem principal</span><p className="mb-3 text-xs text-muted">Usada automaticamente no card, Hero, Sobre o empreendimento e banner.</p>{featuredImage?.url && <img src={featuredImage.url} alt="" className="mb-4 aspect-video w-full max-w-xl rounded-card object-cover" />}<input type="file" accept="image/jpeg,image/png,image/webp,.heic,.heif" onChange={(event) => setData('featured_image', event.target.files?.[0] || null)} className="admin-input" /></label>
+                <div className="tablet:col-span-2"><span className="admin-label">Imagem principal</span><p className="mb-3 text-xs text-muted">Envie a imagem no bloco de upload individual abaixo e clique em &quot;Definir capa&quot;. Ela ser&aacute; usada no card, Hero, Sobre e banner.</p>{featuredImage?.url && <img src={featuredImage.url} alt="" className="mb-4 aspect-video w-full max-w-xl rounded-card object-cover" />}</div>
                 <Field label={text.title} value={data.title} onChange={(event) => setData('title', event.target.value)} error={errors.title} />
                 <SelectField label="Status da obra" options={options.statuses} value={data.development_status_id} onChange={(event) => setData('development_status_id', event.target.value)} />
                 <div className="tablet:col-span-2"><Field label={text.initialText} as="textarea" value={data.excerpt} onChange={(event) => setData('excerpt', event.target.value)} /></div>
@@ -84,8 +86,9 @@ export default function Form({ item, options }) {
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Sobre o empreendimento</h2><p className="mt-1 text-sm text-muted">A imagem usada ser&aacute; automaticamente a imagem principal.</p></div><Field label={'T\u00edtulo'} value={data.about_title} onChange={(event) => setData('about_title', event.target.value)} /><Field label="Texto" as="textarea" value={data.about_text} onChange={(event) => setData('about_text', event.target.value)} /></section>
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <CondominiumPromotions rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
+            <AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} />
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Se&ccedil;&atilde;o Plantas</h2></div><Field label={'T\u00edtulo'} value={data.floor_plans_title} onChange={(event) => setData('floor_plans_title', event.target.value)} /><Field label="Texto de apoio" as="textarea" value={data.floor_plans_support_text} onChange={(event) => setData('floor_plans_support_text', event.target.value)} /></section>
-            <ContentManager data={data} setData={setData} item={item} showSpecialImages={false} showFaqs={false} showDocuments={false} />
+            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showSpecialImages={false} showFaqs={false} showDocuments={false} /></div>
 
             <section className="flex flex-wrap items-end gap-5 rounded-card bg-white p-6 shadow-card"><SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={(event) => setData('status', event.target.value)} /><SelectField label={'Neg\u00f3cio'} options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Loca\u00e7\u00e3o' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={(event) => setData('commercial_purpose', event.target.value)} />{[['featured', 'Destaque'], ['price_on_request', 'Pre\u00e7o sob consulta']].map(([key, label]) => <label key={key} className="flex gap-2 pb-3"><input type="checkbox" checked={data[key]} onChange={(event) => setData(key, event.target.checked)} />{label}</label>)}<Button type="submit" disabled={processing}>Salvar {text.condominium}</Button></section>
         </form>

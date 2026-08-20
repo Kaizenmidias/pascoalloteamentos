@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CmsController;
 use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\MediaUploadController;
 use App\Http\Controllers\Admin\SubdivisionController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('locations/cities', [LocationController::class, 'cities'])->name('locations.cities');
+    Route::post('media-uploads', MediaUploadController::class)->name('media-uploads.store');
     Route::resource('properties', PropertyController::class)->except(['show', 'destroy']);
     Route::resource('condominiums', CondominiumController::class)->except(['show', 'destroy']);
     Route::resource('subdivisions', SubdivisionController::class)->except(['show', 'destroy']);
