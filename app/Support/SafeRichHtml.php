@@ -50,7 +50,17 @@ final class SafeRichHtml
     {
         if ($node->tagName === 'a' && in_array($name, ['href', 'target', 'rel'], true)) return $name !== 'href' || self::safeUrl($value);
         if ($node->tagName === 'img' && in_array($name, ['src', 'alt', 'width', 'height'], true)) return $name !== 'src' || self::safeUrl($value);
+        if ($name === 'style') return self::safeStyle($value);
         return false;
+    }
+
+    private static function safeStyle(string $style): bool
+    {
+        foreach (array_filter(array_map('trim', explode(';', $style))) as $declaration) {
+            if (preg_match('/^(text-align:\s*(left|center|right)|max-width:\s*100%|height:\s*auto)$/i', $declaration) !== 1) return false;
+        }
+
+        return true;
     }
 
     private static function safeUrl(string $url): bool

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
+use App\Models\BlogTag;
 use App\Models\Lead;
 use App\Models\Page;
 use App\Models\SiteSetting;
@@ -144,7 +145,7 @@ class CmsController extends Controller
 
     public function editPost(BlogPost $post): Response
     {
-        return Inertia::render('Admin/Blog/Form', ['item' => $post->load(['categories', 'featuredMedia', 'seo']), 'categories' => BlogCategory::orderBy('name')->get()]);
+        return Inertia::render('Admin/Blog/Form', ['item' => $post->load(['categories', 'tags', 'featuredMedia', 'seo']), 'categories' => BlogCategory::orderBy('name')->get()]);
     }
 
     public function storePost(Request $request): RedirectResponse
@@ -426,12 +427,18 @@ class CmsController extends Controller
             'published_at' => 'nullable|date',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'integer|exists:blog_categories,id',
+            'tags' => 'nullable|string|max:1000',
             'featured_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:12288',
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string|max:500',
         ]);
 
         $categories = Arr::pull($data, 'category_ids', []);
+        $tags = collect(explode(',', (string) Arr::pull($data, 'tags', '')))
+            ->map(fn ($tag) => trim($tag))
+            ->filter(fn ($tag) => $tag !== '' && Str::slug($tag) !== '')
+            ->unique()
+            ->take(30);
         $image = Arr::pull($data, 'featured_image');
         $seo = ['title' => Arr::pull($data, 'seo_title'), 'description' => Arr::pull($data, 'seo_description')];
         $data['content'] = SafeRichHtml::clean($data['content']);
@@ -458,6 +465,7 @@ class CmsController extends Controller
 
         $post->fill($data)->save();
         $post->categories()->sync($categories);
+        $post->tags()->sync($tags->map(fn ($name) => BlogTag::firstOrCreate(['slug' => Str::slug($name)], ['name' => $name])->id));
         $post->seo()->updateOrCreate([], $seo);
     }
 

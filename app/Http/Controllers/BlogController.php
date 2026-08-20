@@ -5,19 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BlogController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return $this->render(BlogPost::query());
+        $category = $request->filled('category')
+            ? BlogCategory::query()->where('slug', (string) $request->string('category'))->first()
+            : null;
+
+        return $this->render($category ? $category->posts() : BlogPost::query(), $category?->slug);
     }
 
     public function category(BlogCategory $category): Response
     {
-        return $this->render($category->posts());
+        return $this->render($category->posts(), $category->slug);
     }
 
     public function tag(BlogTag $tag): Response
@@ -31,12 +36,18 @@ class BlogController extends Controller
 
         return Inertia::render('Public/Blog/Show', [
             'post' => $post->load(['featuredMedia', 'categories', 'author', 'seo']),
-            'related' => BlogPost::query()->where('status', 'published')->whereKeyNot($post->id)->with('featuredMedia')->latest('published_at')->limit(3)->get(),
+            'related' => BlogPost::query()->where('status', 'published')->whereKeyNot($post->id)->with(['featuredMedia', 'categories'])->latest('published_at')->limit(3)->get(),
         ]);
     }
 
-    private function render($query): Response
+    private function render($query, ?string $activeCategory = null): Response
     {
-        return Inertia::render('Public/Blog/Index', ['posts' => $query->where('status', 'published')->whereNotNull('published_at')->where('published_at', '<=', now())->with(['featuredMedia', 'categories'])->latest('published_at')->paginate(12)]);
+        $published = fn ($posts) => $posts->where('status', 'published')->whereNotNull('published_at')->where('published_at', '<=', now());
+
+        return Inertia::render('Public/Blog/Index', [
+            'posts' => $published($query)->with(['featuredMedia', 'categories', 'author'])->latest('published_at')->paginate(12)->withQueryString(),
+            'categories' => BlogCategory::query()->whereHas('posts', $published)->withCount(['posts' => $published])->orderBy('name')->get(),
+            'activeCategory' => $activeCategory,
+        ]);
     }
 }

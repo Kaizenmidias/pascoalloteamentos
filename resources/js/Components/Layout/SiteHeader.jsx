@@ -56,14 +56,14 @@ function MobileGroup({ label, href, items = [] }) {
     );
 }
 
-export default function SiteHeader() {
+export default function SiteHeader({ tone = 'auto' }) {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { url, props } = usePage();
     const pathname = pathnameFromUrl(url);
     const lightPages = ['/sobre-nos', '/condominios', '/loteamentos', '/imoveis'];
     const condominiumDetail = pathname.startsWith('/condominios/');
-    const lightHeader = !condominiumDetail && lightPages.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+    const lightHeader = tone === 'light' || (tone !== 'transparent' && !condominiumDetail && lightPages.some((path) => pathname === path || pathname.startsWith(`${path}/`)));
     const realEstate = props.realEstate || {};
     const menuGroups = useMemo(() => ({
         condominios: realEstate.menuGroups?.condominiums || [],
