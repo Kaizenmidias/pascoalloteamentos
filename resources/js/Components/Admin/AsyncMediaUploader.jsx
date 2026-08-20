@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import SortableCollection from './SortableCollection';
 
 const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'mp4', 'mov'];
 const xsrfToken = () => {
@@ -91,19 +92,11 @@ export default function AsyncMediaUploader({ existing = [], removed = [], data, 
             setData((current) => ({ ...current, remove_media_ids: [...new Set([...(current.remove_media_ids || []), asset.id])], media_order: (current.media_order || []).filter((id) => id !== asset.id) }));
         }
     };
-    const move = (index, direction) => {
-        const next = index + direction;
-        if (next < 0 || next >= ordered.length) return;
-        const copy = [...ordered];
-        [copy[index], copy[next]] = [copy[next], copy[index]];
-        setData('media_order', copy.map((asset) => asset.id));
-    };
-
     return <section className="rounded-xl border border-line bg-white p-6 shadow-sm">
         <h2 className="text-lg font-medium text-ink">Upload individual de m\u00eddia</h2>
         <p className="mt-1 text-sm text-muted">Cada arquivo é enviado e processado separadamente. O formulário final envia somente os IDs.</p>
         <label className="mt-5 block rounded-xl border border-dashed border-brand/40 bg-brand/5 p-6 text-center"><span className="font-medium text-brand">Selecionar imagens ou v\u00eddeos</span><input type="file" multiple accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.mp4,.mov" className="sr-only" onChange={(event) => { selectFiles(Array.from(event.target.files || [])); event.target.value = ''; }} /></label>
         {tasks.length > 0 && <div className="mt-4 space-y-3">{tasks.map((task) => <div key={task.key} className="rounded-lg bg-surface p-3 text-xs"><div className="flex justify-between gap-3"><span className="truncate">{task.name}</span><span className={task.error ? 'text-red-700' : 'text-muted'}>{task.status}</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line"><div className="h-full bg-brand transition-[width]" style={{ width: `${task.progress}%` }} /></div>{task.error && <p className="mt-2 text-red-700">{task.error}</p>}</div>)}</div>}
-        {ordered.length > 0 && <div className="mt-5 grid gap-4 tablet:grid-cols-3 desktop:grid-cols-4">{ordered.map((asset, index) => { const video = asset.type === 'video' || asset.mime_type?.startsWith('video/'); return <article key={asset.id} className="relative overflow-hidden rounded-xl border border-line"><button type="button" aria-label={`Remover ${asset.original_name || 'm\u00eddia'}`} onClick={() => remove(asset)} className="absolute right-2 top-2 z-10 grid size-7 place-items-center rounded-full bg-black/70 text-sm text-white">&times;</button>{video ? <video src={asset.url} poster={asset.poster_url || undefined} className="aspect-[4/3] w-full bg-ink object-cover" muted /> : <img src={asset.url} alt={asset.alt_text || ''} className="aspect-[4/3] w-full object-cover" />}<div className="flex items-center justify-between gap-2 p-3 text-xs"><button type="button" disabled={index === 0} onClick={() => move(index, -1)}>Subir</button>{!video && <button type="button" onClick={() => setData('featured_media_id', asset.id)} className={String(data.featured_media_id) === String(asset.id) ? 'font-medium text-brand' : 'text-muted'}>{String(data.featured_media_id) === String(asset.id) ? 'Capa atual' : 'Definir capa'}</button>}<button type="button" disabled={index === ordered.length - 1} onClick={() => move(index, 1)}>Descer</button></div></article>; })}</div>}
+        {ordered.length > 0 && <SortableCollection items={ordered} getKey={(asset) => asset.id} label="m\u00eddia" onChange={(items) => setData('media_order', items.map((asset) => asset.id))} onRemove={remove} gridClass="mt-5 grid grid-cols-2 gap-3 tablet:grid-cols-4 desktop:grid-cols-[repeat(auto-fill,minmax(150px,1fr))]" itemClass="min-w-0 max-w-[180px]" renderItem={(asset) => { const video = asset.type === 'video' || asset.mime_type?.startsWith('video/'); return <><div className="relative">{video ? <img src={asset.poster_url || ''} alt="" className="aspect-square w-full bg-ink object-cover" /> : <img src={asset.url} alt={asset.alt_text || ''} className="aspect-square w-full object-cover" />}{video && <div className="absolute inset-0 grid place-items-center bg-black/15"><span className="grid size-9 place-items-center rounded-full bg-black/70 text-sm text-white">&#9654;</span></div>}</div><div className="flex min-h-12 items-center justify-between gap-2 p-2 text-[.65rem]"><span className="truncate text-muted">{video ? 'V\u00eddeo' : 'Imagem'}</span>{!video && <button type="button" onClick={() => setData('featured_media_id', asset.id)} className={String(data.featured_media_id) === String(asset.id) ? 'font-medium text-brand' : 'text-muted'}>{String(data.featured_media_id) === String(asset.id) ? 'Capa' : 'Definir capa'}</button>}</div></>; }} />}
     </section>;
 }

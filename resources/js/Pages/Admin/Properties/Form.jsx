@@ -6,6 +6,7 @@ import FeatureChoices from '../../../Components/Forms/FeatureChoices';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import LocationFields from '../../../Components/Forms/LocationFields';
+import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
 
 const numericFields = [['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['rent_price', 'Preço de locação'], ['condominium_fee', 'Condomínio'], ['iptu', 'IPTU'], ['usable_area', 'Área útil'], ['total_area', 'Área total'], ['built_area', 'Área construída'], ['land_area', 'Área do terreno'], ['bedrooms', 'Quartos'], ['suites', 'Suítes'], ['bathrooms', 'Banheiros'], ['lavatories', 'Lavabos'], ['parking_spaces', 'Vagas'], ['rooms', 'Salas']];
 
@@ -43,6 +44,7 @@ export default function Form({ item, options }) {
         accepts_exchange: Boolean(item?.accepts_exchange),
         is_new: Boolean(item?.is_new),
         feature_ids: item?.features?.map((feature) => feature.id) || [],
+        uploaded_media_ids: [],
         ...Object.fromEntries(numericFields.map(([key]) => [key, item?.[key] || ''])),
         ...contentDefaults(item),
     });
@@ -87,7 +89,8 @@ export default function Form({ item, options }) {
                 <section className="rounded-xl border border-line bg-white p-6 shadow-sm">
                     <FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} />
                 </section>
-                <ContentManager data={data} setData={setData} item={item} showStages={false} />
+                <AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} />
+                <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showStages={false} /></div>
                 <section className="flex flex-wrap items-end gap-5 rounded-xl border border-line bg-white p-6 shadow-sm">
                     <SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={(e) => setData('status', e.target.value)} />
                     <SelectField label="Negócio" options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Locação' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={(e) => setData('commercial_purpose', e.target.value)} />
