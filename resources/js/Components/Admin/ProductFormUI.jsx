@@ -36,7 +36,7 @@ export function PublicationCard({ data, setData, errors = {}, flags = [] }) {
     return <ProductCard title="Publicação" description="Controle a visibilidade e os destaques do produto.">
         <div className="space-y-4">
             <SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={(event) => setData('status', event.target.value)} error={errors.status} />
-            <SelectField label="Negócio" options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Locação' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={(event) => setData('commercial_purpose', event.target.value)} />
+            <SelectField label="Finalidade" options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Locação' }, { id: 'sale_rent', name: 'Venda e locação' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={(event) => setData('commercial_purpose', event.target.value)} />
             <div className="grid gap-2">{flags.map(([key, label]) => <label key={key} className="flex min-h-10 items-center gap-3 rounded-lg border border-line px-3 text-sm text-ink"><input type="checkbox" checked={Boolean(data[key])} onChange={(event) => setData(key, event.target.checked)} />{label}</label>)}</div>
         </div>
     </ProductCard>;

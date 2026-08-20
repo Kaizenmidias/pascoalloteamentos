@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PublicLayout from '../../../Components/Layout/PublicLayout';
 import Container from '../../../Components/UI/Container';
 import SeoHead from '../../../Components/SEO/SeoHead';
@@ -12,6 +12,28 @@ const whatsappUrl = (item, fallback) => { const phone = String(item.whatsapp_con
 
 function PropertyGallery({ items }) {
     const [start, setStart] = useState(0);
+    const [paused, setPaused] = useState(false);
+    useEffect(() => {
+        if (items.length < 2 || paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+        const timer = window.setInterval(() => setStart((current) => (current + 1) % items.length), 5000);
+        return () => window.clearInterval(timer);
+    }, [items.length, paused]);
+    useEffect(() => {
+        const gallery = document.querySelector('section[aria-label^="Galeria do"]');
+        if (!gallery) return undefined;
+        const pause = () => setPaused(true);
+        const resume = () => setPaused(false);
+        gallery.addEventListener('mouseenter', pause);
+        gallery.addEventListener('mouseleave', resume);
+        gallery.addEventListener('play', pause, true);
+        gallery.addEventListener('pause', resume, true);
+        return () => {
+            gallery.removeEventListener('mouseenter', pause);
+            gallery.removeEventListener('mouseleave', resume);
+            gallery.removeEventListener('play', pause, true);
+            gallery.removeEventListener('pause', resume, true);
+        };
+    }, []);
     if (!items.length) return null;
     const visible = [0, 1, 2].map((offset) => items[(start + offset) % items.length]).filter((item, index, list) => item && list.indexOf(item) === index);
     const move = (direction) => setStart((current) => (current + direction + items.length) % items.length);
@@ -30,7 +52,9 @@ export default function Show({ item, globalWhatsapp }) {
     const planDocument = item.documents?.find((document) => document.kind === 'property_plan') || item.documents?.find((document) => document.media_asset?.mime_type === 'application/pdf');
     const planLink = planDocument?.media_asset?.url || (item.floor_plans || []).find((plan) => plan.is_active !== false && plan.external_url)?.external_url;
     const whatsapp = whatsappUrl(item, globalWhatsapp);
-    const currentPrice = item.sale_price || item.regular_price || item.rent_price;
+    const salePrice = item.sale_price || item.regular_price;
+    const showSale = item.commercial_purpose !== 'rent' && present(salePrice);
+    const showRent = ['rent', 'sale_rent', 'season'].includes(item.commercial_purpose) && present(item.rent_price);
     return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><PropertyGallery items={gallery} /><section className="bg-surface py-10 tablet:py-14"><Container className="grid max-w-[1120px] gap-6 desktop:grid-cols-[minmax(0,1.85fr)_minmax(310px,1fr)] desktop:items-start"><main className="space-y-5">
         <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><p className="text-sm uppercase text-muted">{item.business_type?.name || 'Imóvel'}</p><h1 className="mt-2 text-3xl font-normal leading-tight tablet:text-4xl">{item.title}</h1>{address && <p className="mt-2 text-base text-muted">{address}</p>}{(item.condominium?.title || item.condominium_name) && <p className="mt-1 text-sm text-muted">{item.condominium?.title || item.condominium_name}</p>}<div className="mt-6 grid grid-cols-2 gap-3 tablet:grid-cols-3">{facts.map(([label, value]) => <InfoCell key={label} label={label} value={value} />)}</div></article>
         {(item.description || item.excerpt) && <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><h2 className="text-2xl font-normal">Descrição do Imóvel</h2><div className="mt-5 max-w-none whitespace-pre-line font-light leading-7 text-muted" dangerouslySetInnerHTML={{ __html: item.description || item.excerpt }} /></article>}
@@ -38,5 +62,5 @@ export default function Show({ item, globalWhatsapp }) {
         {areas.length > 0 && <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><h2 className="text-2xl font-normal">Áreas</h2><div className="mt-5 grid gap-3 tablet:grid-cols-2">{areas.map(([label, value]) => <Row key={label} label={label} value={`${formatNumber(value)} m²`} />)}</div></article>}
         {planLink && <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><h2 className="text-2xl font-normal">Planta do imóvel</h2><p className="mt-3 max-w-xl text-sm leading-6 text-muted">{item.floor_plans_support_text || 'Faça o download da planta e tenha acesso aos detalhes do imóvel, incluindo a distribuição dos ambientes, medidas e organização do projeto.'}</p><a href={planLink} target="_blank" rel="noreferrer" className="brand-button mt-5 inline-flex">{planDocument ? 'Baixar planta' : 'Ver planta'}</a></article>}
         <a href="/imoveis" className="brand-button inline-flex">&#8592; Voltar</a>
-    </main><aside className="space-y-4 desktop:sticky desktop:top-24"><div className="rounded-2xl bg-white p-6 shadow-card"><div className="flex flex-wrap gap-2 text-[.65rem] uppercase"><span className="rounded-md bg-brand px-3 py-1.5 text-white">{item.property_type?.name || 'Imóvel'}</span>{item.development_status?.name && <span className="rounded-md bg-surface px-3 py-1.5">{item.development_status.name}</span>}</div><div className="mt-4 rounded-xl border border-line p-4">{item.regular_price && item.sale_price && Number(item.regular_price) !== Number(item.sale_price) && <p className="text-lg text-muted line-through">{money(item.regular_price)}</p>}<span className="mt-2 block text-xs font-medium uppercase">{item.price_on_request || !currentPrice ? 'Valor' : 'Por apenas:'}</span><strong className="mt-1 block text-3xl font-medium text-brand">{item.price_on_request || !currentPrice ? 'Sob consulta' : money(currentPrice)}</strong></div><div className="mt-4 space-y-2 border-t border-line pt-4"><Row label="Condomínio" value={money(item.condominium_fee)} /><Row label="IPTU" value={money(item.iptu)} /></div></div><LeadForm entityType="property" entityId={item.id} title="Tenho interesse" />{whatsapp && <a href={whatsapp} target="_blank" rel="noreferrer" className="brand-button flex w-full justify-center">Falar no WhatsApp</a>}</aside></Container></section></PublicLayout>;
+    </main><aside className="space-y-4 desktop:sticky desktop:top-24"><div className="rounded-2xl bg-white p-6 shadow-card"><div className="flex flex-wrap gap-2 text-[.65rem] uppercase"><span className="rounded-md bg-brand px-3 py-1.5 text-white">{item.property_type?.name || 'Imóvel'}</span>{item.development_status?.name && <span className="rounded-md bg-surface px-3 py-1.5">{item.development_status.name}</span>}</div><div className="mt-4 space-y-4 rounded-xl border border-line p-4">{item.price_on_request ? <><span className="text-xs font-medium uppercase">Valor</span><strong className="block text-3xl font-medium text-brand">Sob consulta</strong></> : <>{showSale && <div>{item.regular_price && item.sale_price && Number(item.regular_price) !== Number(item.sale_price) && <p className="text-lg text-muted line-through">{money(item.regular_price)}</p>}<span className="text-xs font-medium uppercase">Venda</span><strong className="block text-3xl font-medium text-brand">{money(salePrice)}</strong></div>}{showRent && <div><span className="text-xs font-medium uppercase">Locação</span><strong className="block text-3xl font-medium text-brand">{money(item.rent_price)} <small className="text-sm font-normal">/ mês</small></strong></div>}{!showSale && !showRent && <strong className="block text-2xl font-medium text-brand">Sob consulta</strong>}</>}</div><div className="mt-4 space-y-2 border-t border-line pt-4"><Row label="Condomínio" value={money(item.condominium_fee)} /><Row label="IPTU" value={money(item.iptu)} /></div></div><LeadForm entityType="property" entityId={item.id} title="Tenho interesse" />{whatsapp && <a href={whatsapp} target="_blank" rel="noreferrer" className="brand-button flex w-full justify-center">Falar no WhatsApp</a>}</aside></Container></section></PublicLayout>;
 }

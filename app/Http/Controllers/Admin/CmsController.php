@@ -9,6 +9,7 @@ use App\Models\Lead;
 use App\Models\Page;
 use App\Models\SiteSetting;
 use App\Services\Media\MediaAssetService;
+use App\Support\SafeRichHtml;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -433,6 +434,7 @@ class CmsController extends Controller
         $categories = Arr::pull($data, 'category_ids', []);
         $image = Arr::pull($data, 'featured_image');
         $seo = ['title' => Arr::pull($data, 'seo_title'), 'description' => Arr::pull($data, 'seo_description')];
+        $data['content'] = SafeRichHtml::clean($data['content']);
 
         if (empty($data['slug'])) {
             $baseSlug = Str::slug($data['title']) ?: 'postagem';

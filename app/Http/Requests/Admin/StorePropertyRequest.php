@@ -28,7 +28,7 @@ class StorePropertyRequest extends FormRequest
             'regular_price' => ['nullable', 'numeric', 'min:0'], 'sale_price' => ['nullable', 'numeric', 'min:0'], 'rent_price' => ['nullable', 'numeric', 'min:0'], 'condominium_fee' => ['nullable', 'numeric', 'min:0'], 'iptu' => ['nullable', 'numeric', 'min:0'], 'price_on_request' => ['boolean'],
             'usable_area' => ['nullable', 'numeric', 'min:0'], 'total_area' => ['nullable', 'numeric', 'min:0'], 'built_area' => ['nullable', 'numeric', 'min:0'], 'land_area' => ['nullable', 'numeric', 'min:0'],
             'bedrooms' => ['nullable', 'integer', 'min:0'], 'suites' => ['nullable', 'integer', 'min:0'], 'bathrooms' => ['nullable', 'integer', 'min:0'], 'lavatories' => ['nullable', 'integer', 'min:0'], 'parking_spaces' => ['nullable', 'integer', 'min:0'], 'rooms' => ['nullable', 'integer', 'min:0'],
-            'furnished' => ['boolean'], 'accepts_financing' => ['boolean'], 'accepts_exchange' => ['boolean'], 'is_new' => ['boolean'], 'commercial_purpose' => ['required', Rule::in(['sale', 'rent', 'season'])], 'commercial_status' => ['nullable', 'string', 'max:30'], 'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
+            'furnished' => ['boolean'], 'accepts_financing' => ['boolean'], 'accepts_exchange' => ['boolean'], 'is_new' => ['boolean'], 'commercial_purpose' => ['required', Rule::in(['sale', 'rent', 'sale_rent', 'season'])], 'commercial_status' => ['nullable', 'string', 'max:30'], 'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
             'featured' => ['boolean'], 'published_at' => ['nullable', 'date'], 'feature_ids' => ['array'], 'feature_ids.*' => ['integer', 'exists:features,id'],
             ...$this->contentRules(),
         ];

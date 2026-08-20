@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Models\MediaAsset;
 use App\Services\Media\MediaAssetService;
 use App\Support\ConstructionStageCatalog;
+use App\Support\SafeRichHtml;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,10 @@ class RealEstateContentService
 
             if (($data['status'] ?? null) === 'published' && empty($data['published_at']) && ! $item->published_at) {
                 $data['published_at'] = now();
+            }
+
+            foreach (['description', 'about_text'] as $richField) {
+                if (array_key_exists($richField, $data)) $data[$richField] = SafeRichHtml::clean($data[$richField]);
             }
 
             $item->fill($data)->save();

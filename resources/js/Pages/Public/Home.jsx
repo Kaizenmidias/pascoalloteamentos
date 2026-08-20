@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PublicLayout from '../../Components/Layout/PublicLayout';
 import SeoHead from '../../Components/SEO/SeoHead';
 import Container from '../../Components/UI/Container';
@@ -16,9 +16,15 @@ const defaultHero = {
 function HomeHero({ slides = [], hero = {} }) {
     const items = slides.length ? slides.slice(0, 5) : [{ title: hero.title || defaultHero.title, excerpt: hero.description || defaultHero.description, media_assets: [] }];
     const [active, setActive] = useState(0);
+    const [paused, setPaused] = useState(false);
+    useEffect(() => {
+        if (items.length < 2 || paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+        const timer = window.setInterval(() => setActive((current) => (current + 1) % items.length), 5000);
+        return () => window.clearInterval(timer);
+    }, [items.length, paused]);
 
     return (
-        <section className="relative overflow-hidden text-white">
+        <section className="relative overflow-hidden text-white" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)}>
             <div className="relative min-h-[75svh]">
                 {items.map((item, index) => (
                     <img

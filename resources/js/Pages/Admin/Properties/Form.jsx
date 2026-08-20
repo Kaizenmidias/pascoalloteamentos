@@ -7,6 +7,7 @@ import SelectField from '../../../Components/Forms/SelectField';
 import LocationFields from '../../../Components/Forms/LocationFields';
 import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
 import { ProductFormLayout, ProductCard, PublicationCard, SeoCard } from '../../../Components/Admin/ProductFormUI';
+import RichContentEditor from '../../../Components/Admin/RichContentEditor';
 
 const numericFields = [['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['rent_price', 'Preço de locação'], ['condominium_fee', 'Condomínio'], ['iptu', 'IPTU'], ['usable_area', 'Área útil'], ['total_area', 'Área total'], ['built_area', 'Área construída'], ['land_area', 'Área do terreno'], ['bedrooms', 'Quartos'], ['suites', 'Suítes'], ['bathrooms', 'Banheiros'], ['lavatories', 'Lavabos'], ['parking_spaces', 'Vagas'], ['rooms', 'Salas']];
 
@@ -74,7 +75,7 @@ export default function Form({ item, options }) {
                     <Field label="Nome do condomínio" value={data.condominium_name} onChange={(e) => setData('condominium_name', e.target.value)} />
                     <Field label="Status comercial" value={data.commercial_status} onChange={(e) => setData('commercial_status', e.target.value)} />
                     <Field label="Resumo para cards" as="textarea" value={data.excerpt} onChange={(e) => setData('excerpt', e.target.value)} />
-                    <Field label="Descrição completa" as="textarea" value={data.description} onChange={(e) => setData('description', e.target.value)} />
+                    <div className="tablet:col-span-2"><RichContentEditor label="Descrição completa" value={data.description} onChange={(value) => setData('description', value)} error={errors.description} /></div>
                 </section>
                 <LocationFields states={options.states} initialCity={item?.city} cityId={data.city_id} onCityChange={(cityId) => setData('city_id', cityId)} error={errors.city_id} />
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-3">
