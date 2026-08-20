@@ -77,6 +77,14 @@ const fallbackContact = [
             'Nossa equipe está à disposição para esclarecer dúvidas, apresentar oportunidades e oferecer o suporte necessário para que você faça um investimento com segurança e tranquilidade.',
         image: '/reference-assets/hero-contact.webp',
     },
+    {
+        type: 'contact-form',
+        label: 'Formulário',
+        title: 'Fale com Nossa Equipe',
+        subtitle: 'Estamos disponíveis para atender você.',
+        content: 'Preencha o formulário abaixo e nossa equipe entrará em contato o mais breve possível para esclarecer suas dúvidas ou apresentar as melhores oportunidades disponíveis.',
+        button_label: 'Enviar mensagem',
+    },
 ];
 
 function Paragraphs({ content, className = '' }) {
@@ -236,19 +244,30 @@ function SectionRenderer({ section, kind, reverse = false }) {
     }
 
     if (type === 'contact-form') {
-        const blocks = Array.isArray(data.content_blocks) ? data.content_blocks : Array.isArray(data.content) ? data.content : [];
+        const defaultSchedule = [
+            { title: 'Segunda a Sexta-feira', text: '08h00 às 18h00' },
+            { title: 'Sábados', text: '08h00 às 12h00' },
+            { title: 'Domingos e Feriados', text: 'Plantão de vendas mediante agendamento' },
+        ];
+        const blocks = Array.isArray(data.content_blocks) ? data.content_blocks : Array.isArray(data.content) ? data.content : defaultSchedule;
+        const legacySupportText = typeof data.content === 'string' && data.content.startsWith('Preencha o formul');
+        const supportText = legacySupportText
+            ? 'Preencha o formulário abaixo e nossa equipe entrará em contato o mais breve possível para esclarecer suas dúvidas ou apresentar as melhores oportunidades disponíveis.'
+            : data.content;
+        const sectionTitle = typeof data.title === 'string' && data.title.startsWith('Fale com Nossa Equipe') ? 'Fale com Nossa Equipe' : data.title;
+        const scheduleTitle = typeof data.subtitle === 'string' && data.subtitle.startsWith('Estamos dispon') ? 'Estamos disponíveis para atender você.' : data.subtitle;
         return (
             <section className="py-[var(--section-space)]">
                 <Container className="grid gap-12 desktop:grid-cols-[1fr_1.1fr] desktop:items-start">
                     <div>
-                        {data.title && <h2 className="section-title">{data.title}</h2>}
-                        {data.content && <p className="mt-4 max-w-lg text-sm leading-6 text-muted">{data.content}</p>}
-                        {data.subtitle && <h3 className="mt-8 text-xs font-bold uppercase text-ink">{data.subtitle}</h3>}
+                        {sectionTitle && <h2 className="section-title">{sectionTitle}</h2>}
+                        {supportText && <p className="mt-4 max-w-lg text-sm leading-6 text-muted">{supportText}</p>}
+                        {scheduleTitle && <h3 className="mt-8 text-xs font-bold uppercase text-ink">{scheduleTitle}</h3>}
                         <span className="my-3 block h-px w-20 bg-brand" />
                         <div className="grid gap-5 text-sm text-muted tablet:grid-cols-2">
                             {blocks.map((row) => (
                                 <p key={row.title}>
-                                    {row.title}
+                                    <strong className="font-semibold text-ink">{row.title}</strong>
                                     <br />
                                     {row.text}
                                 </p>
