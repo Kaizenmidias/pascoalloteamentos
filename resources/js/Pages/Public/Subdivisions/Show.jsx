@@ -67,12 +67,6 @@ function Promotions({ items = [] }) {
     return <section className="py-14 tablet:py-16"><SectionContainer>{visible.length === 1 ? <PromotionCard promotion={visible[0]} /> : <Carousel label="Promo&ccedil;&otilde;es de lotes" itemClassName="w-[94%] tablet:w-[86%]">{visible.map((promotion) => <PromotionCard key={promotion.id} promotion={promotion} />)}</Carousel>}</SectionContainer></section>;
 }
 
-function Documents({ documents = [] }) {
-    const visible = documents.filter((document) => document.is_public !== false && (document.external_url || document.media_asset?.url));
-    if (!visible.length) return null;
-    return <section className="py-14 text-center tablet:py-[72px]"><SectionContainer><Eyebrow>Tudo o que voc&ecirc; precisa em um s&oacute; lugar</Eyebrow><Title>Conhe&ccedil;a as Plantas dos Lotes</Title><p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-muted">Fa&ccedil;a o download das plantas e tenha acesso aos detalhes do empreendimento, incluindo a divis&atilde;o dos lotes, medidas e organiza&ccedil;&atilde;o do projeto.</p><div className="mt-7 flex flex-wrap justify-center gap-3">{visible.map((document) => <a key={document.id} href={document.external_url || document.media_asset.url} target="_blank" rel="noreferrer" className="brand-button">{visible.length === 1 ? 'Baixar informa\u00e7\u00f5es dos lotes' : document.title}</a>)}</div></SectionContainer></section>;
-}
-
 function Location({ item, globalWhatsapp }) {
     if (!item.address && !item.latitude && !item.longitude) return null;
     const address = [item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code].filter(Boolean).join(', ');
@@ -96,5 +90,5 @@ function Faq() {
 
 export default function Show({ item, globalWhatsapp }) {
     const image = featuredMedia(item);
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><Features items={item.features} /><Promotions items={item.promotions} /><Documents documents={item.documents} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><Gallery item={item} /><Faq /></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><Features items={item.features} /><Promotions items={item.promotions} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><Gallery item={item} /><Faq /></PublicLayout>;
 }

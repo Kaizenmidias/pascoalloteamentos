@@ -20,7 +20,7 @@ class StoreSubdivisionRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'], 'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('subdivisions')],
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('subdivisions')],
             'subdivision_type_id' => ['nullable', 'exists:subdivision_types,id'], 'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
-            'excerpt' => ['nullable', 'string'], 'description' => ['nullable', 'string'], 'address' => ['nullable', 'string', 'max:255'], 'neighborhood' => ['nullable', 'string', 'max:255'], 'postal_code' => ['nullable', 'string', 'max:12'],
+            'excerpt' => ['nullable', 'string'], 'address' => ['nullable', 'string', 'max:255'], 'neighborhood' => ['nullable', 'string', 'max:255'], 'postal_code' => ['nullable', 'string', 'max:12'],
             'address_number' => ['nullable', 'string', 'max:30'], 'complement' => ['nullable', 'string', 'max:255'], 'whatsapp_contact' => ['nullable', 'string', 'max:30'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'], 'longitude' => ['nullable', 'numeric', 'between:-180,180'], 'regular_price' => ['nullable', 'numeric', 'min:0'], 'sale_price' => ['nullable', 'numeric', 'min:0'], 'price_on_request' => ['boolean'],
             'minimum_lot_area' => ['nullable', 'numeric', 'min:0'], 'maximum_lot_area' => ['nullable', 'numeric', 'gte:minimum_lot_area'], 'total_lots' => ['nullable', 'integer', 'min:0'], 'available_lots' => ['nullable', 'integer', 'min:0', 'lte:total_lots'],
@@ -35,7 +35,7 @@ class StoreSubdivisionRequest extends FormRequest
         ];
 
         foreach (array_keys($rules) as $key) {
-            if (str_starts_with($key, 'faqs') || str_starts_with($key, 'floor_plans')) {
+            if (str_starts_with($key, 'faqs') || str_starts_with($key, 'floor_plans') || str_starts_with($key, 'documents')) {
                 unset($rules[$key]);
             }
         }
@@ -62,13 +62,11 @@ class StoreSubdivisionRequest extends FormRequest
             'business_type_id' => 'Tipo de negócio',
             'city_id' => 'Cidade',
             'excerpt' => 'Texto de apoio',
-            'description' => 'Descrição',
             'address' => 'Endereço',
             'postal_code' => 'CEP',
             'expected_delivery_date' => 'Data prevista de entrega',
             'status' => 'Status de publicação',
             'promotions.*.title' => 'Título da promoção',
-            'documents.*.title' => 'Título do documento',
             'construction_stages.*.name' => 'Nome da etapa',
             'construction_stages.*.progress_percent' => 'Percentual da etapa',
         ];

@@ -14,7 +14,6 @@ const text = {
     subdivision: 'loteamento',
     title: 'T\u00edtulo do loteamento',
     initialText: 'Texto de apoio da se\u00e7\u00e3o inicial',
-    description: 'Descri\u00e7\u00e3o',
     address: 'Endere\u00e7o',
     business: 'Tipo de neg\u00f3cio',
 };
@@ -22,7 +21,7 @@ const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, ''
 const fieldLabels = {
     title: 'Título', slug: 'Slug', reference_code: 'Código de referência', subdivision_type_id: 'Tipo de loteamento',
     development_status_id: 'Status do empreendimento', business_type_id: 'Tipo de negócio', city_id: 'Cidade',
-    excerpt: 'Texto de apoio', description: 'Descrição', address: 'Endereço', address_number: 'Número', complement: 'Complemento',
+    excerpt: 'Texto de apoio', address: 'Endereço', address_number: 'Número', complement: 'Complemento',
     neighborhood: 'Bairro', postal_code: 'CEP', latitude: 'Latitude', longitude: 'Longitude', regular_price: 'Preço regular',
     sale_price: 'Preço de venda', minimum_lot_area: 'Área mínima', maximum_lot_area: 'Área máxima', total_lots: 'Total de lotes',
     available_lots: 'Lotes disponíveis', expected_delivery_date: 'Data prevista de entrega', status: 'Status de publicação',
@@ -30,7 +29,6 @@ const fieldLabels = {
 const errorLabel = (key) => {
     const root = key.replace(/\.\d+\..*$/, '');
     if (root === 'promotions') return 'Promoção';
-    if (root === 'documents') return 'Documento';
     if (root === 'construction_stages') return 'Andamento da obra';
     return fieldLabels[root] || root.replaceAll('_', ' ');
 };
@@ -46,7 +44,7 @@ export default function Form({ item, options }) {
         title: item?.title || '', slug: item?.slug || '', reference_code: item?.reference_code || '',
         subdivision_type_id: item?.subdivision_type_id || '', development_status_id: item?.development_status_id || '',
         business_type_id: item?.business_type_id || '', city_id: item?.city_id || '', excerpt: item?.excerpt || '',
-        description: item?.description || '', address: item?.address || '', address_number: item?.address_number || '',
+        address: item?.address || '', address_number: item?.address_number || '',
         complement: item?.complement || '', neighborhood: item?.neighborhood || '', postal_code: item?.postal_code || '',
         latitude: item?.latitude || '', longitude: item?.longitude || '', whatsapp_contact: item?.whatsapp_contact || '',
         commercial_purpose: item?.commercial_purpose || '', commercial_status: item?.commercial_status || '',
@@ -59,12 +57,13 @@ export default function Form({ item, options }) {
         ...contentDefaults(item, options.stageDefinitions),
         floor_plans: undefined,
         faqs: undefined,
+        documents: undefined,
     });
 
     const submit = (event) => {
         event.preventDefault();
         transform((payload) => {
-            const { faqs, floor_plans, ...cleanPayload } = payload;
+            const { faqs, floor_plans, documents, description, ...cleanPayload } = payload;
             return cleanPayload;
         });
         post(editing ? `/admin/subdivisions/${item.slug}` : '/admin/subdivisions', {
@@ -100,7 +99,6 @@ export default function Form({ item, options }) {
                 <Field label={'C\u00f3digo de refer\u00eancia'} value={data.reference_code} onChange={(event) => setData('reference_code', event.target.value)} error={errors.reference_code} />
                 <SelectField label={`Tipo de ${text.subdivision}`} options={options.types} value={data.subdivision_type_id} onChange={(event) => setData('subdivision_type_id', event.target.value)} />
                 <SelectField label={text.business} options={options.businessTypes} value={data.business_type_id} onChange={(event) => setData('business_type_id', event.target.value)} />
-                <div className="tablet:col-span-2"><Field label={text.description} as="textarea" value={data.description} onChange={(event) => setData('description', event.target.value)} /></div>
             </section>
 
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
@@ -124,7 +122,7 @@ export default function Form({ item, options }) {
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <PromotionManager rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
             <AsyncMediaUploader existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} />
-            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showPlans={false} showSpecialImages={false} showFaqs={false} /></div>
+            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showPlans={false} showSpecialImages={false} showFaqs={false} showDocuments={false} /></div>
 
             <section className="flex flex-wrap items-end gap-5 rounded-card bg-white p-6 shadow-card"><SelectField label="Status" options={[{ id: 'draft', name: 'Rascunho' }, { id: 'published', name: 'Publicado' }, { id: 'archived', name: 'Arquivado' }]} value={data.status} onChange={(event) => setData('status', event.target.value)} error={friendlyError('status', errors.status)} /><SelectField label={'Neg\u00f3cio'} options={[{ id: 'sale', name: 'Venda' }, { id: 'rent', name: 'Loca\u00e7\u00e3o' }, { id: 'season', name: 'Temporada' }]} value={data.commercial_purpose} onChange={(event) => setData('commercial_purpose', event.target.value)} />{[['featured', 'Destaque'], ['price_on_request', 'Pre\u00e7o sob consulta']].map(([key, label]) => <label key={key} className="flex gap-2 pb-3"><input type="checkbox" checked={data[key]} onChange={(event) => setData(key, event.target.checked)} />{label}</label>)}<Button type="submit" disabled={processing}>Salvar {text.subdivision}</Button></section>
         </form>

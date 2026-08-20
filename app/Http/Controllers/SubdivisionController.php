@@ -37,7 +37,7 @@ class SubdivisionController extends Controller
     {
         abort_unless($subdivision->status === 'published', 404);
 
-        $subdivision->load(['city.state', 'subdivisionType', 'developmentStatus', 'features.iconMedia', 'mediaAssets', 'promotions.mediaAsset', 'constructionStages', 'documents.mediaAsset', 'seo']);
+        $subdivision->load(['city.state', 'subdivisionType', 'developmentStatus', 'features.iconMedia', 'mediaAssets', 'promotions.mediaAsset', 'constructionStages', 'seo']);
         $subdivision->setRelation('constructionStages', ConstructionStageCatalog::applicableStages($subdivision, $subdivision->constructionStages));
 
         $globalWhatsapp = Schema::hasTable('site_settings')
