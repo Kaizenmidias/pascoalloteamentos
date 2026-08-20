@@ -38,6 +38,35 @@ class AdminCmsTest extends TestCase
         $this->get('/blog/conteudo-funcional')->assertOk();
     }
 
+    public function test_blog_post_can_be_published_with_an_automatic_unique_slug(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        BlogPost::create(['title' => 'Conteudo funcional', 'slug' => 'conteudo-funcional', 'content' => 'Anterior']);
+
+        $this->actingAs($user)->post('/admin/blog/posts', [
+            'title' => 'Conteudo funcional',
+            'slug' => '',
+            'content' => 'Nova postagem publicada',
+            'status' => 'published',
+        ])->assertRedirect();
+
+        $post = BlogPost::where('slug', 'conteudo-funcional-2')->firstOrFail();
+        $this->assertSame('published', $post->status);
+        $this->assertNotNull($post->published_at);
+        $this->get('/blog/conteudo-funcional-2')->assertOk();
+    }
+
+    public function test_scheduled_blog_post_is_not_public_before_its_date(): void
+    {
+        BlogPost::create([
+            'title' => 'Conteudo futuro', 'slug' => 'conteudo-futuro', 'content' => 'Agendado',
+            'status' => 'published', 'published_at' => now()->addDay(),
+        ]);
+
+        $this->get('/blog/conteudo-futuro')->assertNotFound();
+        $this->get('/blog')->assertOk()->assertDontSee('Conteudo futuro');
+    }
+
     public function test_property_form_persists_shared_content_used_by_public_detail(): void
     {
         $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);

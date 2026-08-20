@@ -85,7 +85,7 @@ function Plans({ item }) {
 function Location({ item }) {
     if (!item.address && item.latitude == null && item.longitude == null) return null;
     const address = [item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code].filter(Boolean).join(', ');
-    return <section id="localizacao" className="scroll-mt-28 bg-surface py-24"><SectionContainer className="grid gap-10 tablet:grid-cols-[.9fr_1.1fr] tablet:items-center"><div><Eyebrow>Localiza&ccedil;&atilde;o</Eyebrow><SectionTitle>Localiza&ccedil;&atilde;o estrat&eacute;gica para facilitar seu dia a dia</SectionTitle>{address && <p className="mt-5 text-sm font-light leading-7 text-muted">{address}</p>}<WhatsAppCTA item={item} className="mt-6" /></div><div className="overflow-hidden rounded-xl [&_iframe]:min-h-[360px]"><Map latitude={item.latitude} longitude={item.longitude} title={`Localizacao de ${item.title}`} /></div></SectionContainer></section>;
+    return <section id="localizacao" className="scroll-mt-28 bg-surface py-24"><SectionContainer className="grid gap-10 tablet:grid-cols-[.9fr_1.1fr] tablet:items-center"><div><Eyebrow>Localiza&ccedil;&atilde;o</Eyebrow><SectionTitle>Localiza&ccedil;&atilde;o estrat&eacute;gica para facilitar seu dia a dia</SectionTitle>{address && <p className="mt-5 text-sm font-light leading-7 text-muted">{address}</p>}<WhatsAppCTA item={item} className="mt-6" /></div><div className="overflow-hidden rounded-xl [&_iframe]:min-h-[360px]"><Map latitude={item.latitude} longitude={item.longitude} address={address} title={`Localizacao de ${item.title}`} /></div></SectionContainer></section>;
 }
 
 function Progress({ item }) {

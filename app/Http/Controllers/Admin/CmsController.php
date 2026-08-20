@@ -418,7 +418,7 @@ class CmsController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('blog_posts')->ignore($post)],
+            'slug' => ['nullable', 'alpha_dash:ascii', 'max:255', Rule::unique('blog_posts')->ignore($post)],
             'excerpt' => 'nullable|string|max:1000',
             'content' => 'required|string',
             'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
@@ -433,6 +433,16 @@ class CmsController extends Controller
         $categories = Arr::pull($data, 'category_ids', []);
         $image = Arr::pull($data, 'featured_image');
         $seo = ['title' => Arr::pull($data, 'seo_title'), 'description' => Arr::pull($data, 'seo_description')];
+
+        if (empty($data['slug'])) {
+            $baseSlug = Str::slug($data['title']) ?: 'postagem';
+            $slug = $baseSlug;
+            $suffix = 2;
+            while (BlogPost::query()->where('slug', $slug)->when($post->exists, fn ($query) => $query->whereKeyNot($post->getKey()))->exists()) {
+                $slug = $baseSlug.'-'.$suffix++;
+            }
+            $data['slug'] = $slug;
+        }
 
         if ($image) {
             $data['featured_media_id'] = $this->media->store($image, 'blog')->id;

@@ -37,6 +37,6 @@ class BlogController extends Controller
 
     private function render($query): Response
     {
-        return Inertia::render('Public/Blog/Index', ['posts' => $query->where('status', 'published')->whereNotNull('published_at')->with(['featuredMedia', 'categories'])->latest('published_at')->paginate(12)]);
+        return Inertia::render('Public/Blog/Index', ['posts' => $query->where('status', 'published')->whereNotNull('published_at')->where('published_at', '<=', now())->with(['featuredMedia', 'categories'])->latest('published_at')->paginate(12)]);
     }
 }
