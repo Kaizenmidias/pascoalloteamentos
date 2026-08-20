@@ -42,4 +42,35 @@ class StoreSubdivisionRequest extends FormRequest
 
         return $rules;
     }
+
+    public function messages(): array
+    {
+        return [
+            'required' => 'O campo :attribute é obrigatório.',
+            'exists' => 'O valor selecionado para :attribute é inválido.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'title' => 'Título',
+            'slug' => 'Slug',
+            'reference_code' => 'Código de referência',
+            'subdivision_type_id' => 'Tipo de loteamento',
+            'development_status_id' => 'Status do empreendimento',
+            'business_type_id' => 'Tipo de negócio',
+            'city_id' => 'Cidade',
+            'excerpt' => 'Texto de apoio',
+            'description' => 'Descrição',
+            'address' => 'Endereço',
+            'postal_code' => 'CEP',
+            'expected_delivery_date' => 'Data prevista de entrega',
+            'status' => 'Status de publicação',
+            'promotions.*.title' => 'Título da promoção',
+            'documents.*.title' => 'Título do documento',
+            'construction_stages.*.name' => 'Nome da etapa',
+            'construction_stages.*.progress_percent' => 'Percentual da etapa',
+        ];
+    }
 }
