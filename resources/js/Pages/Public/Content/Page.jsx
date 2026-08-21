@@ -10,7 +10,7 @@ function SectionRenderer({ section }) {
 
     if (section.type === 'hero') {
         return (
-            <section className="relative flex min-h-[600px] items-center overflow-hidden px-5 pt-20 text-center text-white">
+            <section className="relative flex min-h-[520px] items-center overflow-hidden px-5 pt-20 text-center text-white tablet:min-h-[600px]">
                 {data.image ? <img src={data.image} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 bg-brand" />}
                 <div className="red-overlay absolute inset-0" />
                 <Container className="relative z-10">
@@ -84,7 +84,7 @@ export default function Page({ page }) {
     return (
         <PublicLayout>
             <SeoHead title={page.seo?.title || page.title} description={page.seo?.description || ''} />
-            <section className="relative flex min-h-[600px] items-center overflow-hidden px-5 pt-20 text-center text-white">
+            <section className="relative flex min-h-[520px] items-center overflow-hidden px-5 pt-20 text-center text-white tablet:min-h-[600px]">
                 <div className="absolute inset-0 bg-brand" />
                 <div className="red-overlay absolute inset-0" />
                 <Container className="relative z-10">

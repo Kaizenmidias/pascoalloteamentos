@@ -116,7 +116,7 @@ function SectionRenderer({ section, kind, reverse = false }) {
 
     if (type === 'hero') {
         return (
-            <section className="relative flex min-h-[645px] items-center overflow-hidden px-5 pt-[80px] text-center text-white">
+            <section className="relative flex min-h-[520px] items-center overflow-hidden px-5 pt-[80px] text-center text-white tablet:min-h-[600px] desktop:min-h-[645px]">
                 <img
                     src={data.image || (kind === 'contact' ? '/reference-assets/hero-contact.webp' : '/reference-assets/hero-home.jpg')}
                     alt=""
@@ -125,9 +125,9 @@ function SectionRenderer({ section, kind, reverse = false }) {
                 <div className="red-overlay absolute inset-0" />
                 <div className="relative z-10 mx-auto w-full max-w-[80rem]">
                     {data.subtitle && <p className="eyebrow mx-auto mb-3 text-white/80">{data.subtitle}</p>}
-                    <h1 className="mx-auto max-w-[80rem] text-[57px] font-light leading-[1.08] tracking-[-.015em] tablet:text-[46px] mobile:text-[24px]">{data.title}</h1>
+                    <h1 className="mx-auto max-w-[80rem] text-[34px] font-light leading-[1.1] tracking-[-.015em] tablet:text-[46px] desktop:text-[57px]">{data.title}</h1>
                     {data.content && (
-                        <p className="mx-auto mt-5 max-w-[70%] text-[22px] font-extralight leading-[1.4] text-white/90 tablet:max-w-[80rem] tablet:text-[18px] mobile:max-w-none mobile:text-base">
+                        <p className="mx-auto mt-5 max-w-none text-base font-extralight leading-[1.5] text-white/90 tablet:max-w-[80rem] tablet:text-[18px] desktop:max-w-[70%] desktop:text-[22px]">
                             {data.content}
                         </p>
                     )}
@@ -150,7 +150,7 @@ function SectionRenderer({ section, kind, reverse = false }) {
                     <div className={reverse ? 'desktop:order-1' : 'desktop:order-2'}>
                         {!['purpose', 'differential'].includes(type) && data.label && <p className="eyebrow">{data.label}</p>}
                         {data.title && (
-                            <h2 className={`section-title mt-2 ${type === 'history' ? 'text-[42px] leading-[1.1] tablet:text-[36px] mobile:text-[28px]' : ''}`}>
+                            <h2 className={`section-title mt-2 ${type === 'history' ? 'text-[28px] leading-[1.15] tablet:text-[36px] desktop:text-[42px] desktop:leading-[1.1]' : ''}`}>
                                 {data.title}
                             </h2>
                         )}
@@ -303,8 +303,8 @@ function SectionRenderer({ section, kind, reverse = false }) {
         return (
             <section className="bg-surface py-16 text-center">
                 <Container>
-                    {data.title && <h2 className="mx-auto max-w-[59%] text-[46px] font-light leading-[1.12] text-brand tablet:max-w-2xl tablet:text-3xl mobile:max-w-none mobile:text-[27px]">{data.title}</h2>}
-                    {data.content && <p className="mx-auto mt-4 max-w-[76%] text-[16px] font-light leading-7 text-muted tablet:max-w-2xl mobile:max-w-none">{data.content}</p>}
+                    {data.title && <h2 className="mx-auto max-w-none text-[27px] font-light leading-[1.16] text-brand tablet:max-w-2xl tablet:text-3xl desktop:max-w-[59%] desktop:text-[46px] desktop:leading-[1.12]">{data.title}</h2>}
+                    {data.content && <p className="mx-auto mt-4 max-w-none text-[16px] font-light leading-7 text-muted tablet:max-w-2xl desktop:max-w-[76%]">{data.content}</p>}
                     {data.button_label && data.button_url && (
                         <Link href={data.button_url} className="brand-button mt-6 inline-flex">
                             {data.button_label}

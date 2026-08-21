@@ -95,9 +95,14 @@ img { display: block; max-width: 100%; }
 a.bg-brand, button.bg-brand { color: #fff !important; }
 
 @media (max-width: 48rem) {
-    :root { --section-space: 4.5rem; }
+    :root {
+        --section-space: clamp(3rem, 13vw, 4rem);
+        --gutter: clamp(1rem, 5vw, 1.25rem);
+    }
     .eyebrow { font-size: .9375rem; }
-    .section-title { font-size: clamp(1.75rem, 8.5vw, 2rem); line-height: 1.18; }
+    .section-title { font-size: clamp(1.875rem, 8.5vw, 2.25rem); line-height: 1.14; }
+    .rich-public-content h2 { font-size: clamp(1.75rem, 7.5vw, 2rem); line-height: 1.2; }
+    .rich-public-content h3 { font-size: clamp(1.4rem, 6.5vw, 1.65rem); line-height: 1.25; }
 }
 
 @media (prefers-reduced-motion: reduce) {

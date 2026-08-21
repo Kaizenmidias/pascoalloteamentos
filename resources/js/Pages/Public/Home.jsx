@@ -13,6 +13,34 @@ const defaultHero = {
     description: 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
 };
 
+const formatPostDate = (value) => value
+    ? new Date(value).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '';
+
+function HomeBlogCard({ post }) {
+    const publishedAt = formatPostDate(post.published_at);
+    const category = post.categories?.[0]?.name;
+
+    return (
+        <Link href={`/blog/${post.slug}`} className="group flex min-h-full flex-col overflow-hidden rounded-[14px] border border-line bg-white transition-[border-color,box-shadow] duration-300 hover:border-[#d5d5d5] hover:shadow-[0_6px_18px_rgba(17,17,17,0.06)]">
+            <div className="overflow-hidden bg-surface">
+                <img src={post.featured_media?.url || '/reference-assets/blog-city.jpg'} alt={post.title} className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.015]" />
+            </div>
+            <div className="flex flex-1 flex-col px-5 pb-4 pt-5">
+                <h3 className="line-clamp-3 min-h-[4.35rem] text-[1.15rem] font-normal leading-[1.28] text-ink">{post.title}</h3>
+                <span className="mt-5 text-xs font-medium uppercase tracking-[.05em] text-brand">Leia mais</span>
+                {(publishedAt || category) && (
+                    <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-line pt-4 text-[.7rem] font-light text-muted">
+                        {publishedAt && <time dateTime={post.published_at}>{publishedAt}</time>}
+                        {publishedAt && category && <span aria-hidden="true">&bull;</span>}
+                        {category && <span>{category}</span>}
+                    </div>
+                )}
+            </div>
+        </Link>
+    );
+}
+
 function HomeHero({ slides = [], hero = {} }) {
     const items = slides.length ? slides.slice(0, 5) : [{ title: hero.title || defaultHero.title, excerpt: hero.description || defaultHero.description, media_assets: [] }];
     const [active, setActive] = useState(0);
@@ -131,13 +159,15 @@ export default function Home({ featuredItems = [], homeEntities = [], posts = []
             </section>
 
             <section className="py-[var(--section-space)]">
-                <Container className="grid gap-10 desktop:grid-cols-[41%_59%] desktop:gap-14">
-                    <div>
+                <Container className="grid items-start gap-9 desktop:grid-cols-[minmax(220px,25%)_minmax(0,75%)] desktop:gap-10">
+                    <div className="desktop:sticky desktop:top-32">
                         <p className="eyebrow">Blog</p>
-                        <h2 className="section-title mt-3">Conteúdos que inspiram decisões</h2>
-                        <Link href="/blog" className="mt-6 inline-block text-sm font-medium uppercase text-brand">Ver todos os artigos →</Link>
+                        <h2 className="mt-3 max-w-[18rem] text-[clamp(2rem,3.4vw,3.25rem)] font-light leading-[1.08] tracking-[-.025em] text-ink">Conteúdos que inspiram decisões</h2>
+                        <Link href="/blog" className="mt-7 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[.055em] text-brand transition-colors hover:text-brand-dark">Ver todos os artigos <span aria-hidden="true">&rarr;</span></Link>
                     </div>
-                    <div className="grid gap-[1.875rem] tablet:grid-cols-3">{posts.map((post) => <Link href={`/blog/${post.slug}`} key={post.id} className="group overflow-hidden rounded-card border border-line bg-white shadow-[0_4px_12px_rgba(17,17,17,0.05)] transition-[box-shadow,border-color] duration-300 hover:border-[#d9d9d9] hover:shadow-[0_6px_16px_rgba(17,17,17,0.07)]"><div className="overflow-hidden"><img src={post.featured_media?.url || '/reference-assets/blog-city.jpg'} alt="" className="aspect-[1/.56] w-full object-cover transition duration-500 group-hover:scale-[1.03]" /></div><div className="p-5"><h3 className="text-[1.25rem] font-normal leading-[1.2] text-ink">{post.title}</h3><span className="mt-5 block text-base font-medium uppercase text-brand">Leia mais</span></div></Link>)}</div>
+                    <div className="grid gap-5 tablet:grid-cols-2 desktop:grid-cols-3">
+                        {posts.slice(0, 3).map((post) => <HomeBlogCard key={post.id} post={post} />)}
+                    </div>
                 </Container>
             </section>
         </PublicLayout>
