@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import PublicLayout from '../../../Components/Layout/PublicLayout';
 import SeoHead from '../../../Components/SEO/SeoHead';
 import Container from '../../../Components/UI/Container';
@@ -6,6 +7,7 @@ import ConstructionProgress from '../../../Components/RealEstate/ConstructionPro
 import FeatureIcon from '../../../Components/RealEstate/FeatureIcon';
 import Map from '../../../Components/RealEstate/Map';
 import { featuredMedia, galleryMedia } from '../../../Components/RealEstate/DetailSections';
+import MediaLightbox, { MediaLightboxTrigger, MediaTile } from '../../../Components/RealEstate/MediaLightbox';
 
 const defaultFaqs = [
     ['O loteamento possui infraestrutura completa?', 'Os loteamentos s\u00e3o planejados com infraestrutura urbana completa. Consulte nossa equipe para conhecer os itens deste empreendimento.'],
@@ -79,9 +81,10 @@ function Progress({ item }) {
 }
 
 function Gallery({ item }) {
+    const [lightbox, setLightbox] = useState(null);
     const media = galleryMedia(item);
     if (!media.length) return null;
-    return <section className="py-14 tablet:py-16"><SectionContainer><Eyebrow>Galeria</Eyebrow><Title>Conhe&ccedil;a cada detalhe do loteamento</Title><Carousel label="Galeria do loteamento" className="mt-7" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]">{media.map((asset) => { const video = asset.type === 'video' || asset.mime_type?.startsWith('video/'); return <div key={asset.id} className="aspect-[1.16/1] overflow-hidden rounded-lg bg-ink">{video ? <video src={asset.url} poster={asset.poster_url || undefined} controls playsInline preload="none" className="h-full w-full object-cover" /> : <img src={asset.url} alt={asset.alt_text || ''} className="h-full w-full object-cover" />}</div>; })}</Carousel></SectionContainer></section>;
+    return <section className="py-14 tablet:py-16"><SectionContainer><Eyebrow>Galeria</Eyebrow><Title>Conhe&ccedil;a cada detalhe do loteamento</Title><Carousel label="Galeria do loteamento" className="mt-7" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null}>{media.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mídia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
 function Faq() {

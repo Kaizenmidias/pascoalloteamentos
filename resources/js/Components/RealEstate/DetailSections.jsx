@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import Container from '../UI/Container';
 import Gallery from './Gallery';
 import ConstructionProgress from './ConstructionProgress';
 import Map from './Map';
 import Carousel from '../UI/Carousel';
+import MediaLightbox, { MediaLightboxTrigger } from './MediaLightbox';
 
 export const featuredMedia = (item) => item.media_assets?.find((asset) => asset.pivot?.is_featured) || item.media_assets?.[0];
 export const galleryMedia = (item) => item.media_assets?.filter((asset) => !asset.pivot?.collection || asset.pivot.collection === 'gallery') || [];
@@ -53,10 +55,13 @@ export function ProductGallery({ item, title }) {
 }
 
 export function PlansSection({ item, title = 'Conheça as plantas disponíveis', carousel = false }) {
+    const [lightbox, setLightbox] = useState(null);
     const plans = (item.floor_plans || []).filter((plan) => plan.is_active !== false);
+    const media = plans.map((plan) => plan.media_asset && ({ ...plan.media_asset, alt_text: plan.media_asset.alt_text || plan.name })).filter(Boolean);
     if (!plans.length) return null;
-    const cards = plans.map((plan) => <article key={plan.id} className="h-full overflow-hidden rounded-card bg-white shadow-card">{plan.media_asset && <img src={plan.media_asset.url} alt={plan.name} className="aspect-[4/3] w-full object-cover" />}<div className="p-5"><h3 className="text-lg font-medium">{plan.name}</h3><div className="mt-3 flex flex-wrap gap-3 text-sm text-muted">{plan.area && <span>{Number(plan.area).toLocaleString('pt-BR')} m²</span>}{plan.bedrooms && <span>{plan.bedrooms} quartos</span>}{plan.bathrooms && <span>{plan.bathrooms} banheiros</span>}{plan.suites && <span>{plan.suites} suítes</span>}{plan.parking_spaces && <span>{plan.parking_spaces} vagas</span>}</div>{plan.external_url && <a href={plan.external_url} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-sm font-medium text-brand">Abrir planta</a>}</div></article>);
-    return <section id="plantas" className="bg-surface py-[var(--section-space)]"><Container><p className="eyebrow">Plantas</p><h2 className="section-title mt-3">{item.floor_plans_title || title}</h2>{item.floor_plans_support_text && <p className="mt-5 max-w-3xl text-base leading-7 text-muted">{item.floor_plans_support_text}</p>}{carousel ? <Carousel className="mt-10" label="Plantas disponíveis">{cards}</Carousel> : <div className="mt-10 grid gap-6 tablet:grid-cols-2 desktop:grid-cols-3">{cards}</div>}</Container></section>;
+    let mediaIndex = -1;
+    const cards = plans.map((plan) => { if (plan.media_asset) mediaIndex += 1; const index = mediaIndex; return <article key={plan.id} className="h-full overflow-hidden rounded-card bg-white shadow-card">{plan.media_asset && <MediaLightboxTrigger index={index} onOpen={setLightbox} className="aspect-[4/3] w-full" label={`Ampliar planta ${plan.name}`}><img src={plan.media_asset.url} alt={plan.name} className="h-full w-full object-cover" /></MediaLightboxTrigger>}<div className="p-5"><h3 className="text-lg font-medium">{plan.name}</h3><div className="mt-3 flex flex-wrap gap-3 text-sm text-muted">{plan.area && <span>{Number(plan.area).toLocaleString('pt-BR')} m²</span>}{plan.bedrooms && <span>{plan.bedrooms} quartos</span>}{plan.bathrooms && <span>{plan.bathrooms} banheiros</span>}{plan.suites && <span>{plan.suites} suítes</span>}{plan.parking_spaces && <span>{plan.parking_spaces} vagas</span>}</div>{plan.external_url && <a href={plan.external_url} target="_blank" rel="noreferrer" className="mt-4 inline-flex text-sm font-medium text-brand">Abrir planta</a>}</div></article>; });
+    return <section id="plantas" className="bg-surface py-[var(--section-space)]"><Container><p className="eyebrow">Plantas</p><h2 className="section-title mt-3">{item.floor_plans_title || title}</h2>{item.floor_plans_support_text && <p className="mt-5 max-w-3xl text-base leading-7 text-muted">{item.floor_plans_support_text}</p>}{carousel ? <Carousel className="mt-10" label="Plantas disponíveis" paused={lightbox !== null}>{cards}</Carousel> : <div className="mt-10 grid gap-6 tablet:grid-cols-2 desktop:grid-cols-3">{cards}</div>}</Container><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
 export function DocumentsSection({ documents = [] }) {

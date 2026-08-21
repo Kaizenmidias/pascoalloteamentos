@@ -92,6 +92,13 @@ img { display: block; max-width: 100%; }
     100% { opacity: 0; left: 120%; }
 }
 
+@keyframes media-lightbox-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.media-lightbox { animation: media-lightbox-in .2s ease-out; }
+
 a.bg-brand, button.bg-brand { color: #fff !important; }
 
 @media (max-width: 48rem) {

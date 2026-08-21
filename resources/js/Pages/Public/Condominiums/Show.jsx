@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import PublicLayout from '../../../Components/Layout/PublicLayout';
 import Container from '../../../Components/UI/Container';
 import Carousel from '../../../Components/UI/Carousel';
@@ -6,6 +7,7 @@ import ConstructionProgress from '../../../Components/RealEstate/ConstructionPro
 import Map from '../../../Components/RealEstate/Map';
 import { featuredMedia, galleryMedia, WhatsAppCTA } from '../../../Components/RealEstate/DetailSections';
 import FeatureIcon from '../../../Components/RealEstate/FeatureIcon';
+import MediaLightbox, { MediaLightboxTrigger, MediaTile } from '../../../Components/RealEstate/MediaLightbox';
 
 const fixedFaqs = [
     ['O empreendimento possui toda a infraestrutura necessaria?', 'Sim. Os condominios sao planejados com infraestrutura completa, areas de lazer, seguranca e conforto.'],
@@ -63,24 +65,27 @@ function Promotions({ promotions }) {
     return <section id="promocoes" className="scroll-mt-28 pb-14 tablet:pb-16"><SectionContainer>{promotions.length === 1 ? <PromotionCard promotion={promotions[0]} /> : <Carousel label="Promocoes" itemClassName="w-[94%] tablet:w-[86%]">{promotions.map((promotion) => <PromotionCard key={promotion.id} promotion={promotion} />)}</Carousel>}</SectionContainer></section>;
 }
 
-function GalleryItem({ asset }) {
-    const video = asset.type === 'video' || asset.mime_type?.startsWith('video/');
-    return <div className="aspect-[1.16/1] overflow-hidden rounded-lg bg-ink">{video ? <video src={asset.url} poster={asset.poster_url || undefined} controls playsInline preload="none" className="h-full w-full object-cover" /> : <img src={asset.url} alt={asset.alt_text || ''} className="h-full w-full object-cover" />}</div>;
+function GalleryItem({ asset, index, onOpen }) {
+    return <MediaLightboxTrigger index={index} onOpen={onOpen} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mídia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>;
 }
 
 function GallerySection({ items }) {
+    const [lightbox, setLightbox] = useState(null);
     if (!items.length) return null;
-    return <section id="galeria" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><Eyebrow>Galeria</Eyebrow><SectionTitle>Conhe&ccedil;a cada detalhe do empreendimento</SectionTitle><Carousel label="Galeria do condominio" className="mt-7" itemClassName="w-[82%] tablet:w-[calc((100%-2.5rem)/3)]">{items.map((asset) => <GalleryItem key={asset.id} asset={asset} />)}</Carousel></SectionContainer></section>;
+    return <section id="galeria" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><Eyebrow>Galeria</Eyebrow><SectionTitle>Conhe&ccedil;a cada detalhe do empreendimento</SectionTitle><Carousel label="Galeria do condominio" className="mt-7" itemClassName="w-[82%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null}>{items.map((asset, index) => <GalleryItem key={asset.id} asset={asset} index={index} onOpen={setLightbox} />)}</Carousel></SectionContainer><MediaLightbox items={items} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
-function PlanCard({ plan }) {
-    return <article className="overflow-hidden rounded-xl border border-line bg-white"><div className="p-4"><span className="rounded-sm bg-brand px-2 py-1 text-[.58rem] uppercase text-white">Planta</span><h3 className="mt-2 text-sm font-normal text-ink">{plan.name}</h3></div>{plan.media_asset && <img src={plan.media_asset.url} alt={plan.name} className="aspect-[1.22/1] w-full object-contain p-4" />}<div className="grid grid-cols-2 border-t border-line tablet:grid-cols-4">{[['Area privativa', plan.area && `${Number(plan.area).toLocaleString('pt-BR')} m2`], ['Quartos', plan.bedrooms], ['Banheiros', plan.bathrooms], ['Vagas', plan.parking_spaces]].filter(([, value]) => value).map(([label, value]) => <div key={label} className="border-r border-line p-3 text-center last:border-r-0"><span className="block text-[.55rem] uppercase text-muted">{label}</span><strong className="mt-1 block text-xs font-normal text-ink">{value}</strong></div>)}</div></article>;
+function PlanCard({ plan, mediaIndex, onOpen }) {
+    return <article className="overflow-hidden rounded-xl border border-line bg-white"><div className="p-4"><span className="rounded-sm bg-brand px-2 py-1 text-[.58rem] uppercase text-white">Planta</span><h3 className="mt-2 text-sm font-normal text-ink">{plan.name}</h3></div>{plan.media_asset && <MediaLightboxTrigger index={mediaIndex} onOpen={onOpen} className="aspect-[1.22/1] w-full p-4" label={`Ampliar planta ${plan.name}`}><img src={plan.media_asset.url} alt={plan.name} className="h-full w-full object-contain" /></MediaLightboxTrigger>}<div className="grid grid-cols-2 border-t border-line tablet:grid-cols-4">{[['Area privativa', plan.area && `${Number(plan.area).toLocaleString('pt-BR')} m2`], ['Quartos', plan.bedrooms], ['Banheiros', plan.bathrooms], ['Vagas', plan.parking_spaces]].filter(([, value]) => value).map(([label, value]) => <div key={label} className="border-r border-line p-3 text-center last:border-r-0"><span className="block text-[.55rem] uppercase text-muted">{label}</span><strong className="mt-1 block text-xs font-normal text-ink">{value}</strong></div>)}</div></article>;
 }
 
 function Plans({ item }) {
+    const [lightbox, setLightbox] = useState(null);
     const plans = (item.floor_plans || []).filter((plan) => plan.is_active !== false);
+    const media = plans.map((plan) => plan.media_asset && ({ ...plan.media_asset, alt_text: plan.media_asset.alt_text || plan.name })).filter(Boolean);
     if (!plans.length) return null;
-    return <section id="plantas" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.9fr_1.1fr] tablet:items-center"><div><Eyebrow>Plantas</Eyebrow><SectionTitle>{item.floor_plans_title || 'Conhe\u00e7a as plantas dispon\u00edveis'}</SectionTitle>{item.floor_plans_support_text && <p className="mt-5 text-sm font-light leading-7 text-muted">{item.floor_plans_support_text}</p>}</div><Carousel label="Plantas disponiveis" itemClassName="w-[94%]">{plans.map((plan) => <PlanCard key={plan.id} plan={plan} />)}</Carousel></SectionContainer></section>;
+    let mediaIndex = -1;
+    return <section id="plantas" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.9fr_1.1fr] tablet:items-center"><div><Eyebrow>Plantas</Eyebrow><SectionTitle>{item.floor_plans_title || 'Conhe\u00e7a as plantas dispon\u00edveis'}</SectionTitle>{item.floor_plans_support_text && <p className="mt-5 text-sm font-light leading-7 text-muted">{item.floor_plans_support_text}</p>}</div><Carousel label="Plantas disponiveis" itemClassName="w-[94%]" paused={lightbox !== null}>{plans.map((plan) => { if (plan.media_asset) mediaIndex += 1; return <PlanCard key={plan.id} plan={plan} mediaIndex={mediaIndex} onOpen={setLightbox} />; })}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
 function Location({ item }) {

@@ -4,6 +4,7 @@ import Container from '../../../Components/UI/Container';
 import SeoHead from '../../../Components/SEO/SeoHead';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
 import { galleryMedia } from '../../../Components/RealEstate/DetailSections';
+import MediaLightbox, { MediaLightboxTrigger, MediaTile } from '../../../Components/RealEstate/MediaLightbox';
 
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value)) : null;
 const formatNumber = (value) => Number(value).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
@@ -13,31 +14,16 @@ const whatsappUrl = (item, fallback) => { const phone = String(item.whatsapp_con
 function PropertyGallery({ items }) {
     const [start, setStart] = useState(0);
     const [paused, setPaused] = useState(false);
+    const [lightbox, setLightbox] = useState(null);
     useEffect(() => {
-        if (items.length < 2 || paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+        if (items.length < 2 || paused || lightbox !== null || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
         const timer = window.setInterval(() => setStart((current) => (current + 1) % items.length), 5000);
         return () => window.clearInterval(timer);
-    }, [items.length, paused]);
-    useEffect(() => {
-        const gallery = document.querySelector('section[aria-label^="Galeria do"]');
-        if (!gallery) return undefined;
-        const pause = () => setPaused(true);
-        const resume = () => setPaused(false);
-        gallery.addEventListener('mouseenter', pause);
-        gallery.addEventListener('mouseleave', resume);
-        gallery.addEventListener('play', pause, true);
-        gallery.addEventListener('pause', resume, true);
-        return () => {
-            gallery.removeEventListener('mouseenter', pause);
-            gallery.removeEventListener('mouseleave', resume);
-            gallery.removeEventListener('play', pause, true);
-            gallery.removeEventListener('pause', resume, true);
-        };
-    }, []);
+    }, [items.length, lightbox, paused]);
     if (!items.length) return null;
-    const visible = [0, 1, 2].map((offset) => items[(start + offset) % items.length]).filter((item, index, list) => item && list.indexOf(item) === index);
+    const visible = [0, 1, 2].map((offset) => ({ media: items[(start + offset) % items.length], index: (start + offset) % items.length })).filter((entry, index, list) => entry.media && list.findIndex((candidate) => candidate.media === entry.media) === index);
     const move = (direction) => setStart((current) => (current + direction + items.length) % items.length);
-    return <section className="relative overflow-hidden bg-ink pt-[76px]" aria-label="Galeria do imóvel"><div className="grid h-[340px] gap-1 tablet:h-[470px] tablet:grid-cols-2 desktop:h-[520px] desktop:grid-cols-3">{visible.map((media, index) => { const video = media.type === 'video' || media.mime_type?.startsWith('video/'); return <div key={media.id || index} className={`${index > 0 ? 'hidden tablet:block' : ''} ${index > 1 ? 'tablet:hidden desktop:block' : ''}`}>{video ? <video src={media.url} poster={media.poster_url || undefined} controls playsInline preload="metadata" className="h-full w-full object-cover" /> : <img src={media.url} alt={media.alt_text || ''} className="h-full w-full object-cover" />}</div>; })}</div>{items.length > 1 && <><button type="button" onClick={() => move(-1)} aria-label="Mídia anterior" className="absolute bottom-5 right-20 grid size-11 place-items-center rounded-md bg-brand text-2xl text-white">&#8249;</button><button type="button" onClick={() => move(1)} aria-label="Próxima mídia" className="absolute bottom-5 right-5 grid size-11 place-items-center rounded-md bg-brand text-2xl text-white">&#8250;</button></>}</section>;
+    return <section className="relative overflow-hidden bg-ink pt-[76px]" aria-label="Galeria do imóvel" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}><div className="grid h-[340px] gap-1 tablet:h-[470px] tablet:grid-cols-2 desktop:h-[520px] desktop:grid-cols-3">{visible.map(({ media, index: mediaIndex }, index) => <MediaLightboxTrigger key={media.id || mediaIndex} index={mediaIndex} onOpen={setLightbox} className={`h-full w-full ${index > 0 ? 'hidden tablet:block' : ''} ${index > 1 ? 'tablet:hidden desktop:block' : ''}`} label={`Ampliar mídia ${mediaIndex + 1}`}><MediaTile item={media} /></MediaLightboxTrigger>)}</div>{items.length > 1 && <><button type="button" onClick={() => move(-1)} aria-label="Mídia anterior" className="absolute bottom-5 right-20 grid size-11 place-items-center rounded-md bg-brand text-2xl text-white">&#8249;</button><button type="button" onClick={() => move(1)} aria-label="Próxima mídia" className="absolute bottom-5 right-5 grid size-11 place-items-center rounded-md bg-brand text-2xl text-white">&#8250;</button></>}<MediaLightbox items={items} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
 const InfoCell = ({ label, value }) => present(value) ? <div className="rounded-xl border border-line px-4 py-3"><span className="block text-xs uppercase text-muted">{label}</span><strong className="mt-1 block font-medium text-brand">{value}</strong></div> : null;
