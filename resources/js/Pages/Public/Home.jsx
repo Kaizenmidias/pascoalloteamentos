@@ -162,7 +162,7 @@ export default function Home({ featuredItems = [], homeEntities = [], posts = []
                 <Container className="grid items-start gap-9 desktop:grid-cols-[minmax(220px,25%)_minmax(0,75%)] desktop:gap-10">
                     <div className="desktop:sticky desktop:top-32">
                         <p className="eyebrow">Blog</p>
-                        <h2 className="mt-3 max-w-[18rem] text-[clamp(2rem,3.4vw,3.25rem)] font-light leading-[1.08] tracking-[-.025em] text-ink">Conteúdos que inspiram decisões</h2>
+                        <h2 className="mt-3 max-w-[18rem] text-[clamp(2rem,3.4vw,46px)] font-light leading-[1.08] tracking-[-.025em] text-ink">Conteúdos que inspiram decisões</h2>
                         <Link href="/blog" className="mt-7 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[.055em] text-brand transition-colors hover:text-brand-dark">Ver todos os artigos <span aria-hidden="true">&rarr;</span></Link>
                     </div>
                     <div className="grid gap-5 tablet:grid-cols-2 desktop:grid-cols-3">
