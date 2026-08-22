@@ -5,13 +5,13 @@ import ConstructionProgress from './ConstructionProgress';
 import Map from './Map';
 import Carousel from '../UI/Carousel';
 import MediaLightbox, { MediaLightboxTrigger } from './MediaLightbox';
+import { whatsappUrl } from '../../Support/whatsapp';
 
 export const featuredMedia = (item) => item.media_assets?.find((asset) => asset.pivot?.is_featured) || item.media_assets?.[0];
 export const galleryMedia = (item) => item.media_assets?.filter((asset) => !asset.pivot?.collection || asset.pivot.collection === 'gallery') || [];
 
-export function WhatsAppCTA({ item, label = 'Falar no WhatsApp', className = '' }) {
-    const number = String(item.whatsapp_contact || '5545999999999').replace(/\D/g, '');
-    return <a href={`https://wa.me/${number}`} target="_blank" rel="noreferrer" className={`brand-button inline-flex justify-center ${className}`}>{label}</a>;
+export function WhatsAppCTA({ item, productType = 'condominium', label = 'Falar no WhatsApp', className = '' }) {
+    return <a href={whatsappUrl({ type: productType, title: item.title })} target="_blank" rel="noreferrer" className={`brand-button inline-flex justify-center ${className}`}>{label}</a>;
 }
 
 export function ProductHero({ item, eyebrow, facts = [] }) {
@@ -45,7 +45,8 @@ export function DifferentialsGrid({ items = [] }) {
 export function PromotionSection({ item, areaLabel = 'Área a partir de' }) {
     if (!item.promotion_headline && !item.promotion_price && !item.sale_price && !item.promotion_media) return null;
     const price = item.promotion_price || item.sale_price;
-    return <section className="bg-brand py-[var(--section-space)] text-white"><Container className="grid gap-10 desktop:grid-cols-2 desktop:items-center"><div><p className="text-xs uppercase tracking-widest text-white/70">Oportunidade</p><h2 className="mt-3 text-4xl font-normal">{item.promotion_headline || item.title}</h2>{price && <p className="mt-6 text-3xl">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)}</p>}{(item.minimum_unit_area || item.minimum_lot_area) && <p className="mt-2 text-white/75">{areaLabel}: {Number(item.minimum_unit_area || item.minimum_lot_area).toLocaleString('pt-BR')} m²</p>}{item.promotion_url && <a href={item.promotion_url} className="mt-8 inline-flex rounded-lg bg-white px-6 py-3 text-sm font-medium uppercase text-brand">Quero saber mais</a>}</div>{item.promotion_media && <img src={item.promotion_media.url} alt="" className="aspect-[4/3] w-full rounded-card object-cover" />}</Container></section>;
+    const type = item.minimum_lot_area ? 'subdivision' : item.minimum_unit_area ? 'condominium' : 'property';
+    return <section className="bg-brand py-[var(--section-space)] text-white"><Container className="grid gap-10 desktop:grid-cols-2 desktop:items-center"><div><p className="text-xs uppercase tracking-widest text-white/70">Oportunidade</p><h2 className="mt-3 text-4xl font-normal">{item.promotion_headline || item.title}</h2>{price && <p className="mt-6 text-3xl">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)}</p>}{(item.minimum_unit_area || item.minimum_lot_area) && <p className="mt-2 text-white/75">{areaLabel}: {Number(item.minimum_unit_area || item.minimum_lot_area).toLocaleString('pt-BR')} m²</p>}<a href={whatsappUrl({ type, title: item.title })} target="_blank" rel="noreferrer" className="mt-8 inline-flex rounded-lg bg-white px-6 py-3 text-sm font-medium uppercase text-brand">Quero saber mais</a></div>{item.promotion_media && <img src={item.promotion_media.url} alt="" className="aspect-[4/3] w-full rounded-card object-cover" />}</Container></section>;
 }
 
 export function ProductGallery({ item, title }) {

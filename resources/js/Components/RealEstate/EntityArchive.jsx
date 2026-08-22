@@ -58,7 +58,7 @@ export default function EntityArchive({ entity, items, basePath, filters, cities
                 ) : (
                     <EmptyState title="Nenhum empreendimento encontrado" actionLabel="Limpar filtros" onAction={() => router.get(basePath, {}, { preserveScroll: true, replace: true })}>Tente selecionar outra cidade, status ou tipo.</EmptyState>
                 )}
-                {items.links?.length > 3 && <nav className="mt-10 flex justify-center gap-2">{items.links.map((link, index) => <Link key={index} href={link.url || '#'} dangerouslySetInnerHTML={{ __html: link.label }} className={`grid min-h-10 min-w-10 place-items-center rounded-md border px-3 text-sm ${link.active ? 'border-brand bg-brand text-white' : 'border-line'}`} />)}</nav>}
+                {items.links?.length > 3 && <nav className="mt-10 flex justify-center gap-2">{items.links.map((link, index) => link.url ? <Link key={index} href={link.url} dangerouslySetInnerHTML={{ __html: link.label }} className={`grid min-h-10 min-w-10 place-items-center rounded-md border px-3 text-sm ${link.active ? 'border-brand bg-brand text-white' : 'border-line'}`} /> : <span key={index} className="grid min-h-10 min-w-10 place-items-center rounded-md border border-line px-3 text-sm text-muted/40" dangerouslySetInnerHTML={{ __html: link.label }} />)}</nav>}
             </Container>
         </PublicLayout>
     );

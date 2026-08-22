@@ -62,6 +62,13 @@ class CondominiumController extends Controller
         return redirect()->route('admin.condominiums.edit', $condominium)->with('success', 'Condomínio atualizado.');
     }
 
+    public function destroy(Condominium $condominium): RedirectResponse
+    {
+        $condominium->delete();
+
+        return redirect()->route('admin.condominiums.index')->with('success', 'Condomínio excluído com segurança.');
+    }
+
     private function options(): array
     {
         return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => CondominiumType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::with('iconMedia')->where('is_active', true)->where(fn ($query) => $query->whereNull('scope')->orWhere('scope', 'condominium'))->orderBy('sort_order')->get(), 'stageDefinitions' => ConstructionStageCatalog::definitionsFor(Condominium::class)];

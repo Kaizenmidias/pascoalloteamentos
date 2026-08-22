@@ -15,9 +15,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('locations/cities', [LocationController::class, 'cities'])->name('locations.cities');
     Route::post('media-uploads', MediaUploadController::class)->name('media-uploads.store');
-    Route::resource('properties', PropertyController::class)->except(['show', 'destroy']);
-    Route::resource('condominiums', CondominiumController::class)->except(['show', 'destroy']);
-    Route::resource('subdivisions', SubdivisionController::class)->except(['show', 'destroy']);
+    Route::resource('properties', PropertyController::class)->except(['show']);
+    Route::resource('condominiums', CondominiumController::class)->except(['show']);
+    Route::resource('subdivisions', SubdivisionController::class)->except(['show']);
     Route::get('classifications', [ClassificationController::class, 'index'])->name('classifications.index');
     Route::post('classifications/{group}', [ClassificationController::class, 'store'])->name('classifications.store');
     Route::put('classifications/{group}/{item}', [ClassificationController::class, 'update'])->name('classifications.update');

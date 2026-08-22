@@ -19,6 +19,7 @@ const text = {
     address: 'Endere\u00e7o',
     business: 'Tipo de neg\u00f3cio',
 };
+const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function Form({ item, options }) {
     const editing = Boolean(item);
@@ -52,7 +53,7 @@ export default function Form({ item, options }) {
         <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel={`Salvar ${text.condominium}`} sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card, Hero e seções principais." /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">{text.section}</p><h2 className="mt-2 text-lg font-medium text-ink">Hero do {text.condominium}</h2><p className="mt-1 text-sm text-muted">Estes campos formam a abertura da p&aacute;gina. Estado e cidade s&atilde;o selecionados no bloco seguinte.</p></div>
-                <Field label={text.title} value={data.title} onChange={(event) => setData('title', event.target.value)} error={errors.title} />
+                <Field label={text.title} value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: !editing && (!current.slug || current.slug === slugify(current.title)) ? slugify(title) : current.slug })); }} error={errors.title} />
                 <SelectField label="Status da obra" options={options.statuses} value={data.development_status_id} onChange={(event) => setData('development_status_id', event.target.value)} />
                 <div className="tablet:col-span-2"><Field label={text.initialText} as="textarea" value={data.excerpt} onChange={(event) => setData('excerpt', event.target.value)} /></div>
                 <Field label={'WhatsApp espec\u00edfico (opcional)'} value={data.whatsapp_contact} onChange={(event) => setData('whatsapp_contact', event.target.value)} />
@@ -62,7 +63,7 @@ export default function Form({ item, options }) {
 
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Informa&ccedil;&otilde;es gerais</h2><p className="mt-1 text-sm text-muted">Identifica&ccedil;&atilde;o interna e classifica&ccedil;&otilde;es do {text.condominium}.</p></div>
-                <Field label="Slug" value={data.slug} onChange={(event) => setData('slug', event.target.value)} error={errors.slug} />
+                <div><Field label="Slug" value={data.slug} onChange={(event) => setData('slug', slugify(event.target.value))} error={errors.slug} /><button type="button" onClick={() => setData('slug', slugify(data.title))} className="mt-2 text-xs font-medium text-brand">Gerar novamente</button></div>
                 <Field label={'C\u00f3digo de refer\u00eancia'} value={data.reference_code} onChange={(event) => setData('reference_code', event.target.value)} error={errors.reference_code} />
                 <SelectField label={`Tipo de ${text.condominium}`} options={options.types} value={data.condominium_type_id} onChange={(event) => setData('condominium_type_id', event.target.value)} />
                 <SelectField label={text.business} options={options.businessTypes} value={data.business_type_id} onChange={(event) => setData('business_type_id', event.target.value)} />

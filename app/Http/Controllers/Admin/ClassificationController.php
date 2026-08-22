@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
+use App\Support\UniqueSlug;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -117,10 +118,12 @@ class ClassificationController extends Controller
             $rules['icon'] = ['nullable', 'string', 'max:255'];
         }
 
-        return $request->validate($rules) + [
-            'slug' => Str::slug($request->string('slug')->toString() ?: $request->string('name')->toString()),
-            'sort_order' => (int) $request->input('sort_order', 0),
-            'is_active' => $request->boolean('is_active', true),
-        ];
+        $validated = $request->validate($rules);
+
+        $validated['slug'] = $request->filled('slug') ? Str::slug($request->string('slug')->toString()) : UniqueSlug::for($table, $request->string('name')->toString(), $record?->id, 'classificacao');
+        $validated['sort_order'] = (int) $request->input('sort_order', 0);
+        $validated['is_active'] = $request->boolean('is_active', true);
+
+        return $validated;
     }
 }

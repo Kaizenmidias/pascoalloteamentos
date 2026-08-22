@@ -10,6 +10,7 @@ import { ProductFormLayout, ProductCard, PublicationCard, SeoCard } from '../../
 import RichContentEditor from '../../../Components/Admin/RichContentEditor';
 
 const numericFields = [['regular_price', 'Preço regular'], ['sale_price', 'Preço de venda'], ['rent_price', 'Preço de locação'], ['condominium_fee', 'Condomínio'], ['iptu', 'IPTU'], ['usable_area', 'Área útil'], ['total_area', 'Área total'], ['built_area', 'Área construída'], ['land_area', 'Área do terreno'], ['bedrooms', 'Quartos'], ['suites', 'Suítes'], ['bathrooms', 'Banheiros'], ['lavatories', 'Lavabos'], ['parking_spaces', 'Vagas'], ['rooms', 'Salas']];
+const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function Form({ item, options }) {
     const editing = Boolean(item);
@@ -65,8 +66,8 @@ export default function Form({ item, options }) {
             <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel="Salvar imóvel" sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"], ["furnished", "Mobiliado"], ["accepts_financing", "Aceita financiamento"], ["accepts_exchange", "Aceita permuta"], ["is_new", "Imóvel novo"]]} /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-2">
                     <div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Geral e identificação</h2><p className="mt-1 text-sm text-muted">Dados exibidos junto à galeria principal do imóvel.</p></div>
-                    <Field label="Título" value={data.title} onChange={(e) => setData('title', e.target.value)} error={errors.title} />
-                    <Field label="Slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} error={errors.slug} />
+                    <Field label="Título" value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: !editing && (!current.slug || current.slug === slugify(current.title)) ? slugify(title) : current.slug })); }} error={errors.title} />
+                    <div><Field label="Slug" value={data.slug} onChange={(event) => setData('slug', slugify(event.target.value))} error={errors.slug} /><button type="button" onClick={() => setData('slug', slugify(data.title))} className="mt-2 text-xs font-medium text-brand">Gerar novamente</button></div>
                     <Field label="Código de referência" value={data.reference_code} onChange={(e) => setData('reference_code', e.target.value)} error={errors.reference_code} />
                     <SelectField label="Tipo de imóvel" options={options.types} value={data.property_type_id} onChange={(e) => setData('property_type_id', e.target.value)} />
                     <SelectField label="Estágio" options={options.statuses} value={data.development_status_id} onChange={(e) => setData('development_status_id', e.target.value)} />

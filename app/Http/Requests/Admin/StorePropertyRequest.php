@@ -5,10 +5,19 @@ namespace App\Http\Requests\Admin;
 use App\Http\Requests\Admin\Concerns\HasRealEstateContentRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Support\UniqueSlug;
 
 class StorePropertyRequest extends FormRequest
 {
     use HasRealEstateContentRules;
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->filled('slug')) {
+            $this->merge(['slug' => UniqueSlug::for('properties', (string) $this->input('title'), $this->route('property')?->id, 'imovel')]);
+        }
+    }
+
     public function authorize(): bool
     {
         return $this->user() !== null;
@@ -17,7 +26,7 @@ class StorePropertyRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'title' => ['required', 'string', 'max:255'], 'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('properties')],
+            'title' => ['required', 'string', 'max:255'], 'slug' => ['nullable', 'alpha_dash:ascii', 'max:255', Rule::unique('properties')],
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('properties')], 'property_type_id' => ['nullable', 'exists:property_types,id'],
             'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
             'condominium_id' => ['nullable', 'exists:condominiums,id'], 'excerpt' => ['nullable', 'string'], 'description' => ['nullable', 'string'],

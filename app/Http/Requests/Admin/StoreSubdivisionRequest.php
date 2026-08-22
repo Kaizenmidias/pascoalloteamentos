@@ -5,10 +5,19 @@ namespace App\Http\Requests\Admin;
 use App\Http\Requests\Admin\Concerns\HasRealEstateContentRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Support\UniqueSlug;
 
 class StoreSubdivisionRequest extends FormRequest
 {
     use HasRealEstateContentRules;
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->filled('slug')) {
+            $this->merge(['slug' => UniqueSlug::for('subdivisions', (string) $this->input('title'), $this->route('subdivision')?->id, 'loteamento')]);
+        }
+    }
+
     public function authorize(): bool
     {
         return $this->user() !== null;
@@ -17,7 +26,7 @@ class StoreSubdivisionRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'title' => ['required', 'string', 'max:255'], 'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('subdivisions')],
+            'title' => ['required', 'string', 'max:255'], 'slug' => ['nullable', 'alpha_dash:ascii', 'max:255', Rule::unique('subdivisions')],
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('subdivisions')],
             'subdivision_type_id' => ['nullable', 'exists:subdivision_types,id'], 'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
             'excerpt' => ['nullable', 'string'], 'address' => ['nullable', 'string', 'max:255'], 'neighborhood' => ['nullable', 'string', 'max:255'], 'postal_code' => ['nullable', 'string', 'max:12'],

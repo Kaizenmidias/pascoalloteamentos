@@ -62,6 +62,13 @@ class SubdivisionController extends Controller
         return redirect()->route('admin.subdivisions.edit', $subdivision)->with('success', 'Loteamento atualizado.');
     }
 
+    public function destroy(Subdivision $subdivision): RedirectResponse
+    {
+        $subdivision->delete();
+
+        return redirect()->route('admin.subdivisions.index')->with('success', 'Loteamento excluído com segurança.');
+    }
+
     private function options(): array
     {
         return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => SubdivisionType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'features' => Feature::with('iconMedia')->where('is_active', true)->where(fn ($query) => $query->whereNull('scope')->orWhereIn('scope', ['subdivision', 'condominium']))->orderBy('sort_order')->get(), 'stageDefinitions' => ConstructionStageCatalog::definitionsFor(Subdivision::class)];

@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use App\Support\UniqueSlug;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -172,7 +173,7 @@ class CmsController extends Controller
 
     public function storeCategory(Request $request): RedirectResponse
     {
-        $request->merge(['slug' => Str::slug($request->input('slug') ?: $request->input('name'))]);
+        $request->merge(['slug' => $request->filled('slug') ? Str::slug($request->input('slug')) : UniqueSlug::for('blog_categories', (string) $request->input('name'), fallback: 'categoria')]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'alpha_dash:ascii', 'max:255', 'unique:blog_categories'],
@@ -192,7 +193,7 @@ class CmsController extends Controller
 
     public function updateCategory(Request $request, BlogCategory $category): RedirectResponse
     {
-        $request->merge(['slug' => Str::slug($request->input('slug') ?: $request->input('name'))]);
+        $request->merge(['slug' => $request->filled('slug') ? Str::slug($request->input('slug')) : UniqueSlug::for('blog_categories', (string) $request->input('name'), $category->id, 'categoria')]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('blog_categories')->ignore($category)],
@@ -384,9 +385,12 @@ class CmsController extends Controller
 
     private function savePage(Request $request, Page $page): void
     {
+        if (! $request->filled('slug')) {
+            $request->merge(['slug' => UniqueSlug::for('pages', (string) $request->input('title'), $page->id, 'pagina')]);
+        }
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => ['required', 'alpha_dash:ascii', 'max:255', Rule::unique('pages')->ignore($page)],
+            'slug' => ['nullable', 'alpha_dash:ascii', 'max:255', Rule::unique('pages')->ignore($page)],
             'content' => 'nullable|string',
             'template' => 'required|string|max:100',
             'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
@@ -473,15 +477,7 @@ class CmsController extends Controller
         $seo = ['title' => Arr::pull($data, 'seo_title'), 'description' => Arr::pull($data, 'seo_description')];
         $data['content'] = SafeRichHtml::clean($data['content']);
 
-        if (empty($data['slug'])) {
-            $baseSlug = Str::slug($data['title']) ?: 'postagem';
-            $slug = $baseSlug;
-            $suffix = 2;
-            while (BlogPost::query()->where('slug', $slug)->when($post->exists, fn ($query) => $query->whereKeyNot($post->getKey()))->exists()) {
-                $slug = $baseSlug.'-'.$suffix++;
-            }
-            $data['slug'] = $slug;
-        }
+        if (empty($data['slug'])) $data['slug'] = UniqueSlug::for('blog_posts', $data['title'], $post->id, 'postagem');
 
         if ($image) {
             $data['featured_media_id'] = $this->media->store($image, 'blog')->id;

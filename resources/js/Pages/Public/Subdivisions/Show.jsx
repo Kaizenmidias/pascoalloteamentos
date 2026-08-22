@@ -8,6 +8,8 @@ import FeatureIcon from '../../../Components/RealEstate/FeatureIcon';
 import Map from '../../../Components/RealEstate/Map';
 import { featuredMedia, galleryMedia } from '../../../Components/RealEstate/DetailSections';
 import MediaLightbox, { MediaLightboxTrigger, MediaTile } from '../../../Components/RealEstate/MediaLightbox';
+import { whatsappUrl } from '../../../Support/whatsapp';
+import LeadForm from '../../../Components/RealEstate/LeadForm';
 
 const defaultFaqs = [
     ['O loteamento possui infraestrutura completa?', 'Os loteamentos s\u00e3o planejados com infraestrutura urbana completa. Consulte nossa equipe para conhecer os itens deste empreendimento.'],
@@ -21,12 +23,8 @@ const defaultFaqs = [
 const SectionContainer = ({ children, className = '' }) => <Container className={`max-w-[1280px] ${className}`}>{children}</Container>;
 const Eyebrow = ({ children, className = '' }) => <p className={`text-sm font-light uppercase tracking-[.03em] text-brand ${className}`}>{children}</p>;
 const Title = ({ children, className = '' }) => <h2 className={`mt-3 text-[2rem] font-light leading-[1.08] tracking-[-.025em] text-ink tablet:text-[2.7rem] desktop:text-[3.15rem] ${className}`}>{children}</h2>;
-const whatsappNumber = (item, fallback) => String(item.whatsapp_contact || fallback || '').replace(/\D/g, '');
-
 function WhatsAppButton({ item, fallback, className = '' }) {
-    const number = whatsappNumber(item, fallback);
-    if (!number) return null;
-    return <a href={`https://wa.me/${number}`} target="_blank" rel="noreferrer" className={`brand-button ${className}`}>Falar no WhatsApp</a>;
+    return <a href={whatsappUrl({ type: 'subdivision', title: item.title })} target="_blank" rel="noreferrer" className={`brand-button ${className}`}>Falar no WhatsApp</a>;
 }
 
 function Hero({ item, image, globalWhatsapp }) {
@@ -61,7 +59,7 @@ function Features({ items = [] }) {
 
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : null;
 function PromotionCard({ promotion }) {
-    return <article className="grid min-h-[330px] overflow-hidden rounded-xl border border-line bg-white tablet:grid-cols-[1fr_.9fr]"><div className="flex flex-col justify-center p-7 tablet:p-10"><Eyebrow>{promotion.product_name || 'Oportunidade'}</Eyebrow><h3 className="mt-3 text-[1.8rem] font-light leading-[1.08] tablet:text-[2.3rem]">{promotion.title}</h3>{promotion.text && <p className="mt-4 text-sm leading-6 text-muted">{promotion.text}</p>}<div className="mt-5">{promotion.original_price && <span className="block text-xs text-muted line-through">De {money(promotion.original_price)}</span>}<strong className="text-2xl font-medium text-brand">{money(promotion.promotional_price) || 'Consulte'}</strong></div>{promotion.button_url && <a href={promotion.button_url} className="brand-button mt-5 w-fit">{promotion.button_text || 'Tenho interesse'}</a>}</div>{promotion.media_asset && <img src={promotion.media_asset.url} alt={promotion.title} className="h-full min-h-64 w-full object-cover" />}</article>;
+    return <article className="grid min-h-[330px] overflow-hidden rounded-xl border border-line bg-white tablet:grid-cols-[1fr_.9fr]"><div className="flex flex-col justify-center p-7 tablet:p-10"><Eyebrow>{promotion.product_name || 'Oportunidade'}</Eyebrow><h3 className="mt-3 text-[1.8rem] font-light leading-[1.08] tablet:text-[2.3rem]">{promotion.title}</h3>{promotion.text && <p className="mt-4 text-sm leading-6 text-muted">{promotion.text}</p>}<div className="mt-5">{promotion.original_price && <span className="block text-xs text-muted line-through">De {money(promotion.original_price)}</span>}<strong className="text-2xl font-medium text-brand">{money(promotion.promotional_price) || 'Consulte'}</strong></div><a href={whatsappUrl({ type: 'subdivision', title: promotion.product_name || promotion.title })} target="_blank" rel="noreferrer" className="brand-button mt-5 w-fit">{promotion.button_text || 'Tenho interesse'}</a></div>{promotion.media_asset && <img src={promotion.media_asset.url} alt={promotion.title} className="h-full min-h-64 w-full object-cover" />}</article>;
 }
 function Promotions({ items = [] }) {
     const visible = items.filter((item) => item.is_active !== false && item.title);
@@ -93,5 +91,5 @@ function Faq() {
 
 export default function Show({ item, globalWhatsapp }) {
     const image = featuredMedia(item);
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><Features items={item.features} /><Promotions items={item.promotions} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><Gallery item={item} /><Faq /></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><Features items={item.features} /><Promotions items={item.promotions} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><Gallery item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section><Faq /></PublicLayout>;
 }

@@ -5,6 +5,8 @@ import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import Button from '../../../Components/UI/Button';
 
+const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
 const baseSection = (type, label) => ({
     type,
     label,
@@ -662,8 +664,8 @@ export default function Form({ item }) {
                             <p className="text-sm text-gray-500">Nome, slug, template e estado da página.</p>
                         </div>
                         <div className="grid gap-5 tablet:grid-cols-2">
-                            <Field label="Título" value={data.title} onChange={(event) => setData('title', event.target.value)} error={errors.title} />
-                            <Field label="Slug" value={data.slug} onChange={(event) => setData('slug', event.target.value)} error={errors.slug} />
+                        <Field label="Título" value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: !editing && (!current.slug || current.slug === slugify(current.title)) ? slugify(title) : current.slug })); }} error={errors.title} />
+                        <div><Field label="Slug" value={data.slug} onChange={(event) => setData('slug', slugify(event.target.value))} error={errors.slug} /><button type="button" onClick={() => setData('slug', slugify(data.title))} className="mt-2 text-xs font-medium text-brand">Gerar novamente</button></div>
                             <SelectField
                                 label="Template"
                                 options={[

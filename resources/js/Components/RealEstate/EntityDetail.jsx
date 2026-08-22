@@ -5,6 +5,7 @@ import SeoHead from '../SEO/SeoHead';
 import ConstructionProgress from './ConstructionProgress';
 import FeatureGrid from './FeatureGrid';
 import LeadForm from './LeadForm';
+import { whatsappUrl } from '../../Support/whatsapp';
 import Map from './Map';
 import PriceDisplay from './PriceDisplay';
 import Gallery from './Gallery';
@@ -67,7 +68,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                         <div className="rounded-card bg-white p-6 shadow-card">
                             {priceKey && <PriceDisplay value={item[priceKey]} prefix={item.regular_price ? `De ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.regular_price)}` : 'Por apenas'} />}
                             {isProperty && <p className="mt-4 text-sm leading-6 text-muted">{[item.address, item.address_number, item.neighborhood, item.city?.name].filter(Boolean).join(', ')}</p>}
-                            {!isProperty && <a className="brand-button mt-6 inline-flex w-full justify-center" href={`https://wa.me/${item.whatsapp_contact || '5545999999999'}`}>Falar no WhatsApp</a>}
+                            {!isProperty && <a className="brand-button mt-6 inline-flex w-full justify-center" href={whatsappUrl({ type: entityType, title: item.title })} target="_blank" rel="noreferrer">Falar no WhatsApp</a>}
                         </div>
                     </div>
 
@@ -158,7 +159,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                             <div className="rounded-card bg-white p-6 shadow-card">
                                 <PriceDisplay value={item[priceKey]} prefix={item.regular_price ? `De ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.regular_price)}` : 'Por apenas'} />
                             </div>
-                            <LeadForm entityType={entityType} entityId={item.id} />
+                            <LeadForm entityType={entityType} entityId={item.id} entityName={item.title} />
                         </aside>
                     </div>
                 </Container>
@@ -235,7 +236,7 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                                 <p className="eyebrow">Localização</p>
                                 <h2 className="section-title mt-3">Localização estratégica para facilitar seu dia a dia</h2>
                                 <p className="mt-5 text-base font-light leading-[1.7] text-muted desktop:text-lg">Próximo aos principais acessos da cidade, com infraestrutura urbana consolidada e fácil deslocamento para serviços, comércio e lazer.</p>
-                                <a className="brand-button mt-7" href={`https://wa.me/${item.whatsapp_contact || '5545999999999'}`}>Falar no WhatsApp</a>
+                                <a className="brand-button mt-7" href={whatsappUrl({ type: entityType, title: item.title })} target="_blank" rel="noreferrer">Falar no WhatsApp</a>
                             </div>
                             <Map latitude={item.latitude == null ? null : Number(item.latitude)} longitude={item.longitude == null ? null : Number(item.longitude)} />
                         </Container>

@@ -17,6 +17,16 @@ class StoreLeadRequest extends FormRequest
         return ['name' => ['required', 'string', 'max:255'], 'email' => ['nullable', 'email:rfc', 'max:255'], 'phone' => ['required', 'string', 'max:30'], 'message' => ['nullable', 'string', 'max:3000'], 'consent' => ['required', 'accepted'], 'property_id' => ['nullable', 'exists:properties,id'], 'condominium_id' => ['nullable', 'exists:condominiums,id'], 'subdivision_id' => ['nullable', 'exists:subdivisions,id'], 'source_url' => ['nullable', 'url', 'max:2048']];
     }
 
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'O nome é obrigatório.',
+            'email.email' => 'Informe um e-mail válido.',
+            'phone.required' => 'Informe seu telefone.',
+            'consent.accepted' => 'Autorize o uso dos dados para que possamos retornar o contato.',
+        ];
+    }
+
     public function after(): array
     {
         return [function (Validator $validator) {

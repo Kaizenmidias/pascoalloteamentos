@@ -62,6 +62,13 @@ class PropertyController extends Controller
         return redirect()->route('admin.properties.edit', $property)->with('success', 'Imóvel atualizado.');
     }
 
+    public function destroy(Property $property): RedirectResponse
+    {
+        $property->delete();
+
+        return redirect()->route('admin.properties.index')->with('success', 'Imóvel excluído com segurança.');
+    }
+
     private function options(): array
     {
         return ['states' => State::orderBy('name')->get(['id', 'name', 'code']), 'types' => PropertyType::where('is_active', true)->orderBy('sort_order')->get(), 'statuses' => DevelopmentStatus::where('is_active', true)->orderBy('sort_order')->get(), 'businessTypes' => Schema::hasTable('business_types') ? BusinessType::where('is_active', true)->orderBy('sort_order')->get() : collect(), 'condominiums' => Condominium::orderBy('title')->get(['id', 'title']), 'features' => Feature::orderBy('sort_order')->get()];
