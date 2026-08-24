@@ -177,6 +177,86 @@ class RealEstateShortSummaryTest extends TestCase
         );
     }
 
+    public function test_lots_info_url_persists_and_is_exposed_on_admin_and_public_pages(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        [$city, $status, $condominiumType, $subdivisionType] = $this->classifications();
+
+        $initialUrl = 'https://drive.google.com/file/d/1uzKyOeu881yvbXn4QYFUZtuxGXnbtX4O/view?usp=drive_link';
+        $updatedUrl = 'https://example.com/lotes-atualizado.pdf';
+
+        $this->actingAs($user)->post(route('admin.subdivisions.store'), [
+            'title' => 'Loteamento Informacoes',
+            'summary' => 'Resumo do loteamento',
+            'lots_info_url' => $initialUrl,
+            'city_id' => $city->id,
+            'development_status_id' => $status->id,
+            'subdivision_type_id' => $subdivisionType->id,
+            'status' => 'published',
+            'featured' => false,
+            'price_on_request' => false,
+            'feature_ids' => [],
+            'promotions' => [],
+            'uploaded_media_ids' => [],
+        ])->assertRedirect();
+
+        $subdivision = Subdivision::where('title', 'Loteamento Informacoes')->firstOrFail();
+        $this->assertSame($initialUrl, $subdivision->lots_info_url);
+
+        $this->actingAs($user)->get(route('admin.subdivisions.edit', $subdivision))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Subdivisions/Form')
+            ->where('item.lots_info_url', $initialUrl)
+        );
+
+        $this->get('/loteamentos/'.$subdivision->slug)->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Subdivisions/Show')
+            ->where('item.lots_info_url', $initialUrl)
+        );
+
+        $this->actingAs($user)->put(route('admin.subdivisions.update', $subdivision), [
+            'title' => 'Loteamento Informacoes',
+            'slug' => $subdivision->slug,
+            'summary' => 'Resumo do loteamento',
+            'lots_info_url' => $updatedUrl,
+            'city_id' => $city->id,
+            'development_status_id' => $status->id,
+            'subdivision_type_id' => $subdivisionType->id,
+            'status' => 'published',
+            'featured' => false,
+            'price_on_request' => false,
+            'feature_ids' => [],
+            'promotions' => [],
+            'uploaded_media_ids' => [],
+        ])->assertRedirect(route('admin.subdivisions.edit', $subdivision));
+
+        $subdivision = $subdivision->fresh();
+        $this->assertSame($updatedUrl, $subdivision->lots_info_url);
+
+        $this->actingAs($user)->put(route('admin.subdivisions.update', $subdivision), [
+            'title' => 'Loteamento Informacoes',
+            'slug' => $subdivision->slug,
+            'summary' => 'Resumo do loteamento',
+            'lots_info_url' => '',
+            'city_id' => $city->id,
+            'development_status_id' => $status->id,
+            'subdivision_type_id' => $subdivisionType->id,
+            'status' => 'published',
+            'featured' => false,
+            'price_on_request' => false,
+            'feature_ids' => [],
+            'promotions' => [],
+            'uploaded_media_ids' => [],
+        ])->assertRedirect(route('admin.subdivisions.edit', $subdivision));
+
+        $subdivision = $subdivision->fresh();
+        $this->assertNull($subdivision->lots_info_url);
+
+        $this->get('/loteamentos/'.$subdivision->slug)->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Subdivisions/Show')
+            ->where('item.lots_info_url', null)
+        );
+    }
+
     private function classifications(): array
     {
         $state = State::create(['name' => 'Parana', 'code' => 'PR']);

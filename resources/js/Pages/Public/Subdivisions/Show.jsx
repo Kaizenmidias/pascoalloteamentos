@@ -82,7 +82,12 @@ function Gallery({ item }) {
     const [lightbox, setLightbox] = useState(null);
     const media = galleryMedia(item);
     if (!media.length) return null;
-    return <section className="py-14 tablet:py-16"><SectionContainer><Eyebrow>Galeria</Eyebrow><Title>Conhe&ccedil;a cada detalhe do loteamento</Title><Carousel label="Galeria do loteamento" className="mt-7" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null}>{media.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mídia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+    return <section className="py-14 tablet:py-16"><SectionContainer><Eyebrow>Galeria</Eyebrow><Title>Conhe&ccedil;a cada detalhe do loteamento</Title><Carousel label="Galeria do loteamento" className="mt-7" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null}>{media.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mÃ­dia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+}
+
+function LotsInfoSection({ item }) {
+    if (!item.lots_info_url) return null;
+    return <section className="bg-surface py-14 tablet:py-[72px]"><SectionContainer className="grid gap-8 rounded-xl border border-line bg-white p-6 shadow-[0_6px_22px_rgba(17,17,17,.05)] tablet:grid-cols-[1.15fr_.85fr] tablet:items-center tablet:p-8"><div><Eyebrow>Informações dos lotes</Eyebrow><Title>Conheça as Plantas dos Lotes</Title><p className="mt-5 max-w-2xl text-base font-light leading-7 text-muted">Faça o download das plantas e tenha acesso aos detalhes do empreendimento, incluindo a divisão dos lotes, medidas e organização do projeto.</p></div><div className="rounded-2xl bg-ink p-6 text-white tablet:p-8"><p className="text-sm uppercase tracking-[.08em] text-white/70">Tudo o que você precisa em um só lugar</p><a href={item.lots_info_url} target="_blank" rel="noopener noreferrer" className="brand-button mt-5 inline-flex w-full justify-center tablet:w-auto">BAIXAR INFORMAÇÕES DOS LOTES</a></div></SectionContainer></section>;
 }
 
 function Faq() {
@@ -91,5 +96,5 @@ function Faq() {
 
 export default function Show({ item, globalWhatsapp }) {
     const image = featuredMedia(item);
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><Features items={item.features} /><Promotions items={item.promotions} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><Gallery item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section><Faq /></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><Features items={item.features} /><Promotions items={item.promotions} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><Gallery item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section><Faq /></PublicLayout>;
 }

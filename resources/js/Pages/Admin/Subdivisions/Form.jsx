@@ -20,21 +20,21 @@ const text = {
 const summaryLimit = 400;
 const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const fieldLabels = {
-    title: 'Título', slug: 'Slug', reference_code: 'Código de referência', subdivision_type_id: 'Tipo de loteamento',
-    development_status_id: 'Status do empreendimento', business_type_id: 'Tipo de negócio', city_id: 'Cidade',
-    summary: 'Breve resumo', address: 'Endereço', address_number: 'Número', complement: 'Complemento',
-    neighborhood: 'Bairro', postal_code: 'CEP', latitude: 'Latitude', longitude: 'Longitude', regular_price: 'Preço regular',
-    sale_price: 'Preço de venda', minimum_lot_area: 'Área mínima', maximum_lot_area: 'Área máxima', total_lots: 'Total de lotes',
-    available_lots: 'Lotes disponíveis', expected_delivery_date: 'Data prevista de entrega', status: 'Status de publicação',
+    title: 'TÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tulo', slug: 'Slug', reference_code: 'CÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³digo de referÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªncia', subdivision_type_id: 'Tipo de loteamento',
+    development_status_id: 'Status do empreendimento', business_type_id: 'Tipo de negÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³cio', city_id: 'Cidade',
+    summary: 'Breve resumo', lots_info_url: 'Link das informações dos lotes', address: 'EndereÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o', address_number: 'NÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºmero', complement: 'Complemento',
+    neighborhood: 'Bairro', postal_code: 'CEP', latitude: 'Latitude', longitude: 'Longitude', regular_price: 'PreÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o regular',
+    sale_price: 'PreÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o de venda', minimum_lot_area: 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Ârea mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­nima', maximum_lot_area: 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Ârea mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡xima', total_lots: 'Total de lotes',
+    available_lots: 'Lotes disponÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­veis', expected_delivery_date: 'Data prevista de entrega', status: 'Status de publicaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o',
 };
 const errorLabel = (key) => {
     const root = key.replace(/\.\d+\..*$/, '');
-    if (root === 'promotions') return 'Promoção';
+    if (root === 'promotions') return 'PromoÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o';
     if (root === 'construction_stages') return 'Andamento da obra';
     return fieldLabels[root] || root.replaceAll('_', ' ');
 };
 const friendlyError = (key, message) => message?.startsWith('validation.')
-    ? `O campo ${errorLabel(key)} é obrigatório.`
+    ? `O campo ${errorLabel(key)} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â© obrigatÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³rio.`
     : message;
 
 export default function Form({ item, options }) {
@@ -44,7 +44,7 @@ export default function Form({ item, options }) {
         _method: editing ? 'put' : undefined,
         title: item?.title || '', slug: item?.slug || '', reference_code: item?.reference_code || '',
         subdivision_type_id: item?.subdivision_type_id || '', development_status_id: item?.development_status_id || '',
-        business_type_id: item?.business_type_id || '', city_id: item?.city_id || '', summary: item?.summary || item?.excerpt || '',
+        business_type_id: item?.business_type_id || '', city_id: item?.city_id || '', summary: item?.summary || item?.excerpt || '', lots_info_url: item?.lots_info_url || '',
         address: item?.address || '', address_number: item?.address_number || '',
         complement: item?.complement || '', neighborhood: item?.neighborhood || '', postal_code: item?.postal_code || '',
         latitude: item?.latitude || '', longitude: item?.longitude || '', whatsapp_contact: item?.whatsapp_contact || '',
@@ -79,7 +79,7 @@ export default function Form({ item, options }) {
     };
 
     return <AdminLayout title={editing ? `Editar ${text.subdivision}` : `Novo ${text.subdivision}`}>
-        <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel={`Salvar ${text.subdivision}`} sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card, Hero e seção Sobre o loteamento." /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
+        <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel={`Salvar ${text.subdivision}`} sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "PreÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o sob consulta"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card, Hero e seÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o Sobre o loteamento." /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Se&ccedil;&atilde;o inicial</p><h2 className="mt-2 text-lg font-medium text-ink">Hero do {text.subdivision}</h2><p className="mt-1 text-sm text-muted">Estes campos formam a abertura da p&aacute;gina. Estado e cidade s&atilde;o selecionados no bloco seguinte.</p></div>
                 <Field label={text.title} value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: !editing && (!current.slug || current.slug === slugify(current.title)) ? slugify(title) : current.slug })); }} error={friendlyError('title', errors.title)} />
@@ -116,6 +116,10 @@ export default function Form({ item, options }) {
                 <div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Sobre o loteamento</h2><p className="mt-1 text-sm text-muted">A imagem usada nesta se&ccedil;&atilde;o ser&aacute; automaticamente a imagem principal.</p></div>
                 <Field label={'T\u00edtulo'} value={data.about_title} onChange={(event) => setData('about_title', event.target.value)} />
                 <Field label="Texto" as="textarea" value={data.about_text} onChange={(event) => setData('about_text', event.target.value)} />
+                <div className="tablet:col-span-2 space-y-2">
+                    <Field label="Link das informa\u00e7\u00f5es dos lotes" type="url" value={data.lots_info_url} onChange={(event) => setData('lots_info_url', event.target.value)} error={errors.lots_info_url} placeholder="https://..." />
+                    <p className="text-xs text-muted">Adicione o link do arquivo com as plantas, divis\u00e3o e informa\u00e7\u00f5es dos lotes.</p>
+                </div>
             </section>
 
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2 desktop:grid-cols-4">

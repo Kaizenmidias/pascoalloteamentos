@@ -748,7 +748,7 @@ class WordPressImportService
             'properties' => LegacyEntity::Property,
             'condominiums' => LegacyEntity::Condominium,
             'subdivisions' => LegacyEntity::Subdivision,
-            default => throw new \InvalidArgumentException("Target inválido: {$target}"),
+            default => throw new \InvalidArgumentException("Target invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido: {$target}"),
         };
     }
 
@@ -759,7 +759,7 @@ class WordPressImportService
             'properties' => Property::query(),
             'condominiums' => Condominium::query(),
             'subdivisions' => Subdivision::query(),
-            default => throw new \InvalidArgumentException("Target inválido: {$target}"),
+            default => throw new \InvalidArgumentException("Target invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido: {$target}"),
         };
 
         $model = $query->firstOrNew([
@@ -884,6 +884,7 @@ class WordPressImportService
             'price_on_request' => $this->boolMeta($meta, ['price_on_request', 'sob_consulta']),
             'promotion_headline' => $this->stringMeta($meta, ['headline_loteamento', 'titulo_principal', 'promotion_headline']) ?: null,
             'promotion_url' => $this->stringMeta($meta, ['link_do_botao_do_empreendimento_em_promocao', 'promotion_url']) ?: null,
+            'lots_info_url' => $target === 'subdivisions' ? ($this->stringMeta($meta, ['link_para_download_das_plantas', 'arquivos_e_documentos_para_download']) ?: null) : null,
             'expected_delivery_date' => $this->dateMeta($meta, ['data_de_entrega', 'expected_delivery_date', 'previsao_entrega']),
             'address' => $this->stringMeta($meta, ['endereco_do_empreendimento', 'localizacao', 'address', 'endereco']) ?: null,
             'neighborhood' => $this->stringMeta($meta, ['neighborhood', 'bairro']) ?: null,
@@ -929,7 +930,7 @@ class WordPressImportService
         if ($model instanceof Subdivision) {
             $downloadUrl = $this->stringMeta($meta, ['link_para_download_das_plantas', 'arquivos_e_documentos_para_download']);
             if ($downloadUrl && ! $model->documents()->exists()) {
-                $model->documents()->create(['title' => 'Informações dos lotes', 'kind' => 'plans', 'external_url' => $downloadUrl, 'is_public' => true]);
+                $model->documents()->create(['title' => 'InformaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes dos lotes', 'kind' => 'plans', 'external_url' => $downloadUrl, 'is_public' => true]);
             }
         }
 
@@ -938,7 +939,7 @@ class WordPressImportService
             $planMediaId = $this->firstAttachmentId($meta['planta_imovel'] ?? null);
             if (($planUrl || $planMediaId) && ! $model->floorPlans()->exists()) {
                 $media = $planMediaId ? $this->mediaAssetByLegacyId($planMediaId) : null;
-                $model->floorPlans()->create(['name' => 'Planta do imóvel', 'media_asset_id' => $media?->id, 'external_url' => $planUrl, 'sort_order' => 0]);
+                $model->floorPlans()->create(['name' => 'Planta do imÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³vel', 'media_asset_id' => $media?->id, 'external_url' => $planUrl, 'sort_order' => 0]);
             }
         }
 
@@ -1257,7 +1258,7 @@ class WordPressImportService
     {
         $value = strtolower((string) ($meta['tipo_negocio'] ?? $meta['business_type'] ?? 'sale'));
         return match ($value) {
-            'rent', 'locacao', 'locação', 'aluguel' => 'rent',
+            'rent', 'locacao', 'locaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o', 'aluguel' => 'rent',
             'season', 'temporada' => 'season',
             default => 'sale',
         };

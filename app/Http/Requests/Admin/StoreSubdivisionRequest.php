@@ -15,6 +15,10 @@ class StoreSubdivisionRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if ($this->has('lots_info_url')) {
+            $this->merge(['lots_info_url' => trim((string) $this->input('lots_info_url')) ?: null]);
+        }
+
         if (! $this->filled('summary') && $this->filled('excerpt')) {
             $this->merge(['summary' => trim((string) $this->input('excerpt'))]);
         }
@@ -36,6 +40,7 @@ class StoreSubdivisionRequest extends FormRequest
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('subdivisions')],
             'subdivision_type_id' => ['nullable', 'exists:subdivision_types,id'], 'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
             'summary' => ['nullable', 'string', 'max:'.self::SHORT_SUMMARY_LIMIT], 'address' => ['nullable', 'string', 'max:255'], 'neighborhood' => ['nullable', 'string', 'max:255'], 'postal_code' => ['nullable', 'string', 'max:12'],
+            'lots_info_url' => ['nullable', 'url', 'max:2048'],
             'address_number' => ['nullable', 'string', 'max:30'], 'complement' => ['nullable', 'string', 'max:255'], 'whatsapp_contact' => ['nullable', 'string', 'max:30'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'], 'longitude' => ['nullable', 'numeric', 'between:-180,180'], 'regular_price' => ['nullable', 'numeric', 'min:0'], 'sale_price' => ['nullable', 'numeric', 'min:0'], 'price_on_request' => ['boolean'],
             'minimum_lot_area' => ['nullable', 'numeric', 'min:0'], 'maximum_lot_area' => ['nullable', 'numeric', 'gte:minimum_lot_area'], 'total_lots' => ['nullable', 'integer', 'min:0'], 'available_lots' => ['nullable', 'integer', 'min:0', 'lte:total_lots'],
@@ -61,27 +66,29 @@ class StoreSubdivisionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'required' => 'O campo :attribute é obrigatório.',
-            'exists' => 'O valor selecionado para :attribute é inválido.',
+            'required' => 'O campo :attribute Ã© obrigatÃ³rio.',
+            'exists' => 'O valor selecionado para :attribute Ã© invÃ¡lido.',
+            'lots_info_url.url' => 'Informe um link vÃ¡lido para as informaÃ§Ãµes dos lotes.',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'title' => 'Título',
+            'title' => 'TÃ­tulo',
             'slug' => 'Slug',
-            'reference_code' => 'Código de referência',
+            'reference_code' => 'CÃ³digo de referÃªncia',
             'subdivision_type_id' => 'Tipo de loteamento',
             'development_status_id' => 'Status do empreendimento',
-            'business_type_id' => 'Tipo de negócio',
+            'business_type_id' => 'Tipo de negÃ³cio',
             'city_id' => 'Cidade',
             'summary' => 'Breve resumo',
-            'address' => 'Endereço',
+            'lots_info_url' => 'Link das informacoes dos lotes',
+            'address' => 'EndereÃ§o',
             'postal_code' => 'CEP',
             'expected_delivery_date' => 'Data prevista de entrega',
-            'status' => 'Status de publicação',
-            'promotions.*.title' => 'Título da promoção',
+            'status' => 'Status de publicaÃ§Ã£o',
+            'promotions.*.title' => 'TÃ­tulo da promoÃ§Ã£o',
             'construction_stages.*.name' => 'Nome da etapa',
             'construction_stages.*.progress_percent' => 'Percentual da etapa',
         ];
