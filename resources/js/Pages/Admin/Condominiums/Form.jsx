@@ -29,7 +29,7 @@ export default function Form({ item, options }) {
         _method: editing ? 'put' : undefined,
         title: item?.title || '', slug: item?.slug || '', reference_code: item?.reference_code || '',
         condominium_type_id: item?.condominium_type_id || '', development_status_id: item?.development_status_id || '',
-        business_type_id: item?.business_type_id || '', city_id: item?.city_id || '', excerpt: item?.excerpt || '',
+        business_type_id: item?.business_type_id || '', city_id: item?.city_id || '', summary: item?.summary || item?.excerpt || '',
         description: item?.description || '', address: item?.address || '', address_number: item?.address_number || '',
         complement: item?.complement || '', neighborhood: item?.neighborhood || '', postal_code: item?.postal_code || '',
         latitude: item?.latitude || '', longitude: item?.longitude || '', whatsapp_contact: item?.whatsapp_contact || '',
@@ -60,15 +60,15 @@ export default function Form({ item, options }) {
                     <label className="block space-y-2">
                         <span className="text-sm font-medium text-slate-700">{text.initialText}</span>
                         <textarea
-                            value={data.excerpt}
-                            onChange={(event) => setData('excerpt', event.target.value)}
+                            value={data.summary}
+                            onChange={(event) => setData('summary', event.target.value)}
                             rows={4}
                             maxLength={summaryLimit}
-                            className={`w-full rounded-2xl border px-4 py-3 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-100 ${errors.excerpt ? 'border-red-300' : 'border-slate-200'}`}
+                            className={`w-full rounded-2xl border px-4 py-3 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-100 ${errors.summary ? 'border-red-300' : 'border-slate-200'}`}
                             placeholder="Escreva um resumo curto sobre o empreendimento."
                         />
-                        <div className="text-right text-xs text-slate-500">{data.excerpt?.length || 0}/{summaryLimit}</div>
-                        {errors.excerpt && <p className="text-sm text-red-600">{errors.excerpt}</p>}
+                        <div className="text-right text-xs text-slate-500">{data.summary?.length || 0}/{summaryLimit}</div>
+                        {errors.summary && <p className="text-sm text-red-600">{errors.summary}</p>}
                     </label>
                 </div>
                 <Field label={'WhatsApp espec\u00edfico (opcional)'} value={data.whatsapp_contact} onChange={(event) => setData('whatsapp_contact', event.target.value)} />

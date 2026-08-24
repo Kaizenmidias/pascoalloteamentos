@@ -277,6 +277,27 @@ class WordPressImportServiceTest extends TestCase
         $this->assertSame('casa-legada-2', $data['slug']);
     }
 
+    public function test_map_entity_data_maps_summary_for_condominiums_and_subdivisions(): void
+    {
+        $service = $this->makeImportService();
+        $post = [
+            'ID' => 88,
+            'post_type' => 'condominios',
+            'post_title' => 'Condominio Legado',
+            'post_name' => '',
+            'post_status' => 'publish',
+            'post_content' => 'Descricao completa do empreendimento legado',
+            'post_excerpt' => 'Resumo legado para o card',
+        ];
+
+        $condominiumData = $this->invokePrivate($service, 'mapEntityData', ['condominiums', $post, [], 88]);
+        $subdivisionData = $this->invokePrivate($service, 'mapEntityData', ['subdivisions', $post, [], 89]);
+
+        $this->assertSame('Resumo legado para o card', $condominiumData['summary']);
+        $this->assertSame('Descricao completa do empreendimento legado', $condominiumData['description']);
+        $this->assertSame('Resumo legado para o card', $subdivisionData['summary']);
+        $this->assertSame('Descricao completa do empreendimento legado', $subdivisionData['description']);
+    }
     public function test_heic_upload_fails_clearly_when_imagick_is_unavailable(): void
     {
         if (class_exists(\Imagick::class)) {

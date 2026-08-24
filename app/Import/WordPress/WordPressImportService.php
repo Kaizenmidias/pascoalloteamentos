@@ -837,6 +837,7 @@ class WordPressImportService
 
         if ($target === 'condominiums') {
             return $common + [
+                'summary' => $common['excerpt'],
                 'reference_code' => $this->stringMeta($meta, ['reference_code', '_reference_code']) ?: null,
                 'condominium_type_id' => $this->classificationId(CondominiumType::class, $this->taxonomySlug($meta, ['tipo_condominio', 'condominium_type'])),
                 'development_status_id' => $this->classificationId(DevelopmentStatus::class, $this->taxonomySlug($meta, ['estagio', 'stage', 'development_status'])),
@@ -865,6 +866,7 @@ class WordPressImportService
         }
 
         return $common + [
+            'summary' => $common['excerpt'],
             'reference_code' => $this->stringMeta($meta, ['reference_code', '_reference_code']) ?: null,
             'subdivision_type_id' => $this->classificationId(SubdivisionType::class, $this->taxonomySlug($meta, ['tipo_loteamento', 'subdivision_type'])),
             'development_status_id' => $this->classificationId(DevelopmentStatus::class, $this->taxonomySlug($meta, ['estagio', 'stage', 'development_status'])),

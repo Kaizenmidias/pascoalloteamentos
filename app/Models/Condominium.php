@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasAutomaticSlug;
+use App\Models\Concerns\HasCardSummary;
 use App\Models\Concerns\HasRealEstateContent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Condominium extends Model
 {
-    use HasAutomaticSlug, HasFactory, HasRealEstateContent, SoftDeletes;
+    use HasAutomaticSlug, HasCardSummary, HasFactory, HasRealEstateContent, SoftDeletes;
+
+    protected $appends = ['card_summary'];
 
     protected $table = 'condominiums';
 

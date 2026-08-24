@@ -8,7 +8,7 @@ export default function EntityCard({ item, href }) {
     const status = item.development_status?.name;
     const city = item.city?.name;
     const showProgress = item.category !== 'properties' && item.overall_progress !== null && item.overall_progress !== undefined;
-    const summary = item.excerpt || item.description || [item.neighborhood, city, item.city?.state?.code].filter(Boolean).join(' · ');
+    const summary = item.card_summary || [item.neighborhood, city, item.city?.state?.code].filter(Boolean).join(' · ');
 
     return (
         <article className="group min-w-0 overflow-hidden rounded-[18px] border border-line bg-white shadow-[0_4px_12px_rgba(17,17,17,0.05)] transition-[box-shadow,border-color] duration-300 hover:border-[#d9d9d9] hover:shadow-[0_6px_16px_rgba(17,17,17,0.07)]">
