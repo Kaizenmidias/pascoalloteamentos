@@ -34,8 +34,6 @@ export default function Form({ item, options }) {
         complement: item?.complement || '', neighborhood: item?.neighborhood || '', postal_code: item?.postal_code || '',
         latitude: item?.latitude || '', longitude: item?.longitude || '', whatsapp_contact: item?.whatsapp_contact || '',
         commercial_purpose: item?.commercial_purpose || '', commercial_status: item?.commercial_status || '',
-        starting_price: item?.starting_price || '', promotion_price: item?.promotion_price || '',
-        minimum_unit_area: item?.minimum_unit_area || '', about_title: item?.about_title || '', about_text: item?.about_text || '',
         floor_plans_support_text: item?.floor_plans_support_text || '', floor_plans_title: item?.floor_plans_title || '',
         promotion_headline: item?.promotion_headline || '', promotion_url: item?.promotion_url || '',
         expected_delivery_date: item?.expected_delivery_date ? String(item.expected_delivery_date).slice(0, 10) : '',
@@ -82,13 +80,8 @@ export default function Form({ item, options }) {
                 <Field label={'C\u00f3digo de refer\u00eancia'} value={data.reference_code} onChange={(event) => setData('reference_code', event.target.value)} error={errors.reference_code} />
                 <SelectField label={`Tipo de ${text.condominium}`} options={options.types} value={data.condominium_type_id} onChange={(event) => setData('condominium_type_id', event.target.value)} />
                 <SelectField label={text.business} options={options.businessTypes} value={data.business_type_id} onChange={(event) => setData('business_type_id', event.target.value)} />
-                <Field label={text.address} value={data.address} onChange={(event) => setData('address', event.target.value)} />
+                <Field label={text.address} value={data.address} onChange={(event) => setData('address', event.target.value)} error={errors.address} />
                 <Field label={text.description} as="textarea" value={data.description} onChange={(event) => setData('description', event.target.value)} />
-            </section>
-
-            <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-3">
-                <div className="tablet:col-span-3"><h2 className="text-lg font-medium text-ink">Condi&ccedil;&otilde;es comerciais</h2></div>
-                {[['starting_price', 'Pre\u00e7o inicial'], ['promotion_price', 'Pre\u00e7o promocional'], ['minimum_unit_area', '\u00c1rea m\u00ednima']].map(([key, label]) => <Field key={key} label={label} type="number" step="0.01" min="0" value={data[key]} onChange={(event) => setData(key, event.target.value)} error={errors[key]} />)}
             </section>
 
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-3">
