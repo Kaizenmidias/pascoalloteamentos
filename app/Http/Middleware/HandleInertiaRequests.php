@@ -34,6 +34,7 @@ class HandleInertiaRequests extends Middleware
             'mediaUpload' => [
                 'url' => config('media.upload_url') ?: null,
                 'maxKb' => config('media.max_upload_kb'),
+                'maxItems' => config('media.gallery_upload_limit'),
             ],
             'realEstate' => [
                 'propertyTypes' => $propertyTypes,

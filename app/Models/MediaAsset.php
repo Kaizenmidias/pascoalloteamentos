@@ -35,7 +35,21 @@ class MediaAsset extends Model
 
     protected function type(): Attribute
     {
-        return Attribute::get(fn () => $this->media_type
-            ?: (str_starts_with((string) $this->mime_type, 'video/') ? 'video' : 'image'));
+        return Attribute::get(function () {
+            if ($this->media_type) {
+                return $this->media_type;
+            }
+
+            $mime = strtolower((string) $this->mime_type);
+            if (str_starts_with($mime, 'video/')) {
+                return 'video';
+            }
+
+            if ($mime === 'application/pdf') {
+                return 'document';
+            }
+
+            return 'image';
+        });
     }
 }

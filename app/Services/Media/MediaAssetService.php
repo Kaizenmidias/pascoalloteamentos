@@ -25,6 +25,7 @@ class MediaAssetService
         if ($this->isWebImageCandidate($file)) {
             $this->assertValidWebImage($file);
         }
+
         $checksum = hash_file('sha256', $file->getRealPath());
         if ($existing = MediaAsset::where('checksum', $checksum)->first()) {
             return $existing;
@@ -33,14 +34,40 @@ class MediaAssetService
         return DB::transaction(function () use ($file, $collection, $disk, $checksum) {
             $path = $file->store($collection, $disk);
             try {
-                [$width, $height] = str_starts_with((string) $file->getMimeType(), 'image/') ? (getimagesize($file->getRealPath()) ?: [null, null]) : [null, null];
+                $mime = $file->getMimeType();
+                [$width, $height] = is_string($mime) && str_starts_with($mime, 'image/') ? (getimagesize($file->getRealPath()) ?: [null, null]) : [null, null];
 
-                return MediaAsset::create(['disk' => $disk, 'path' => $path, 'original_name' => $file->getClientOriginalName(), 'mime_type' => $file->getMimeType(), 'media_type' => 'image', 'size' => $file->getSize(), 'width' => $width, 'height' => $height, 'checksum' => $checksum]);
+                return MediaAsset::create([
+                    'disk' => $disk,
+                    'path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $mime,
+                    'media_type' => $this->inferMediaType($mime),
+                    'size' => $file->getSize(),
+                    'width' => $width,
+                    'height' => $height,
+                    'checksum' => $checksum,
+                ]);
             } catch (\Throwable $exception) {
                 Storage::disk($disk)->delete($path);
                 throw $exception;
             }
         });
+    }
+
+    private function inferMediaType(?string $mime): string
+    {
+        $mime = strtolower((string) $mime);
+
+        if (str_starts_with($mime, 'video/')) {
+            return 'video';
+        }
+
+        if ($mime === 'application/pdf') {
+            return 'document';
+        }
+
+        return 'image';
     }
 
     private function isHeic(UploadedFile $file): bool
@@ -75,12 +102,12 @@ class MediaAssetService
     private function storeConvertedHeic(UploadedFile $file, string $collection, string $disk): MediaAsset
     {
         if (! class_exists(\Imagick::class)) {
-            throw new RuntimeException('Upload HEIC requer a extensão PHP Imagick com suporte ao formato HEIC/HEIF.');
+            throw new RuntimeException('Upload HEIC requer a extensÃ£o PHP Imagick com suporte ao formato HEIC/HEIF.');
         }
 
         $temporary = tempnam(sys_get_temp_dir(), 'pascoal-heic-');
         if ($temporary === false) {
-            throw new RuntimeException('Não foi possível criar o arquivo temporário para conversão HEIC.');
+            throw new RuntimeException('NÃ£o foi possÃ­vel criar o arquivo temporÃ¡rio para conversÃ£o HEIC.');
         }
         try {
             $image = new \Imagick();
@@ -91,7 +118,7 @@ class MediaAssetService
             $image->setImageCompressionQuality((int) config('media.webp_quality', 85));
             $image->stripImage();
             if (! $image->writeImage($temporary)) {
-                throw new RuntimeException('Não foi possível converter o arquivo HEIC para WebP.');
+                throw new RuntimeException('NÃ£o foi possÃ­vel converter o arquivo HEIC para WebP.');
             }
             $image->clear();
 
@@ -179,7 +206,7 @@ class MediaAssetService
                     'path' => $stored,
                     'original_name' => basename($realPath),
                     'mime_type' => $mime,
-                    'media_type' => is_string($mime) && str_starts_with($mime, 'video/') ? 'video' : 'image',
+                    'media_type' => $this->inferMediaType($mime),
                     'size' => is_file($realPath) ? (filesize($realPath) ?: null) : null,
                     'width' => $width,
                     'height' => $height,
