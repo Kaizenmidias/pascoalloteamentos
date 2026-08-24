@@ -6,7 +6,7 @@ export default function LeadForm({ entityType, entityId, entityName = '', title 
     const idKey = entityType ? `${entityType}_id` : null;
     const [submittedName, setSubmittedName] = useState('');
     const { data, setData, post, processing, errors, reset, recentlySuccessful } = useForm({ name: '', email: '', phone: '', message: '', consent: true, source_url: typeof window === 'undefined' ? '' : window.location.href, ...(idKey ? { [idKey]: entityId } : {}) });
-    const submit = (event) => { event.preventDefault(); const leadName = data.name; post('/contato', { preserveScroll: true, onSuccess: () => { setSubmittedName(leadName); reset('name', 'email', 'phone', 'message'); } }); };
+    const submit = (event) => { event.preventDefault(); const leadName = data.name.trim(); post('/contato', { preserveScroll: true, onSuccess: () => { setSubmittedName(leadName); reset('name', 'email', 'phone', 'message'); } }); };
     const followUp = entityType && entityName ? whatsappUrl({ type: entityType, title: entityName, name: submittedName }) : null;
     return (
         <form onSubmit={submit} className="space-y-3 rounded-card bg-white p-6 shadow-card">
