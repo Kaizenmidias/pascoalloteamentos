@@ -1,7 +1,8 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutomaticSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Page extends Model
 {
-    use SoftDeletes;
+    use HasAutomaticSlug, SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -21,6 +22,11 @@ class Page extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    protected static function slugFallback(): string
+    {
+        return 'pagina';
     }
 
     public function sections(): HasMany

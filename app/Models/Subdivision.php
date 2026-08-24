@@ -1,7 +1,8 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutomaticSlug;
 use App\Models\Concerns\HasRealEstateContent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subdivision extends Model
 {
-    use HasFactory, HasRealEstateContent, SoftDeletes;
+    use HasAutomaticSlug, HasFactory, HasRealEstateContent, SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -25,6 +26,11 @@ class Subdivision extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    protected static function slugFallback(): string
+    {
+        return 'loteamento';
     }
 
     public function scopePublished(Builder $query): Builder

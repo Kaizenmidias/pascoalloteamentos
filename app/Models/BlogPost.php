@@ -1,7 +1,8 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAutomaticSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BlogPost extends Model
 {
-    use SoftDeletes;
+    use HasAutomaticSlug, SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -22,6 +23,11 @@ class BlogPost extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    protected static function slugFallback(): string
+    {
+        return 'postagem';
     }
 
     public function author(): BelongsTo

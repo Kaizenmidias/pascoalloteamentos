@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Support;
 
@@ -9,7 +9,7 @@ class UniqueSlug
 {
     public static function for(string $table, string $value, ?int $ignoreId = null, string $fallback = 'item'): string
     {
-        $base = Str::slug($value) ?: $fallback;
+        $base = Str::slug(trim($value)) ?: $fallback;
         $slug = $base;
         $suffix = 2;
 

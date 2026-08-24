@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace Tests\Unit;
 
@@ -8,14 +8,15 @@ use App\Import\WordPress\WordPressDump;
 use App\Import\WordPress\WordPressDumpParser;
 use App\Import\WordPress\WordPressImportService;
 use App\Models\MediaAsset;
+use App\Models\Property;
 use App\Services\Media\MediaAssetService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use ReflectionMethod;
-use Tests\TestCase;
-use Illuminate\Http\UploadedFile;
 use RuntimeException;
+use Tests\TestCase;
 
 class WordPressImportServiceTest extends TestCase
 {
@@ -219,16 +220,16 @@ class WordPressImportServiceTest extends TestCase
     public function test_property_catalog_aliases_are_mapped_and_unknown_metadata_is_preserved(): void
     {
         $service = $this->makeImportService();
-        $post = ['ID' => 77, 'post_title' => 'Casa legado', 'post_name' => 'casa-legado', 'post_status' => 'publish', 'post_content' => 'Conteúdo original', 'post_excerpt' => '', 'post_date' => '2024-01-01 10:00:00'];
+        $post = ['ID' => 77, 'post_title' => 'Casa legado', 'post_name' => 'casa-legado', 'post_status' => 'publish', 'post_content' => 'Conteudo original', 'post_excerpt' => '', 'post_date' => '2024-01-01 10:00:00'];
         $meta = [
-            'texto_empreendimento' => 'Descrição do catálogo', 'endereco_imovel' => 'Rua Legado, 10',
+            'texto_empreendimento' => 'Descricao do catalogo', 'endereco_imovel' => 'Rua Legado, 10',
             'valor_venda_copy' => 'R$ 850.000,00', 'valor_condominio' => '650,00', 'valor_iptu' => '120,00',
             'texto_plantas' => 'Veja a planta', 'campo_rural_sem_destino' => 'Preservar',
         ];
 
         $data = $this->invokePrivate($service, 'mapEntityData', ['properties', $post, $meta, 77]);
 
-        $this->assertSame('Descrição do catálogo', $data['description']);
+        $this->assertSame('Descricao do catalogo', $data['description']);
         $this->assertSame('Rua Legado, 10', $data['address']);
         $this->assertSame('850000.00', $data['sale_price']);
         $this->assertSame('650.00', $data['condominium_fee']);
@@ -249,6 +250,31 @@ class WordPressImportServiceTest extends TestCase
         $ids = $this->invokePrivate($service, 'attachmentIdsFromUrls', [$meta, ['galeria_imoveis'], $dump]);
 
         $this->assertSame([901, 902], $ids);
+    }
+
+    public function test_map_entity_data_generates_unique_slug_when_legacy_slug_is_blank(): void
+    {
+        Property::create([
+            'title' => 'Casa Legada',
+            'slug' => 'casa-legada',
+            'status' => 'draft',
+            'commercial_purpose' => 'sale',
+        ]);
+
+        $service = $this->makeImportService();
+        $post = [
+            'ID' => 77,
+            'post_type' => 'imoveis',
+            'post_title' => 'Casa Legada',
+            'post_name' => '',
+            'post_status' => 'publish',
+            'post_content' => 'Conteudo legado',
+            'post_excerpt' => '',
+        ];
+
+        $data = $this->invokePrivate($service, 'mapEntityData', ['properties', $post, [], 77]);
+
+        $this->assertSame('casa-legada-2', $data['slug']);
     }
 
     public function test_heic_upload_fails_clearly_when_imagick_is_unavailable(): void
