@@ -13,12 +13,13 @@ import { ProductFormLayout, PublicationCard, SeoCard, SidebarMediaIntro } from '
 const text = {
     condominium: 'condom\u00ednio',
     title: 'T\u00edtulo do condom\u00ednio',
-    initialText: 'Texto de apoio da se\u00e7\u00e3o inicial',
+    initialText: 'Breve resumo',
     section: 'Se\u00e7\u00e3o inicial',
     description: 'Descri\u00e7\u00e3o',
     address: 'Endere\u00e7o',
     business: 'Tipo de neg\u00f3cio',
 };
+const summaryLimit = 400;
 const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function Form({ item, options }) {
@@ -55,7 +56,21 @@ export default function Form({ item, options }) {
                 <div className="tablet:col-span-2"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">{text.section}</p><h2 className="mt-2 text-lg font-medium text-ink">Hero do {text.condominium}</h2><p className="mt-1 text-sm text-muted">Estes campos formam a abertura da p&aacute;gina. Estado e cidade s&atilde;o selecionados no bloco seguinte.</p></div>
                 <Field label={text.title} value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: !editing && (!current.slug || current.slug === slugify(current.title)) ? slugify(title) : current.slug })); }} error={errors.title} />
                 <SelectField label="Status da obra" options={options.statuses} value={data.development_status_id} onChange={(event) => setData('development_status_id', event.target.value)} />
-                <div className="tablet:col-span-2"><Field label={text.initialText} as="textarea" value={data.excerpt} onChange={(event) => setData('excerpt', event.target.value)} /></div>
+                <div className="tablet:col-span-2">
+                    <label className="block space-y-2">
+                        <span className="text-sm font-medium text-slate-700">{text.initialText}</span>
+                        <textarea
+                            value={data.excerpt}
+                            onChange={(event) => setData('excerpt', event.target.value)}
+                            rows={4}
+                            maxLength={summaryLimit}
+                            className={`w-full rounded-2xl border px-4 py-3 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-100 ${errors.excerpt ? 'border-red-300' : 'border-slate-200'}`}
+                            placeholder="Escreva um resumo curto sobre o empreendimento."
+                        />
+                        <div className="text-right text-xs text-slate-500">{data.excerpt?.length || 0}/{summaryLimit}</div>
+                        {errors.excerpt && <p className="text-sm text-red-600">{errors.excerpt}</p>}
+                    </label>
+                </div>
                 <Field label={'WhatsApp espec\u00edfico (opcional)'} value={data.whatsapp_contact} onChange={(event) => setData('whatsapp_contact', event.target.value)} />
             </section>
 

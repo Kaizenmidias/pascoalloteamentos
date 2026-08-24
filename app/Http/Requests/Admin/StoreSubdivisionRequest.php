@@ -11,6 +11,8 @@ class StoreSubdivisionRequest extends FormRequest
 {
     use HasRealEstateContentRules;
 
+    private const SHORT_SUMMARY_LIMIT = 400;
+
     protected function prepareForValidation(): void
     {
         if (! $this->filled('slug')) {
@@ -29,7 +31,7 @@ class StoreSubdivisionRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'], 'slug' => ['nullable', 'alpha_dash:ascii', 'max:255', Rule::unique('subdivisions')],
             'reference_code' => ['nullable', 'string', 'max:100', Rule::unique('subdivisions')],
             'subdivision_type_id' => ['nullable', 'exists:subdivision_types,id'], 'development_status_id' => ['nullable', 'exists:development_statuses,id'], 'business_type_id' => ['nullable', 'exists:business_types,id'], 'city_id' => ['nullable', 'exists:cities,id'],
-            'excerpt' => ['nullable', 'string'], 'address' => ['nullable', 'string', 'max:255'], 'neighborhood' => ['nullable', 'string', 'max:255'], 'postal_code' => ['nullable', 'string', 'max:12'],
+            'excerpt' => ['nullable', 'string', 'max:'.self::SHORT_SUMMARY_LIMIT], 'address' => ['nullable', 'string', 'max:255'], 'neighborhood' => ['nullable', 'string', 'max:255'], 'postal_code' => ['nullable', 'string', 'max:12'],
             'address_number' => ['nullable', 'string', 'max:30'], 'complement' => ['nullable', 'string', 'max:255'], 'whatsapp_contact' => ['nullable', 'string', 'max:30'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'], 'longitude' => ['nullable', 'numeric', 'between:-180,180'], 'regular_price' => ['nullable', 'numeric', 'min:0'], 'sale_price' => ['nullable', 'numeric', 'min:0'], 'price_on_request' => ['boolean'],
             'minimum_lot_area' => ['nullable', 'numeric', 'min:0'], 'maximum_lot_area' => ['nullable', 'numeric', 'gte:minimum_lot_area'], 'total_lots' => ['nullable', 'integer', 'min:0'], 'available_lots' => ['nullable', 'integer', 'min:0', 'lte:total_lots'],
@@ -70,7 +72,7 @@ class StoreSubdivisionRequest extends FormRequest
             'development_status_id' => 'Status do empreendimento',
             'business_type_id' => 'Tipo de negócio',
             'city_id' => 'Cidade',
-            'excerpt' => 'Texto de apoio',
+            'excerpt' => 'Breve resumo',
             'address' => 'Endereço',
             'postal_code' => 'CEP',
             'expected_delivery_date' => 'Data prevista de entrega',

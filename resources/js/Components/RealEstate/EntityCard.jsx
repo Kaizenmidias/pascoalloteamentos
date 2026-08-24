@@ -8,6 +8,7 @@ export default function EntityCard({ item, href }) {
     const status = item.development_status?.name;
     const city = item.city?.name;
     const showProgress = item.category !== 'properties' && item.overall_progress !== null && item.overall_progress !== undefined;
+    const summary = item.excerpt || item.description || [item.neighborhood, city, item.city?.state?.code].filter(Boolean).join(' · ');
 
     return (
         <article className="group min-w-0 overflow-hidden rounded-[18px] border border-line bg-white shadow-[0_4px_12px_rgba(17,17,17,0.05)] transition-[box-shadow,border-color] duration-300 hover:border-[#d9d9d9] hover:shadow-[0_6px_16px_rgba(17,17,17,0.07)]">
@@ -23,7 +24,7 @@ export default function EntityCard({ item, href }) {
                 </div>
                 <div className="p-5 tablet:p-6">
                     <h2 className="text-[1.15rem] font-semibold leading-[1.28] text-ink desktop:text-[1.3rem]">{item.title}</h2>
-                    <p className="mt-3 line-clamp-2 min-h-12 text-sm font-light leading-6 text-muted">{item.excerpt || [item.neighborhood, city, item.city?.state?.code].filter(Boolean).join(' · ')}</p>
+                    <p className="mt-3 line-clamp-2 min-h-12 text-sm font-light leading-6 text-muted">{summary}</p>
                     <span className="mt-6 inline-block text-xs font-medium uppercase tracking-[.06em] text-brand">Ver detalhes</span>
                 </div>
             </Link>
