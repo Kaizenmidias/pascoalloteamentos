@@ -1,13 +1,19 @@
 import { useMemo, useState } from 'react';
-import { Link, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import AdminLayout from '../../../Components/Layout/AdminLayout';
 import Button from '../../../Components/UI/Button';
 import Field from '../../../Components/Forms/Field';
 
 const blankSlide = { image: '', title: '', excerpt: '' };
 const blankDifferential = { title: '', text: '' };
+const defaultHomeNumbers = [
+    { value: '20+', title: 'Anos de experiência', description: 'de atuação no mercado.' },
+    { value: '15+', title: 'Empreendimentos', description: 'entregues com excelência.' },
+    { value: '2+', title: 'Cidades', description: 'com presença consolidada.' },
+    { value: '2', title: 'Distritos', description: 'atendidos pela empresa.' },
+];
 
-export default function Home({ homeHero = {}, homeDifferentials = [] }) {
+export default function Home({ homeHero = {}, homeDifferentials = [], homeNumbers = [] }) {
     const initialHero = useMemo(() => ({
         title: homeHero.title || 'Encontre o lugar onde sua próxima história começa.',
         description: homeHero.description || 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
@@ -25,9 +31,15 @@ export default function Home({ homeHero = {}, homeDifferentials = [] }) {
         ]
     ), [homeDifferentials]);
 
+    const initialNumbers = useMemo(() => defaultHomeNumbers.map((fallback, index) => ({
+        ...fallback,
+        ...(Array.isArray(homeNumbers) ? homeNumbers[index] || {} : {}),
+    })), [homeNumbers]);
+
     const { data, setData, put, processing } = useForm({
         home_hero: initialHero,
         home_differentials: initialDifferentials,
+        home_numbers: initialNumbers,
     });
 
     const [tab, setTab] = useState('hero');
@@ -49,6 +61,8 @@ export default function Home({ homeHero = {}, homeDifferentials = [] }) {
     const updateDifferential = (index, key, value) => setData('home_differentials', data.home_differentials.map((item, itemIndex) => (itemIndex === index ? { ...item, [key]: value } : item)));
     const addDifferential = () => setData('home_differentials', [...data.home_differentials, { ...blankDifferential }]);
     const removeDifferential = (index) => setData('home_differentials', data.home_differentials.filter((_, itemIndex) => itemIndex !== index));
+
+    const updateHomeNumber = (index, key, value) => setData('home_numbers', data.home_numbers.map((item, itemIndex) => (itemIndex === index ? { ...item, [key]: value } : item)));
 
     return (
         <AdminLayout title="Home CMS">
@@ -115,12 +129,23 @@ export default function Home({ homeHero = {}, homeDifferentials = [] }) {
                 )}
 
                 {tab === 'numbers' && (
-                    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <div className="mb-4">
+                    <section className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                        <div>
                             <h2 className="text-lg font-medium text-gray-900">Números da Home</h2>
-                            <p className="text-sm text-gray-500">Use a tela específica para manter os números organizados.</p>
+                            <p className="text-sm text-gray-500">Edite os quatro indicadores exibidos na página inicial.</p>
                         </div>
-                        <Link href="/admin/pages/home-numbers" className="brand-button inline-flex">Abrir números da Home</Link>
+                        <div className="grid gap-4 xl:grid-cols-2">
+                            {data.home_numbers.map((number, index) => (
+                                <div key={index} className="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+                                    <p className="mb-4 text-xs font-semibold uppercase tracking-[.08em] text-gray-500">Indicador {index + 1}</p>
+                                    <div className="grid gap-4 tablet:grid-cols-2">
+                                        <Field label="Valor" value={number.value} onChange={(e) => updateHomeNumber(index, 'value', e.target.value)} />
+                                        <Field label="Título" value={number.title} onChange={(e) => updateHomeNumber(index, 'title', e.target.value)} />
+                                        <Field label="Descrição" as="textarea" value={number.description} onChange={(e) => updateHomeNumber(index, 'description', e.target.value)} className="tablet:col-span-2" placeholder="Escreva um texto curto sobre o indicador." />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </section>
                 )}
 

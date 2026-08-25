@@ -16,7 +16,7 @@ class HomeController extends Controller
     public function __invoke(): Response
     {
         if (! Schema::hasTable('condominiums')) {
-            return Inertia::render('Public/Home', ['featuredItems' => [], 'condominiums' => [], 'properties' => [], 'subdivisions' => [], 'posts' => []]);
+            return Inertia::render('Public/Home', ['featuredItems' => [], 'condominiums' => [], 'properties' => [], 'subdivisions' => [], 'posts' => [], 'homeNumbers' => $this->defaultHomeNumbers()]);
         }
 
         $condominiums = Condominium::query()->published()->with(['city.state', 'condominiumType', 'developmentStatus', 'mediaAssets'])->featured()->latest('published_at')->limit(3)->get();
@@ -58,12 +58,7 @@ class HomeController extends Controller
             'subdivisions' => $subdivisions,
             'homeHero' => SiteSetting::query()->where('key', 'home_hero')->first()?->value,
             'homeDifferentials' => SiteSetting::query()->where('key', 'home_differentials')->first()?->value,
-            'homeNumbers' => SiteSetting::query()->where('key', 'home_numbers')->first()?->value ?? [
-                ['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'],
-                ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'],
-                ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presença consolidada.'],
-                ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.'],
-            ],
+            'homeNumbers' => SiteSetting::query()->where('key', 'home_numbers')->first()?->value ?? $this->defaultHomeNumbers(),
             'posts' => BlogPost::query()->where('status', 'published')->with(['featuredMedia', 'categories'])->latest('published_at')->limit(3)->get(),
         ]);
     }
@@ -86,5 +81,15 @@ class HomeController extends Controller
                 'href' => $path.$item->slug,
                 'overall_progress' => $category === 'properties' ? null : $item->constructionProgressPercentage(),
             ]);
+    }
+
+    private function defaultHomeNumbers(): array
+    {
+        return [
+            ['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'],
+            ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'],
+            ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presença consolidada.'],
+            ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.'],
+        ];
     }
 }

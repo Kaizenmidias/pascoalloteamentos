@@ -6,6 +6,7 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\Faq;
 use App\Models\Property;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -84,5 +85,39 @@ class AdminCmsTest extends TestCase
         $this->assertSame('Título SEO do imóvel', $property->seo->title);
         $this->assertSame('Está disponível?', Faq::where('owner_id', $property->id)->value('question'));
         $this->get('/imoveis/imovel-administravel')->assertOk();
+    }
+
+    public function test_home_cms_can_update_home_numbers_and_public_home_uses_them(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+
+        $payload = [
+            'home_hero' => [
+                'title' => 'Hero institucional',
+                'description' => 'Descrição da home.',
+                'slides' => [
+                    ['image' => '/reference-assets/hero-home.jpg', 'title' => '', 'excerpt' => ''],
+                ],
+            ],
+            'home_differentials' => [
+                ['title' => 'Diferencial 1', 'text' => 'Texto do diferencial.'],
+            ],
+            'home_numbers' => [
+                ['value' => '21+', 'title' => 'Anos de experiência', 'description' => 'Em atuação.'],
+                ['value' => '16+', 'title' => 'Empreendimentos', 'description' => 'Entregues.'],
+                ['value' => '3+', 'title' => 'Cidades', 'description' => 'Atendidas.'],
+                ['value' => '5', 'title' => 'Distritos', 'description' => 'Atendidos.'],
+            ],
+        ];
+
+        $this->actingAs($user)->put('/admin/pages/home', $payload)->assertRedirect();
+
+        $saved = SiteSetting::where('key', 'home_numbers')->firstOrFail()->value;
+        $this->assertSame('21+', $saved[0]['value']);
+        $this->assertSame('16+', $saved[1]['value']);
+        $this->assertSame('3+', $saved[2]['value']);
+        $this->assertSame('5', $saved[3]['value']);
+
+        $this->get('/')->assertOk()->assertSee('21+');
     }
 }

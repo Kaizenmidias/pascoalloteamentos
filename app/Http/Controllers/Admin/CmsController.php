@@ -251,7 +251,7 @@ class CmsController extends Controller
 
     public function homeNumbers(): Response
     {
-        $numbers = SiteSetting::query()->where('key', 'home_numbers')->value('value') ?? [];
+        $numbers = SiteSetting::query()->where('key', 'home_numbers')->first()?->value ?? $this->defaultHomeNumbers();
 
         return Inertia::render('Admin/Cms/HomeNumbers', ['numbers' => $numbers]);
     }
@@ -259,15 +259,15 @@ class CmsController extends Controller
     public function home(): Response
     {
         $settings = SiteSetting::query()
-            ->whereIn('key', ['home_hero', 'home_differentials'])
+            ->whereIn('key', ['home_hero', 'home_differentials', 'home_numbers'])
             ->get()
             ->keyBy('key')
             ->map(fn (SiteSetting $setting) => $setting->value);
 
         return Inertia::render('Admin/Cms/Home', [
             'homeHero' => $settings['home_hero'] ?? [
-                'title' => 'Encontre o lugar onde sua prÃƒÂ³xima histÃƒÂ³ria comeÃƒÂ§a.',
-                'description' => 'Empreendimentos de alto padrÃƒÂ£o, condomÃƒÂ­nios e loteamentos planejados para viver melhor.',
+                'title' => 'Encontre o lugar onde sua próxima história começa.',
+                'description' => 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
                 'slides' => [
                     ['image' => '/reference-assets/hero-home.jpg', 'title' => '', 'excerpt' => ''],
                 ],
@@ -275,32 +275,32 @@ class CmsController extends Controller
             'homeDifferentials' => $settings['home_differentials'] ?? [
                 [
                     'title' => 'Arquitetura autoral',
-                    'text' => 'Projetos exclusivos desenvolvidos para unir estÃƒÂ©tica, funcionalidade e conforto.',
+                    'text' => 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.',
                 ],
                 [
-                    'title' => 'LocalizaÃƒÂ§ÃƒÂµes estratÃƒÂ©gicas',
-                    'text' => 'Empreendimentos em regiÃƒÂµes com alto potencial de valorizaÃƒÂ§ÃƒÂ£o.',
+                    'title' => 'Localizações estratégicas',
+                    'text' => 'Empreendimentos em regiões com alto potencial de valorização.',
                 ],
                 [
                     'title' => 'Sustentabilidade',
-                    'text' => 'PrÃƒÂ¡ticas conscientes e soluÃƒÂ§ÃƒÂµes inteligentes para reduzir impactos ambientais.',
+                    'text' => 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.',
                 ],
                 [
-                    'title' => 'Alto padrÃƒÂ£o construtivo',
+                    'title' => 'Alto padrão construtivo',
                     'text' => 'Materiais selecionados e processos rigorosos para garantir qualidade.',
                 ],
                 [
                     'title' => 'Equipe especializada',
-                    'text' => 'Profissionais experientes dedicados a entregar projetos com eficiÃƒÂªncia.',
+                    'text' => 'Profissionais experientes dedicados a entregar projetos com eficiência.',
                 ],
                 [
                     'title' => 'Atendimento personalizado',
-                    'text' => 'Relacionamento prÃƒÂ³ximo, transparente e focado em compreender cada cliente.',
+                    'text' => 'Relacionamento próximo, transparente e focado em compreender cada cliente.',
                 ],
             ],
+            'homeNumbers' => $settings['home_numbers'] ?? $this->defaultHomeNumbers(),
         ]);
     }
-
     public function updateHome(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -313,6 +313,10 @@ class CmsController extends Controller
             'home_differentials' => ['required', 'array', 'min:1'],
             'home_differentials.*.title' => ['required', 'string', 'max:255'],
             'home_differentials.*.text' => ['required', 'string', 'max:1000'],
+            'home_numbers' => ['required', 'array', 'min:1'],
+            'home_numbers.*.value' => ['required', 'string', 'max:30'],
+            'home_numbers.*.title' => ['required', 'string', 'max:255'],
+            'home_numbers.*.description' => ['nullable', 'string', 'max:255'],
         ]);
 
         SiteSetting::updateOrCreate(['key' => 'home_hero'], [
@@ -324,6 +328,12 @@ class CmsController extends Controller
         SiteSetting::updateOrCreate(['key' => 'home_differentials'], [
             'group' => 'home',
             'value' => $data['home_differentials'],
+            'is_public' => true,
+        ]);
+
+        SiteSetting::updateOrCreate(['key' => 'home_numbers'], [
+            'group' => 'home',
+            'value' => $this->normalizeHomeNumbers($data['home_numbers']),
             'is_public' => true,
         ]);
 
@@ -341,15 +351,7 @@ class CmsController extends Controller
             'numbers.*.is_active' => ['nullable', 'boolean'],
         ]);
 
-        $numbers = array_values(array_map(function (array $item, int $index): array {
-            return [
-                'value' => (string) ($item['value'] ?? ''),
-                'title' => (string) ($item['title'] ?? ''),
-                'description' => (string) ($item['description'] ?? ''),
-                'sort_order' => (int) ($item['sort_order'] ?? $index),
-                'is_active' => (bool) ($item['is_active'] ?? true),
-            ];
-        }, $data['numbers'], array_keys($data['numbers'])));
+        $numbers = $this->normalizeHomeNumbers($data['numbers']);
 
         SiteSetting::updateOrCreate(['key' => 'home_numbers'], [
             'group' => 'home',
@@ -381,6 +383,20 @@ class CmsController extends Controller
         }
 
         return back()->with('success', 'IntegraÃƒÂ§ÃƒÂµes atualizadas.');
+    }
+
+
+    private function normalizeHomeNumbers(array $numbers): array
+    {
+        return array_values(array_map(function (array $item, int $index): array {
+            return [
+                'value' => trim((string) ($item['value'] ?? '')),
+                'title' => trim((string) ($item['title'] ?? '')),
+                'description' => trim((string) ($item['description'] ?? '')),
+                'sort_order' => (int) ($item['sort_order'] ?? $index),
+                'is_active' => (bool) ($item['is_active'] ?? true),
+            ];
+        }, $numbers, array_keys($numbers)));
     }
 
     private function savePage(Request $request, Page $page): void

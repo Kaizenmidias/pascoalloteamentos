@@ -502,6 +502,13 @@ export default function Form({ item }) {
             }
 
             if (sectionType === 'numbers') {
+                const items = parseNumberItems(section.content);
+                const updateNumberItem = (numberIndex, key, value) => {
+                    const next = parseNumberItems(section.content);
+                    next[numberIndex][key] = value;
+                    updateSection(index, 'content', serializeNumberItems(next));
+                };
+
                 return (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -512,8 +519,20 @@ export default function Form({ item }) {
                             <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
                             <Field label="Título" value={section.title} onChange={(event) => updateSection(index, 'title', event.target.value)} />
                             <Field label="Subtítulo" value={section.subtitle} onChange={(event) => updateSection(index, 'subtitle', event.target.value)} />
-                            <Field label="Números" as="textarea" rows="8" value={section.content} onChange={(event) => updateSection(index, 'content', event.target.value)} />
-                            <p className="tablet:col-span-2 text-xs text-gray-500">Use JSON com lista de itens, preservando os números atuais da página.</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {items.map((item, numberIndex) => (
+                                <div key={numberIndex} className="rounded-xl border border-gray-200 bg-white p-4">
+                                    <p className="mb-4 text-xs font-semibold uppercase tracking-[.08em] text-gray-500">NÚMERO {numberIndex + 1}</p>
+                                    <div className="grid gap-4 tablet:grid-cols-2">
+                                        <Field label="Prefixo" value={item.prefix} onChange={(event) => updateNumberItem(numberIndex, 'prefix', event.target.value)} />
+                                        <Field label="Valor" value={item.value} onChange={(event) => updateNumberItem(numberIndex, 'value', event.target.value)} />
+                                        <Field label="Sufixo" value={item.suffix} onChange={(event) => updateNumberItem(numberIndex, 'suffix', event.target.value)} />
+                                        <Field label="Descrição" as="textarea" rows="4" value={item.description} onChange={(event) => updateNumberItem(numberIndex, 'description', event.target.value)} className="tablet:col-span-2" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 );
