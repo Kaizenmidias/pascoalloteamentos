@@ -2,7 +2,8 @@ import { usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import SortableCollection from './SortableCollection';
 
-const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'mp4', 'mov'];
+const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+const allowedExtensions = [...imageExtensions, 'mp4', 'mov'];
 const maxItemsFallback = 50;
 const xsrfToken = () => {
     const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
@@ -11,15 +12,26 @@ const xsrfToken = () => {
 const fileKey = (file) => `${file.name}-${file.size}-${file.lastModified}`;
 const uniqueIds = (values = []) => [...new Set(values.filter((value) => value !== undefined && value !== null && value !== ''))];
 
-export default function AsyncMediaUploader({ existing = [], removed = [], data, setData, compact = false }) {
+export default function AsyncMediaUploader({
+    existing = [],
+    removed = [],
+    data = {},
+    setData = () => {},
+    compact = false,
+    mode = 'gallery',
+    onSelect,
+    onRemove,
+    title,
+}) {
     const { mediaUpload = {} } = usePage().props;
     const [uploaded, setUploaded] = useState([]);
     const [tasks, setTasks] = useState([]);
     const [dragActive, setDragActive] = useState(false);
     const endpoint = `${String(mediaUpload.url || '').replace(/\/$/, '')}/admin/media-uploads`;
     const maxBytes = Number(mediaUpload.maxKb || 524288) * 1024;
-    const maxItems = Number(mediaUpload.maxItems || maxItemsFallback);
-    const visibleExisting = existing.filter((asset) => !removed.includes(asset.id));
+    const singleImage = mode === 'single-image';
+    const maxItems = singleImage ? 1 : Number(mediaUpload.maxItems || maxItemsFallback);
+    const visibleExisting = singleImage && uploaded.length ? [] : existing.filter((asset) => !removed.includes(asset.id));
     const media = [...visibleExisting, ...uploaded];
     const order = data.media_order?.length ? data.media_order : media.map((asset) => asset.id);
     const ordered = [...media].sort((a, b) => {
@@ -36,7 +48,7 @@ export default function AsyncMediaUploader({ existing = [], removed = [], data, 
     const upload = (file) => new Promise((resolve, reject) => {
         const key = fileKey(file);
         const extension = file.name.split('.').pop()?.toLowerCase();
-        if (!allowedExtensions.includes(extension)) {
+        if (!(singleImage ? imageExtensions : allowedExtensions).includes(extension)) {
             reject(new Error('Formato não permitido. Envie JPG, JPEG, PNG, WebP, HEIC, HEIF, MP4 ou MOV.'));
             return;
         }
@@ -76,6 +88,13 @@ export default function AsyncMediaUploader({ existing = [], removed = [], data, 
     });
 
     const appendAsset = (asset) => {
+        if (singleImage) {
+            if (asset.type !== 'image') throw new Error('Selecione uma imagem para este campo.');
+            setUploaded([asset]);
+            onSelect?.(asset);
+            return;
+        }
+
         setUploaded((current) => current.some((item) => item.id === asset.id) ? current : [...current, asset]);
         setData((current) => {
             const uploadedIds = uniqueIds([...(current.uploaded_media_ids || []), asset.id]);
@@ -90,13 +109,13 @@ export default function AsyncMediaUploader({ existing = [], removed = [], data, 
     };
 
     const selectFiles = async (files) => {
-        const queue = Array.from(files || []);
+        const queue = Array.from(files || []).slice(0, singleImage ? 1 : undefined);
         if (!queue.length) return;
 
         const knownIds = new Set(media.map((asset) => asset.id));
         for (const file of queue) {
             const key = fileKey(file);
-            if (knownIds.size >= maxItems) {
+            if (!singleImage && knownIds.size >= maxItems) {
                 addErrorTask(key, file.name, `Você pode enviar no máximo ${maxItems} arquivos nesta galeria.`);
                 continue;
             }
@@ -112,6 +131,12 @@ export default function AsyncMediaUploader({ existing = [], removed = [], data, 
     };
 
     const remove = (asset) => {
+        if (singleImage) {
+            setUploaded((current) => current.filter((item) => item.id !== asset.id));
+            onRemove?.(asset);
+            return;
+        }
+
         if (uploaded.some((item) => item.id === asset.id)) {
             setUploaded((current) => current.filter((item) => item.id !== asset.id));
             setData((current) => ({ ...current, uploaded_media_ids: (current.uploaded_media_ids || []).filter((id) => id !== asset.id), media_order: (current.media_order || []).filter((id) => id !== asset.id) }));
@@ -127,8 +152,8 @@ export default function AsyncMediaUploader({ existing = [], removed = [], data, 
     };
 
     return <section className={`rounded-xl border border-line bg-white shadow-sm ${compact ? 'p-5' : 'p-6'}`}>
-        <h2 className="text-lg font-medium text-ink">Upload individual de mídia</h2>
-        <p className="mt-1 text-sm text-muted">Cada arquivo é enviado e processado separadamente. O formulário final envia somente os IDs.</p>
+        <h2 className="text-lg font-medium text-ink">{title || (singleImage ? 'Imagem do slide' : 'Upload individual de mídia')}</h2>
+        <p className="mt-1 text-sm text-muted">{singleImage ? 'Envie ou substitua a imagem. O arquivo permanece na biblioteca ao remover o slide.' : 'Cada arquivo é enviado e processado separadamente. O formulário final envia somente os IDs.'}</p>
         <label
             className={`mt-4 block cursor-pointer rounded-xl border border-dashed text-center transition ${dragActive ? 'border-brand bg-brand/10 ring-2 ring-brand/20' : 'border-brand/40 bg-brand/5'} ${compact ? 'p-4' : 'p-6'}`}
             onDragEnter={(event) => { event.preventDefault(); setDragActive(true); }}
@@ -137,10 +162,35 @@ export default function AsyncMediaUploader({ existing = [], removed = [], data, 
             onDrop={handleDrop}
         >
             <span className="text-sm font-medium text-brand">{dragActive ? 'Solte os arquivos aqui' : 'Arraste ou clique para enviar'}</span>
-            <span className="mt-1 block text-[.65rem] text-muted">JPG, PNG, WebP, HEIC, HEIF, MP4 ou MOV. Limite de {Math.round(maxBytes / 1024 / 1024)} MB por arquivo e até {maxItems} itens.</span>
-            <input type="file" multiple accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.mp4,.mov" className="sr-only" onChange={(event) => { selectFiles(Array.from(event.target.files || [])); event.target.value = ''; }} />
+            <span className="mt-1 block text-[.65rem] text-muted">{singleImage ? 'JPG, PNG, WebP, HEIC ou HEIF.' : 'JPG, PNG, WebP, HEIC, HEIF, MP4 ou MOV.'} Limite de {Math.round(maxBytes / 1024 / 1024)} MB por arquivo{singleImage ? '.' : ' e até ' + maxItems + ' itens.'}</span>
+            <input type="file" multiple={!singleImage} accept={singleImage ? '.jpg,.jpeg,.png,.webp,.heic,.heif' : '.jpg,.jpeg,.png,.webp,.heic,.heif,.mp4,.mov'} className="sr-only" onChange={(event) => { selectFiles(Array.from(event.target.files || [])); event.target.value = ''; }} />
         </label>
         {tasks.length > 0 && <div className="mt-4 space-y-3">{tasks.map((task) => <div key={task.key} className="rounded-lg bg-surface p-3 text-xs"><div className="flex justify-between gap-3"><span className="truncate">{task.name}</span><span className={task.error ? 'text-red-700' : 'text-muted'}>{task.status}</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line"><div className="h-full bg-brand transition-[width]" style={{ width: `${task.progress}%` }} /></div>{task.error && <p className="mt-2 text-red-700">{task.error}</p>}</div>)}</div>}
-        {ordered.length > 0 && <SortableCollection items={ordered} getKey={(asset) => asset.id} label="mídia" onChange={(items) => setData('media_order', items.map((asset) => asset.id))} onRemove={remove} gridClass={compact ? 'mt-4 grid grid-cols-2 gap-2' : 'mt-5 grid grid-cols-2 gap-3 tablet:grid-cols-4 desktop:grid-cols-[repeat(auto-fill,minmax(150px,1fr))]'} itemClass={compact ? 'min-w-0' : 'min-w-0 max-w-[180px]'} renderItem={(asset, index) => { const video = asset.type === 'video' || asset.mime_type?.startsWith('video/'); return <><div className="relative">{video ? <img src={asset.poster_url || ''} alt="" className="aspect-square w-full bg-ink object-cover" /> : <img src={asset.url} alt={asset.alt_text || ''} className="aspect-square w-full object-cover" />}{video && <div className="absolute inset-0 grid place-items-center bg-black/15"><span className="grid size-9 place-items-center rounded-full bg-black/70 text-sm text-white">&#9654;</span></div>}</div><div className="flex min-h-10 items-center justify-between gap-1 p-2 text-[.65rem]"><span className="truncate text-muted">{video ? 'Vídeo' : 'Foto'} #{String(index + 1).padStart(2, '0')}</span>{!video && <button type="button" onClick={() => setData('featured_media_id', asset.id)} className={String(data.featured_media_id) === String(asset.id) ? 'font-medium text-brand' : 'text-muted'}>{String(data.featured_media_id) === String(asset.id) ? 'Capa' : 'Capa?'}</button>}</div></>; }} />}
+        {ordered.length > 0 && (
+            <SortableCollection
+                items={ordered}
+                getKey={(asset) => asset.id}
+                label="mídia"
+                onChange={(items) => { if (!singleImage) setData('media_order', items.map((asset) => asset.id)); }}
+                onRemove={remove}
+                gridClass={compact ? 'mt-4 grid grid-cols-2 gap-2' : 'mt-5 grid grid-cols-2 gap-3 tablet:grid-cols-4 desktop:grid-cols-[repeat(auto-fill,minmax(150px,1fr))]'}
+                itemClass={compact ? 'min-w-0' : 'min-w-0 max-w-[180px]'}
+                renderItem={(asset, index) => {
+                    const video = asset.type === 'video' || asset.mime_type?.startsWith('video/');
+                    return (
+                        <>
+                            <div className="relative">
+                                {video ? <img src={asset.poster_url || ''} alt="" className="aspect-square w-full bg-ink object-cover" /> : <img src={asset.url} alt={asset.alt_text || ''} className="aspect-square w-full object-cover" />}
+                                {video && <div className="absolute inset-0 grid place-items-center bg-black/15"><span className="grid size-9 place-items-center rounded-full bg-black/70 text-sm text-white">&#9654;</span></div>}
+                            </div>
+                            <div className="flex min-h-10 items-center justify-between gap-1 p-2 text-[.65rem]">
+                                <span className="truncate text-muted">{video ? 'Vídeo' : 'Foto'} #{String(index + 1).padStart(2, '0')}</span>
+                                {!singleImage && !video && <button type="button" onClick={() => setData('featured_media_id', asset.id)} className={String(data.featured_media_id) === String(asset.id) ? 'font-medium text-brand' : 'text-muted'}>{String(data.featured_media_id) === String(asset.id) ? 'Capa' : 'Capa?'}</button>}
+                            </div>
+                        </>
+                    );
+                }}
+            />
+        )}
     </section>;
 }

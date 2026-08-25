@@ -25,7 +25,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('pages', [CmsController::class, 'pages'])->name('pages.index');
     Route::get('pages/home/edit', [CmsController::class, 'redirectHomeEditor'])->name('pages.home.legacy');
     Route::get('pages/home', [CmsController::class, 'home'])->name('pages.home');
-    Route::put('pages/home', [CmsController::class, 'updateHome'])->name('pages.home.update');
+    Route::match(['put', 'patch'], 'pages/home', [CmsController::class, 'updateHome'])->name('pages.home.update');
     Route::get('pages/home-numbers', [CmsController::class, 'homeNumbers'])->name('pages.home-numbers');
     Route::put('pages/home-numbers', [CmsController::class, 'updateHomeNumbers'])->name('pages.home-numbers.update');
     Route::get('pages/create', [CmsController::class, 'createPage'])->name('pages.create');

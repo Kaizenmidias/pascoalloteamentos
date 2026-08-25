@@ -7,16 +7,20 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Models\Lead;
+use App\Models\MediaAsset;
 use App\Models\Page;
 use App\Models\SiteSetting;
 use App\Services\Media\MediaAssetService;
+use App\Support\HomeContent;
 use App\Support\SafeRichHtml;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 use App\Support\UniqueSlug;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -266,72 +270,50 @@ class CmsController extends Controller
 
     public function homeNumbers(): Response
     {
-        $numbers = SiteSetting::query()->where('key', 'home_numbers')->first()?->value ?? $this->defaultHomeNumbers();
+        $stored = Schema::hasTable('site_settings')
+            ? SiteSetting::query()->where('key', 'home_numbers')->first()?->value
+            : null;
+        $numbers = HomeContent::numbers($stored);
 
         return Inertia::render('Admin/Cms/HomeNumbers', ['numbers' => $numbers]);
     }
 
     public function home(): Response
     {
-        $settings = SiteSetting::query()
-            ->whereIn('key', ['home_hero', 'home_differentials', 'home_numbers'])
-            ->get()
-            ->keyBy('key')
-            ->map(fn (SiteSetting $setting) => $setting->value);
-        $homeHero = $settings->get('home_hero');
-        $homeDifferentials = $settings->get('home_differentials');
-        $homeNumbers = $settings->get('home_numbers');
-
-        $homeHero = is_array($homeHero) && $homeHero !== [] ? $homeHero : null;
-        $homeDifferentials = is_array($homeDifferentials) && $homeDifferentials !== [] ? $homeDifferentials : null;
-        $homeNumbers = is_array($homeNumbers) && $homeNumbers !== [] ? $homeNumbers : null;
+        $settings = Schema::hasTable('site_settings')
+            ? SiteSetting::query()
+                ->whereIn('key', ['home_hero', 'home_differentials', 'home_numbers'])
+                ->get()
+                ->keyBy('key')
+                ->map(fn (SiteSetting $setting) => $setting->value)
+            : collect();
 
         return Inertia::render('Admin/Cms/Home', [
-            'homeHero' => $homeHero ?? [
-                'title' => 'Encontre o lugar onde sua próxima história começa.',
-                'description' => 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
-                'slides' => [
-                    ['image' => '/reference-assets/hero-home.jpg', 'title' => '', 'excerpt' => ''],
-                ],
-            ],
-            'homeDifferentials' => $homeDifferentials ?? [
-                [
-                    'title' => 'Arquitetura autoral',
-                    'text' => 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.',
-                ],
-                [
-                    'title' => 'Localizações estratégicas',
-                    'text' => 'Empreendimentos em regiões com alto potencial de valorização.',
-                ],
-                [
-                    'title' => 'Sustentabilidade',
-                    'text' => 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.',
-                ],
-                [
-                    'title' => 'Alto padrão construtivo',
-                    'text' => 'Materiais selecionados e processos rigorosos para garantir qualidade.',
-                ],
-                [
-                    'title' => 'Equipe especializada',
-                    'text' => 'Profissionais experientes dedicados a entregar projetos com eficiência.',
-                ],
-                [
-                    'title' => 'Atendimento personalizado',
-                    'text' => 'Relacionamento próximo, transparente e focado em compreender cada cliente.',
-                ],
-            ],
-            'homeNumbers' => $homeNumbers ?? $this->defaultHomeNumbers(),
+            'homeHero' => $this->hydrateHomeHeroMedia(HomeContent::hero($settings->get('home_hero')), true),
+            'homeDifferentials' => HomeContent::differentials($settings->get('home_differentials')),
+            'homeNumbers' => HomeContent::numbers($settings->get('home_numbers')),
         ]);
     }
     public function updateHome(Request $request): RedirectResponse
     {
+        if (! Schema::hasTable('site_settings')) {
+            return back()->with('error', 'As configurações da Home ainda não estão disponíveis. Execute as migrations pendentes.');
+        }
+
         $data = $request->validate([
             'home_hero.title' => ['required', 'string', 'max:255'],
             'home_hero.description' => ['required', 'string', 'max:1000'],
             'home_hero.slides' => ['required', 'array', 'min:1'],
-            'home_hero.slides.*.image' => ['required', 'string', 'max:2048'],
+            'home_hero.slides.*.image' => ['nullable', 'string', 'max:2048'],
+            'home_hero.slides.*.mobile_image' => ['nullable', 'string', 'max:2048'],
+            'home_hero.slides.*.media_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'home_hero.slides.*.mobile_media_id' => ['nullable', 'integer', 'exists:media_assets,id'],
             'home_hero.slides.*.title' => ['nullable', 'string', 'max:255'],
             'home_hero.slides.*.excerpt' => ['nullable', 'string', 'max:1000'],
+            'home_hero.slides.*.button_text' => ['nullable', 'string', 'max:100'],
+            'home_hero.slides.*.button_url' => ['nullable', 'string', 'max:2048'],
+            'home_hero.slides.*.sort_order' => ['nullable', 'integer', 'min:0'],
+            'home_hero.slides.*.is_active' => ['nullable', 'boolean'],
             'home_differentials' => ['required', 'array', 'min:1'],
             'home_differentials.*.title' => ['required', 'string', 'max:255'],
             'home_differentials.*.text' => ['required', 'string', 'max:1000'],
@@ -341,21 +323,30 @@ class CmsController extends Controller
             'home_numbers.*.description' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $hero = $this->hydrateHomeHeroMedia(HomeContent::hero($data['home_hero'], false));
+        foreach ($hero['slides'] as $index => $slide) {
+            if ($slide['image'] === '') {
+                throw ValidationException::withMessages([
+                    "home_hero.slides.{$index}.image" => 'Selecione ou envie uma imagem para este slide.',
+                ]);
+            }
+        }
+
         SiteSetting::updateOrCreate(['key' => 'home_hero'], [
             'group' => 'home',
-            'value' => $data['home_hero'],
+            'value' => $hero,
             'is_public' => true,
         ]);
 
         SiteSetting::updateOrCreate(['key' => 'home_differentials'], [
             'group' => 'home',
-            'value' => $data['home_differentials'],
+            'value' => HomeContent::differentials($data['home_differentials']),
             'is_public' => true,
         ]);
 
         SiteSetting::updateOrCreate(['key' => 'home_numbers'], [
             'group' => 'home',
-            'value' => $this->normalizeHomeNumbers($data['home_numbers']),
+            'value' => HomeContent::numbers($data['home_numbers']),
             'is_public' => true,
         ]);
 
@@ -373,7 +364,7 @@ class CmsController extends Controller
             'numbers.*.is_active' => ['nullable', 'boolean'],
         ]);
 
-        $numbers = $this->normalizeHomeNumbers($data['numbers']);
+        $numbers = HomeContent::numbers($data['numbers']);
 
         SiteSetting::updateOrCreate(['key' => 'home_numbers'], [
             'group' => 'home',
@@ -408,17 +399,46 @@ class CmsController extends Controller
     }
 
 
-    private function normalizeHomeNumbers(array $numbers): array
+    private function hydrateHomeHeroMedia(array $hero, bool $includeAssets = false): array
     {
-        return array_values(array_map(function (array $item, int $index): array {
-            return [
-                'value' => trim((string) ($item['value'] ?? '')),
-                'title' => trim((string) ($item['title'] ?? '')),
-                'description' => trim((string) ($item['description'] ?? '')),
-                'sort_order' => (int) ($item['sort_order'] ?? $index),
-                'is_active' => (bool) ($item['is_active'] ?? true),
-            ];
-        }, $numbers, array_keys($numbers)));
+        if (! Schema::hasTable('media_assets')) {
+            return $hero;
+        }
+
+        $ids = collect($hero['slides'])
+            ->flatMap(fn (array $slide) => [$slide['media_id'], $slide['mobile_media_id']])
+            ->filter()
+            ->unique()
+            ->values();
+        $assets = MediaAsset::query()->whereKey($ids)->get()->keyBy('id');
+
+        $hero['slides'] = array_map(function (array $slide) use ($assets, $includeAssets): array {
+            foreach ([
+                ['media_id', 'image', 'media'],
+                ['mobile_media_id', 'mobile_image', 'mobile_media'],
+            ] as [$idKey, $urlKey, $assetKey]) {
+                $asset = $slide[$idKey] ? $assets->get($slide[$idKey]) : null;
+                if (! $asset || $asset->type !== 'image') {
+                    $slide[$idKey] = null;
+                    continue;
+                }
+
+                $slide[$urlKey] = $asset->url;
+                if ($includeAssets) {
+                    $slide[$assetKey] = [
+                        'id' => $asset->id,
+                        'original_name' => $asset->original_name,
+                        'mime_type' => $asset->mime_type,
+                        'url' => $asset->url,
+                        'type' => $asset->type,
+                    ];
+                }
+            }
+
+            return $slide;
+        }, $hero['slides']);
+
+        return $hero;
     }
 
     private function savePage(Request $request, Page $page): void

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use App\Models\Condominium;
+use App\Models\MediaAsset;
 use App\Models\Property;
 use App\Models\SiteSetting;
 use App\Models\Subdivision;
+use App\Support\HomeContent;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,7 +18,14 @@ class HomeController extends Controller
     public function __invoke(): Response
     {
         if (! Schema::hasTable('condominiums')) {
-            return Inertia::render('Public/Home', ['featuredItems' => [], 'condominiums' => [], 'properties' => [], 'subdivisions' => [], 'posts' => [], 'homeNumbers' => $this->defaultHomeNumbers()]);
+            return Inertia::render('Public/Home', [
+                'featuredItems' => [],
+                'homeEntities' => [],
+                'posts' => [],
+                'homeHero' => HomeContent::hero(null, false),
+                'homeDifferentials' => HomeContent::differentials(null),
+                'homeNumbers' => HomeContent::numbers(null),
+            ]);
         }
 
         $condominiums = Condominium::query()->published()->with(['city.state', 'condominiumType', 'developmentStatus', 'mediaAssets'])->featured()->latest('published_at')->limit(3)->get();
@@ -49,6 +58,14 @@ class HomeController extends Controller
             ->concat($this->homeEntities(Subdivision::class, 'subdivisions', '/loteamentos/', 'subdivisionType'))
             ->concat($this->homeEntities(Property::class, 'properties', '/imoveis/', 'propertyType'))
             ->values();
+        $homeSettings = Schema::hasTable('site_settings')
+            ? SiteSetting::query()->whereIn('key', ['home_hero', 'home_differentials', 'home_numbers'])->get()->keyBy('key')
+            : collect();
+        $homeHero = $this->hydrateHomeHeroMedia(HomeContent::hero($homeSettings->get('home_hero')?->value, false));
+        $homeHero['slides'] = array_values(array_filter(
+            $homeHero['slides'],
+            fn (array $slide) => $slide['is_active'] && $slide['image'] !== '',
+        ));
 
         return Inertia::render('Public/Home', [
             'featuredItems' => $featuredItems,
@@ -56,9 +73,9 @@ class HomeController extends Controller
             'condominiums' => $condominiums,
             'properties' => $properties,
             'subdivisions' => $subdivisions,
-            'homeHero' => SiteSetting::query()->where('key', 'home_hero')->first()?->value,
-            'homeDifferentials' => SiteSetting::query()->where('key', 'home_differentials')->first()?->value,
-            'homeNumbers' => SiteSetting::query()->where('key', 'home_numbers')->first()?->value ?? $this->defaultHomeNumbers(),
+            'homeHero' => $homeHero,
+            'homeDifferentials' => HomeContent::differentials($homeSettings->get('home_differentials')?->value),
+            'homeNumbers' => HomeContent::numbers($homeSettings->get('home_numbers')?->value),
             'posts' => BlogPost::query()->where('status', 'published')->with(['featuredMedia', 'categories'])->latest('published_at')->limit(3)->get(),
         ]);
     }
@@ -83,13 +100,34 @@ class HomeController extends Controller
             ]);
     }
 
-    private function defaultHomeNumbers(): array
+    private function hydrateHomeHeroMedia(array $hero): array
     {
-        return [
-            ['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'],
-            ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'],
-            ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presença consolidada.'],
-            ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.'],
-        ];
+        if (! Schema::hasTable('media_assets')) {
+            return $hero;
+        }
+
+        $ids = collect($hero['slides'])
+            ->flatMap(fn (array $slide) => [$slide['media_id'], $slide['mobile_media_id']])
+            ->filter()
+            ->unique()
+            ->values();
+        $assets = MediaAsset::query()->whereKey($ids)->get()->keyBy('id');
+
+        $hero['slides'] = array_map(function (array $slide) use ($assets): array {
+            foreach ([
+                ['media_id', 'image'],
+                ['mobile_media_id', 'mobile_image'],
+            ] as [$idKey, $urlKey]) {
+                $asset = $slide[$idKey] ? $assets->get($slide[$idKey]) : null;
+                if ($asset && $asset->type === 'image') {
+                    $slide[$urlKey] = $asset->url;
+                }
+            }
+
+            return $slide;
+        }, $hero['slides']);
+
+        return $hero;
     }
+
 }

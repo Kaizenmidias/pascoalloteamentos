@@ -2,13 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Admin\CmsController;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\Faq;
+use App\Models\MediaAsset;
 use App\Models\Property;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class AdminCmsTest extends TestCase
@@ -156,5 +159,84 @@ class AdminCmsTest extends TestCase
                 ->assertOk()
                 ->assertSee('Admin/Pages/Form');
         }
+    }
+
+    public function test_home_routes_match_only_the_dedicated_controller_methods(): void
+    {
+        $routes = app('router')->getRoutes();
+        $cases = [
+            ['GET', '/admin/pages/home', 'home'],
+            ['GET', '/admin/pages/home/edit', 'redirectHomeEditor'],
+            ['PUT', '/admin/pages/home', 'updateHome'],
+            ['PATCH', '/admin/pages/home', 'updateHome'],
+        ];
+
+        foreach ($cases as [$method, $uri, $action]) {
+            $route = $routes->match(Request::create($uri, $method));
+
+            $this->assertSame(CmsController::class.'@'.$action, $route->getActionName());
+            $this->assertNull($route->parameter('page'));
+        }
+    }
+
+    public function test_home_carousel_persists_media_order_and_hides_inactive_slides_publicly(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $first = MediaAsset::create(['disk' => 'external', 'path' => 'https://example.com/primeiro.jpg', 'mime_type' => 'image/jpeg']);
+        $second = MediaAsset::create(['disk' => 'external', 'path' => 'https://example.com/segundo.jpg', 'mime_type' => 'image/jpeg']);
+        $inactive = MediaAsset::create(['disk' => 'external', 'path' => 'https://example.com/inativo.jpg', 'mime_type' => 'image/jpeg']);
+
+        $payload = [
+            'home_hero' => [
+                'title' => 'Home administrável',
+                'description' => 'Descrição administrável.',
+                'slides' => [
+                    ['media_id' => $second->id, 'image' => '', 'title' => 'Segundo', 'excerpt' => '', 'button_text' => '', 'button_url' => '', 'sort_order' => 2, 'is_active' => true],
+                    ['media_id' => $inactive->id, 'image' => '', 'title' => 'Inativo', 'excerpt' => '', 'button_text' => '', 'button_url' => '', 'sort_order' => 3, 'is_active' => false],
+                    ['media_id' => $first->id, 'image' => '', 'title' => 'Primeiro', 'excerpt' => '', 'button_text' => 'Conheça', 'button_url' => '/loteamentos', 'sort_order' => 1, 'is_active' => true],
+                ],
+            ],
+            'home_differentials' => [['title' => 'Qualidade', 'text' => 'Em cada detalhe.']],
+            'home_numbers' => [
+                ['value' => '20+', 'title' => 'Anos', 'description' => 'de experiência.'],
+                ['value' => '15+', 'title' => 'Projetos', 'description' => 'entregues.'],
+                ['value' => '2+', 'title' => 'Cidades', 'description' => 'atendidas.'],
+                ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos.'],
+            ],
+        ];
+
+        $this->actingAs($user)->put('/admin/pages/home', $payload)->assertRedirect();
+
+        $hero = SiteSetting::where('key', 'home_hero')->firstOrFail()->value;
+        $this->assertSame(['Primeiro', 'Segundo', 'Inativo'], array_column($hero['slides'], 'title'));
+        $this->assertSame($first->id, $hero['slides'][0]['media_id']);
+        $this->assertSame('https://example.com/primeiro.jpg', $hero['slides'][0]['image']);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('https://example.com/primeiro.jpg')
+            ->assertSee('https://example.com/segundo.jpg')
+            ->assertDontSee('https://example.com/inativo.jpg');
+    }
+
+    public function test_home_editor_normalizes_json_string_legacy_carousel(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        SiteSetting::create([
+            'key' => 'home_hero',
+            'group' => 'home',
+            'value' => json_encode([
+                'title' => 'Hero legado',
+                'slides' => [['url' => '/reference-assets/hero-home.jpg', 'subtitle' => 'Chamada antiga']],
+            ]),
+            'is_public' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->get('/admin/pages/home')
+            ->assertOk()
+            ->assertSee('Hero legado')
+            ->assertSee('/reference-assets/hero-home.jpg')
+            ->assertSee('Chamada antiga');
     }
 }

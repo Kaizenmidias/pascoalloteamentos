@@ -1,10 +1,23 @@
 import { useMemo, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import AdminLayout from '../../../Components/Layout/AdminLayout';
+import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
 import Button from '../../../Components/UI/Button';
 import Field from '../../../Components/Forms/Field';
 
-const blankSlide = { image: '', title: '', excerpt: '' };
+const newSlide = () => ({
+    _key: 'slide-' + Date.now() + '-' + Math.random(),
+    image: '',
+    mobile_image: '',
+    media_id: null,
+    mobile_media_id: null,
+    title: '',
+    excerpt: '',
+    button_text: '',
+    button_url: '',
+    sort_order: 0,
+    is_active: true,
+});
 const blankDifferential = { title: '', text: '' };
 const defaultHomeNumbers = [
     { value: '20+', title: 'Anos de experiência', description: 'de atuação no mercado.' },
@@ -20,11 +33,17 @@ export default function Home({ homeHero = {}, homeDifferentials = [], homeNumber
         : []), [homeDifferentials]);
     const safeNumbers = useMemo(() => (Array.isArray(homeNumbers) ? homeNumbers : []), [homeNumbers]);
 
-    const initialHero = useMemo(() => ({
-        title: safeHero.title || 'Encontre o lugar onde sua próxima história começa.',
-        description: safeHero.description || 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
-        slides: Array.isArray(safeHero.slides) && safeHero.slides.length ? safeHero.slides.filter((slide) => slide && typeof slide === 'object') : [{ ...blankSlide, image: '/reference-assets/hero-home.jpg' }],
-    }), [safeHero]);
+    const initialHero = useMemo(() => {
+        const slides = Array.isArray(safeHero.slides)
+            ? safeHero.slides.map((slide, index) => ({ ...newSlide(), ...slide, _key: 'saved-slide-' + index + '-' + (slide.media_id || slide.image || 'empty') }))
+            : [];
+
+        return {
+            title: safeHero.title || 'Encontre o lugar onde sua próxima história começa.',
+            description: safeHero.description || 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
+            slides: slides.length ? slides : [{ ...newSlide(), image: '/reference-assets/hero-home.jpg' }],
+        };
+    }, [safeHero]);
 
     const initialDifferentials = useMemo(() => (
         safeDifferentials.length ? safeDifferentials : [
@@ -42,7 +61,7 @@ export default function Home({ homeHero = {}, homeDifferentials = [], homeNumber
         ...(safeNumbers[index] && typeof safeNumbers[index] === 'object' ? safeNumbers[index] : {}),
     })), [safeNumbers]);
 
-    const { data, setData, put, processing } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         home_hero: initialHero,
         home_differentials: initialDifferentials,
         home_numbers: initialNumbers,
@@ -56,13 +75,38 @@ export default function Home({ homeHero = {}, homeDifferentials = [], homeNumber
     };
 
     const updateHero = (key, value) => setData('home_hero', { ...data.home_hero, [key]: value });
-    const updateSlide = (index, key, value) => setData('home_hero', {
+    const updateSlideFields = (index, changes) => setData('home_hero', {
         ...data.home_hero,
-        slides: data.home_hero.slides.map((slide, slideIndex) => (slideIndex === index ? { ...slide, [key]: value } : slide)),
+        slides: data.home_hero.slides.map((slide, slideIndex) => (slideIndex === index ? { ...slide, ...changes } : slide)),
     });
+    const updateSlide = (index, key, value) => updateSlideFields(index, { [key]: value });
 
-    const addSlide = () => setData('home_hero', { ...data.home_hero, slides: [...data.home_hero.slides, { ...blankSlide }] });
-    const removeSlide = (index) => setData('home_hero', { ...data.home_hero, slides: data.home_hero.slides.filter((_, slideIndex) => slideIndex !== index) });
+    const setSlides = (slides) => setData('home_hero', {
+        ...data.home_hero,
+        slides: slides.map((slide, index) => ({ ...slide, sort_order: index })),
+    });
+    const addSlide = () => setSlides([...data.home_hero.slides, newSlide()]);
+    const removeSlide = (index) => {
+        const slides = data.home_hero.slides.filter((_, slideIndex) => slideIndex !== index);
+        setSlides(slides.length ? slides : [newSlide()]);
+    };
+    const moveSlide = (index, direction) => {
+        const nextIndex = index + direction;
+        if (nextIndex < 0 || nextIndex >= data.home_hero.slides.length) return;
+        const slides = [...data.home_hero.slides];
+        [slides[index], slides[nextIndex]] = [slides[nextIndex], slides[index]];
+        setSlides(slides);
+    };
+    const selectSlideMedia = (index, asset, mobile = false) => {
+        updateSlideFields(index, mobile
+            ? { mobile_media_id: asset.id, mobile_image: asset.url, mobile_media: asset }
+            : { media_id: asset.id, image: asset.url, media: asset });
+    };
+    const removeSlideMedia = (index, mobile = false) => {
+        updateSlideFields(index, mobile
+            ? { mobile_media_id: null, mobile_image: '', mobile_media: null }
+            : { media_id: null, image: '', media: null });
+    };
 
     const updateDifferential = (index, key, value) => setData('home_differentials', data.home_differentials.map((item, itemIndex) => (itemIndex === index ? { ...item, [key]: value } : item)));
     const addDifferential = () => setData('home_differentials', [...data.home_differentials, { ...blankDifferential }]);
@@ -75,7 +119,7 @@ export default function Home({ homeHero = {}, homeDifferentials = [], homeNumber
             <form onSubmit={submit} className="space-y-6">
                 <div className="flex flex-wrap gap-2">
                     {[
-                        ['hero', 'Hero'],
+                        ['hero', 'Carrossel'],
                         ['differentials', 'Diferenciais'],
                         ['numbers', 'Números'],
                     ].map(([key, label]) => (
@@ -87,7 +131,10 @@ export default function Home({ homeHero = {}, homeDifferentials = [], homeNumber
 
                 {tab === 'hero' && (
                     <section className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <h2 className="text-lg font-medium text-gray-900">Hero da Home</h2>
+                        <div>
+                            <h2 className="text-lg font-medium text-gray-900">Carrossel da Home</h2>
+                            <p className="mt-1 text-sm text-gray-500">Administre imagens, textos, links, ordem e visibilidade dos slides.</p>
+                        </div>
                         <div className="grid gap-5 tablet:grid-cols-2">
                             <Field label="Título principal" value={data.home_hero.title} onChange={(e) => updateHero('title', e.target.value)} />
                             <Field label="Descrição" as="textarea" value={data.home_hero.description} onChange={(e) => updateHero('description', e.target.value)} />
@@ -98,14 +145,59 @@ export default function Home({ homeHero = {}, homeDifferentials = [], homeNumber
                                 <Button type="button" variant="secondary" onClick={addSlide}>Adicionar slide</Button>
                             </div>
                             {data.home_hero.slides.map((slide, index) => (
-                                <div key={index} className="rounded-2xl border border-gray-200 bg-gray-50 p-5">
-                                    <div className="grid gap-4 tablet:grid-cols-2">
-                                        <Field label="Imagem" value={slide.image} onChange={(e) => updateSlide(index, 'image', e.target.value)} />
-                                        <Field label="Título do slide" value={slide.title} onChange={(e) => updateSlide(index, 'title', e.target.value)} />
-                                        <Field label="Chamada" as="textarea" value={slide.excerpt} onChange={(e) => updateSlide(index, 'excerpt', e.target.value)} className="tablet:col-span-2" />
+                                <div key={slide._key} className="space-y-5 rounded-2xl border border-gray-200 bg-gray-50 p-5">
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">Slide {index + 1}</h4>
+                                            <p className="text-xs text-gray-500">Ordem {index + 1}</p>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <label className="flex items-center gap-2 text-sm text-gray-600">
+                                                <input type="checkbox" checked={Boolean(slide.is_active)} onChange={(event) => updateSlide(index, 'is_active', event.target.checked)} />
+                                                Ativo
+                                            </label>
+                                            <button type="button" disabled={index === 0} onClick={() => moveSlide(index, -1)} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm disabled:opacity-30" aria-label="Mover slide para cima">↑</button>
+                                            <button type="button" disabled={index === data.home_hero.slides.length - 1} onClick={() => moveSlide(index, 1)} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm disabled:opacity-30" aria-label="Mover slide para baixo">↓</button>
+                                            <button type="button" onClick={() => removeSlide(index)} className="rounded-lg px-3 py-2 text-sm font-medium text-red-700">Remover slide</button>
+                                        </div>
                                     </div>
-                                    <div className="mt-4 flex justify-end">
-                                        <button type="button" onClick={() => removeSlide(index)} className="text-sm font-medium text-red-700">Remover slide</button>
+
+                                    <div className="grid gap-4 desktop:grid-cols-2">
+                                        <div>
+                                            <AsyncMediaUploader
+                                                compact
+                                                mode="single-image"
+                                                title="Imagem principal"
+                                                existing={slide.media ? [slide.media] : []}
+                                                onSelect={(asset) => selectSlideMedia(index, asset)}
+                                                onRemove={() => removeSlideMedia(index)}
+                                            />
+                                            {!slide.media && slide.image && <img src={slide.image} alt="" className="mt-3 aspect-[16/7] w-full rounded-xl border border-gray-200 object-cover" />}
+                                            <div className="mt-3">
+                                                <Field label="URL da imagem" value={slide.image || ''} onChange={(event) => updateSlide(index, 'image', event.target.value)} error={errors['home_hero.slides.' + index + '.image']} />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <AsyncMediaUploader
+                                                compact
+                                                mode="single-image"
+                                                title="Imagem mobile (opcional)"
+                                                existing={slide.mobile_media ? [slide.mobile_media] : []}
+                                                onSelect={(asset) => selectSlideMedia(index, asset, true)}
+                                                onRemove={() => removeSlideMedia(index, true)}
+                                            />
+                                            {!slide.mobile_media && slide.mobile_image && <img src={slide.mobile_image} alt="" className="mt-3 aspect-[4/3] w-full rounded-xl border border-gray-200 object-cover" />}
+                                            <div className="mt-3">
+                                                <Field label="URL da imagem mobile" value={slide.mobile_image || ''} onChange={(event) => updateSlide(index, 'mobile_image', event.target.value)} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid gap-4 tablet:grid-cols-2">
+                                        <Field label="Título do slide" value={slide.title || ''} onChange={(event) => updateSlide(index, 'title', event.target.value)} />
+                                        <Field label="Texto do botão" value={slide.button_text || ''} onChange={(event) => updateSlide(index, 'button_text', event.target.value)} />
+                                        <Field label="Chamada" as="textarea" value={slide.excerpt || ''} onChange={(event) => updateSlide(index, 'excerpt', event.target.value)} />
+                                        <Field label="Link do botão" value={slide.button_url || ''} onChange={(event) => updateSlide(index, 'button_url', event.target.value)} placeholder="/loteamentos ou https://..." />
                                     </div>
                                 </div>
                             ))}

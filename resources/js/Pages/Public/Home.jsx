@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import PublicLayout from '../../Components/Layout/PublicLayout';
 import SeoHead from '../../Components/SEO/SeoHead';
 import Container from '../../Components/UI/Container';
@@ -42,35 +42,72 @@ function HomeBlogCard({ post }) {
 }
 
 function HomeHero({ slides = [], hero = {} }) {
-    const items = slides.length ? slides.slice(0, 5) : [{ title: hero.title || defaultHero.title, excerpt: hero.description || defaultHero.description, media_assets: [] }];
+    const items = slides.length ? slides : [{ title: hero.title || defaultHero.title, excerpt: hero.description || defaultHero.description, media_assets: [] }];
     const [active, setActive] = useState(0);
-    const [paused, setPaused] = useState(false);
+    const [reducedMotion, setReducedMotion] = useState(false);
+    const touchStart = useRef(null);
+    const activeItem = items[active] || items[0];
+    const managedSlide = Object.prototype.hasOwnProperty.call(activeItem, 'is_active');
+
     useEffect(() => {
-        if (items.length < 2 || paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-        const timer = window.setInterval(() => setActive((current) => (current + 1) % items.length), 5000);
-        return () => window.clearInterval(timer);
-    }, [items.length, paused]);
+        setActive((current) => Math.min(current, Math.max(0, items.length - 1)));
+    }, [items.length]);
+
+    useEffect(() => {
+        const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const update = () => setReducedMotion(query.matches);
+        update();
+        query.addEventListener?.('change', update);
+        return () => query.removeEventListener?.('change', update);
+    }, []);
+
+    useEffect(() => {
+        if (items.length < 2 || reducedMotion) return undefined;
+        const timer = window.setTimeout(() => setActive((current) => (current + 1) % items.length), 4000);
+        return () => window.clearTimeout(timer);
+    }, [active, items.length, reducedMotion]);
+
+    const move = (direction) => setActive((current) => (current + direction + items.length) % items.length);
+    const finishSwipe = (event) => {
+        if (touchStart.current === null) return;
+        const distance = event.changedTouches[0].clientX - touchStart.current;
+        if (Math.abs(distance) > 45) move(distance < 0 ? 1 : -1);
+        touchStart.current = null;
+    };
 
     return (
-        <section className="relative overflow-hidden text-white" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)}>
+        <section
+            className="relative overflow-hidden text-white"
+            onTouchStart={(event) => { touchStart.current = event.touches[0].clientX; }}
+            onTouchEnd={finishSwipe}
+        >
             <div className="relative min-h-[75svh]">
                 {items.map((item, index) => (
-                    <img
-                        key={item.id || index}
-                        src={item.image || item.media_assets?.[0]?.url || '/reference-assets/hero-home.jpg'}
-                        alt={item.title || 'Empreendimento'}
-                        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${index === active ? 'opacity-100' : 'opacity-0'}`}
-                    />
+                    <picture key={item.media_id || item.id || item.image || index}>
+                        {item.mobile_image && <source media="(max-width: 767px)" srcSet={item.mobile_image} />}
+                        <img
+                            src={item.image || item.media_assets?.[0]?.url || '/reference-assets/hero-home.jpg'}
+                            alt={item.title || 'Empreendimento'}
+                            className={['absolute inset-0 h-full w-full object-cover transition-opacity', reducedMotion ? 'duration-0' : 'duration-500', index === active ? 'opacity-100' : 'opacity-0'].join(' ')}
+                        />
+                    </picture>
                 ))}
                 <div className="hero-overlay absolute inset-0" />
                 <div className="relative z-10 mx-auto flex min-h-[75svh] max-w-[80rem] items-center px-5 pt-20 text-center">
-                    <div className="mx-auto max-w-[980px]">
-                        <h1 className="mx-auto max-w-[1120px] text-[2.125rem] font-light leading-[1.06] tracking-[-.025em] tablet:text-[3.25rem] desktop:text-[clamp(3.75rem,4.1vw,4.25rem)]">{hero.title || defaultHero.title}</h1>
-                        <p className="mx-auto mt-5 max-w-[760px] text-[1.125rem] font-light leading-[1.45] text-white/90 desktop:text-[1.4375rem]">{hero.description || defaultHero.description}</p>
+                    <div className="mx-auto max-w-[980px]" aria-live="off">
+                        <h1 className="mx-auto max-w-[1120px] text-[2.125rem] font-light leading-[1.06] tracking-[-.025em] tablet:text-[3.25rem] desktop:text-[clamp(3.75rem,4.1vw,4.25rem)]">{(managedSlide && activeItem.title) || hero.title || defaultHero.title}</h1>
+                        <p className="mx-auto mt-5 max-w-[760px] text-[1.125rem] font-light leading-[1.45] text-white/90 desktop:text-[1.4375rem]">{(managedSlide && activeItem.excerpt) || hero.description || defaultHero.description}</p>
+                        {managedSlide && activeItem.button_text && activeItem.button_url && <Link href={activeItem.button_url} className="brand-button mt-7 inline-flex">{activeItem.button_text}</Link>}
                     </div>
                 </div>
+                {items.length > 1 && (
+                    <>
+                        <button type="button" onClick={() => move(-1)} aria-label="Slide anterior" className="absolute left-4 top-1/2 z-20 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/30 text-2xl text-white backdrop-blur-sm transition hover:bg-black/50">&#8249;</button>
+                        <button type="button" onClick={() => move(1)} aria-label="Próximo slide" className="absolute right-4 top-1/2 z-20 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/30 text-2xl text-white backdrop-blur-sm transition hover:bg-black/50">&#8250;</button>
+                    </>
+                )}
                 <div className="absolute inset-x-0 bottom-6 z-20 flex justify-center gap-2">
-                    {items.map((_, index) => <button key={index} type="button" aria-label={`Ir para slide ${index + 1}`} onClick={() => setActive(index)} className={`h-2.5 rounded-full transition-all ${index === active ? 'w-8 bg-white' : 'w-2.5 bg-white/50'}`} />)}
+                    {items.map((_, index) => <button key={index} type="button" aria-label={'Ir para slide ' + (index + 1)} onClick={() => setActive(index)} className={['h-2.5 rounded-full transition-all', index === active ? 'w-8 bg-white' : 'w-2.5 bg-white/50'].join(' ')} />)}
                 </div>
             </div>
         </section>
