@@ -29,8 +29,10 @@ function DropdownGroup({ label, href, items = [] }) {
                 <span className="text-[10px]">▾</span>
             </Link>
             {open && items.length > 0 && (
-                <div className="absolute left-0 top-full z-20 mt-3 w-72 overflow-hidden rounded-2xl border border-line bg-white p-2 text-ink shadow-header">
-                    {items.map((item) => <Link key={item.slug} href={`/${href.replace('/', '')}/${item.slug}`} className="block rounded-xl px-4 py-3 text-sm font-light transition hover:bg-surface">{item.title}</Link>)}
+                <div className="absolute left-0 top-full z-20 w-72 pt-3">
+                    <div className="overflow-hidden rounded-2xl border border-line bg-white p-2 text-ink shadow-header">
+                        {items.map((item) => <Link key={item.slug} href={`/${href.replace('/', '')}/${item.slug}`} className="block rounded-xl px-4 py-3 text-sm font-light transition hover:bg-surface">{item.title}</Link>)}
+                    </div>
                 </div>
             )}
         </div>
