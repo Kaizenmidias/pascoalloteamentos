@@ -23,15 +23,16 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('classifications/{group}/{item}', [ClassificationController::class, 'update'])->name('classifications.update');
     Route::delete('classifications/{group}/{item}', [ClassificationController::class, 'destroy'])->name('classifications.destroy');
     Route::get('pages', [CmsController::class, 'pages'])->name('pages.index');
+    Route::get('pages/home/edit', [CmsController::class, 'redirectHomeEditor'])->name('pages.home.legacy');
+    Route::get('pages/home', [CmsController::class, 'home'])->name('pages.home');
+    Route::put('pages/home', [CmsController::class, 'updateHome'])->name('pages.home.update');
+    Route::get('pages/home-numbers', [CmsController::class, 'homeNumbers'])->name('pages.home-numbers');
+    Route::put('pages/home-numbers', [CmsController::class, 'updateHomeNumbers'])->name('pages.home-numbers.update');
     Route::get('pages/create', [CmsController::class, 'createPage'])->name('pages.create');
     Route::post('pages', [CmsController::class, 'storePage'])->name('pages.store');
     Route::get('pages/{page}/edit', [CmsController::class, 'editPage'])->name('pages.edit');
     Route::put('pages/{page}', [CmsController::class, 'updatePage'])->name('pages.update');
     Route::delete('pages/{page}', [CmsController::class, 'destroyPage'])->name('pages.destroy');
-    Route::get('pages/home', [CmsController::class, 'home'])->name('pages.home');
-    Route::put('pages/home', [CmsController::class, 'updateHome'])->name('pages.home.update');
-    Route::get('pages/home-numbers', [CmsController::class, 'homeNumbers'])->name('pages.home-numbers');
-    Route::put('pages/home-numbers', [CmsController::class, 'updateHomeNumbers'])->name('pages.home-numbers.update');
     Route::prefix('blog')->name('blog.')->group(function () {
         Route::get('posts', [CmsController::class, 'posts'])->name('posts.index');
         Route::get('posts/create', [CmsController::class, 'createPost'])->name('posts.create');

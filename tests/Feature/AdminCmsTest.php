@@ -118,6 +118,7 @@ class AdminCmsTest extends TestCase
         $this->assertSame('3+', $saved[2]['value']);
         $this->assertSame('5', $saved[3]['value']);
 
+        $this->actingAs($user)->get('/admin/pages/home')->assertOk()->assertSee('21+');
         $this->get('/')->assertOk()->assertSee('21+');
     }
 
@@ -127,5 +128,33 @@ class AdminCmsTest extends TestCase
 
         $this->actingAs($user)->get('/admin/pages')->assertOk()->assertSee('/admin/pages/home');
         $this->actingAs($user)->get('/admin/pages/home/edit')->assertRedirect('/admin/pages/home');
+        $this->actingAs($user)->get('/admin/pages/home')->assertOk()->assertSee('Admin/Cms/Home');
+    }
+
+    public function test_home_editor_uses_safe_defaults_for_legacy_settings(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        SiteSetting::create(['key' => 'home_hero', 'group' => 'home', 'value' => null, 'is_public' => true]);
+        SiteSetting::create(['key' => 'home_differentials', 'group' => 'home', 'value' => 'legacy', 'is_public' => true]);
+        SiteSetting::create(['key' => 'home_numbers', 'group' => 'home', 'value' => [], 'is_public' => true]);
+
+        $this->actingAs($user)
+            ->get('/admin/pages/home')
+            ->assertOk()
+            ->assertSee('Admin/Cms/Home')
+            ->assertSee('Encontre o lugar onde sua próxima história começa.');
+    }
+
+    public function test_other_structural_pages_still_use_generic_editor(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $this->actingAs($user)->get('/admin/pages')->assertOk();
+
+        foreach (['sobre-nos', 'condominios', 'loteamentos', 'imoveis', 'contato'] as $slug) {
+            $this->actingAs($user)
+                ->get('/admin/pages/'.$slug.'/edit')
+                ->assertOk()
+                ->assertSee('Admin/Pages/Form');
+        }
     }
 }

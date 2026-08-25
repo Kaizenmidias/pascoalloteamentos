@@ -14,14 +14,20 @@ const defaultHomeNumbers = [
 ];
 
 export default function Home({ homeHero = {}, homeDifferentials = [], homeNumbers = [] }) {
+    const safeHero = useMemo(() => (homeHero && typeof homeHero === 'object' && !Array.isArray(homeHero) ? homeHero : {}), [homeHero]);
+    const safeDifferentials = useMemo(() => (Array.isArray(homeDifferentials)
+        ? homeDifferentials.filter((item) => item && typeof item === 'object')
+        : []), [homeDifferentials]);
+    const safeNumbers = useMemo(() => (Array.isArray(homeNumbers) ? homeNumbers : []), [homeNumbers]);
+
     const initialHero = useMemo(() => ({
-        title: homeHero.title || 'Encontre o lugar onde sua próxima história começa.',
-        description: homeHero.description || 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
-        slides: Array.isArray(homeHero.slides) && homeHero.slides.length ? homeHero.slides : [{ ...blankSlide, image: '/reference-assets/hero-home.jpg' }],
-    }), [homeHero]);
+        title: safeHero.title || 'Encontre o lugar onde sua próxima história começa.',
+        description: safeHero.description || 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
+        slides: Array.isArray(safeHero.slides) && safeHero.slides.length ? safeHero.slides.filter((slide) => slide && typeof slide === 'object') : [{ ...blankSlide, image: '/reference-assets/hero-home.jpg' }],
+    }), [safeHero]);
 
     const initialDifferentials = useMemo(() => (
-        homeDifferentials.length ? homeDifferentials : [
+        safeDifferentials.length ? safeDifferentials : [
             { title: 'Arquitetura autoral', text: 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.' },
             { title: 'Localizações estratégicas', text: 'Empreendimentos em regiões com alto potencial de valorização.' },
             { title: 'Sustentabilidade', text: 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.' },
@@ -29,12 +35,12 @@ export default function Home({ homeHero = {}, homeDifferentials = [], homeNumber
             { title: 'Equipe especializada', text: 'Profissionais experientes dedicados a entregar projetos com eficiência.' },
             { title: 'Atendimento personalizado', text: 'Relacionamento próximo, transparente e focado em compreender cada cliente.' },
         ]
-    ), [homeDifferentials]);
+    ), [safeDifferentials]);
 
     const initialNumbers = useMemo(() => defaultHomeNumbers.map((fallback, index) => ({
         ...fallback,
-        ...(Array.isArray(homeNumbers) ? homeNumbers[index] || {} : {}),
-    })), [homeNumbers]);
+        ...(safeNumbers[index] && typeof safeNumbers[index] === 'object' ? safeNumbers[index] : {}),
+    })), [safeNumbers]);
 
     const { data, setData, put, processing } = useForm({
         home_hero: initialHero,

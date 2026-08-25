@@ -3,6 +3,15 @@ import { useEffect, useState } from 'react';
 
 const Icon = ({ children }) => <span className="grid size-5 place-items-center text-base" aria-hidden="true">{children}</span>;
 
+const pageLinks = [
+    ['Home', '/admin/pages/home'],
+    ['Sobre', '/admin/pages/sobre-nos/edit'],
+    ['Condomínios', '/admin/pages/condominios/edit'],
+    ['Loteamentos', '/admin/pages/loteamentos/edit'],
+    ['Imóveis', '/admin/pages/imoveis/edit'],
+    ['Contato', '/admin/pages/contato/edit'],
+];
+
 export default function AdminLayout({ title, children }) {
     const { auth, flash } = usePage().props;
     const { url } = usePage();
@@ -27,7 +36,23 @@ export default function AdminLayout({ title, children }) {
                 </div>
                 <nav className="flex-1 overflow-y-auto py-5 text-sm">
                     <Link href="/admin" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⌂</Icon>Início</Link>
-                    <Link href="/admin/pages" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/pages') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>¤</Icon>Páginas</Link>
+                    <details open className="group">
+                        <summary className={`flex cursor-pointer list-none items-center gap-3 px-6 py-3 transition ${active('/admin/pages') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
+                            <Icon>¤</Icon><span className="flex-1">Páginas</span><span className="text-xs transition group-open:rotate-180">⌄</span>
+                        </summary>
+                        <div className="pb-2 pl-14">
+                            <Link href="/admin/pages" className={`block rounded-l-lg px-4 py-2.5 ${url === '/admin/pages' ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}>Todas</Link>
+                            {pageLinks.map(([label, href]) => (
+                                <Link
+                                    key={href}
+                                    href={href}
+                                    className={`block rounded-l-lg px-4 py-2.5 ${url === href || (href === '/admin/pages/home' && url === '/admin/pages/home/edit') ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}
+                                >
+                                    {label}
+                                </Link>
+                            ))}
+                        </div>
+                    </details>
                     <details open className="group">
                         <summary className="flex cursor-pointer list-none items-center gap-3 px-6 py-3 text-white/70 transition hover:bg-white/5 hover:text-white">
                             <Icon>⌂</Icon><span className="flex-1">Empreendimentos</span><span className="text-xs transition group-open:rotate-180">⌄</span>

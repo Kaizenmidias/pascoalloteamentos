@@ -92,6 +92,11 @@ class CmsController extends Controller
         return Inertia::render('Admin/Pages/Form', ['item' => null]);
     }
 
+    public function redirectHomeEditor(): RedirectResponse
+    {
+        return redirect()->route('admin.pages.home');
+    }
+
     public function editPage(Page $page): Response|RedirectResponse
     {
         if ($page->slug === 'home') {
@@ -273,16 +278,23 @@ class CmsController extends Controller
             ->get()
             ->keyBy('key')
             ->map(fn (SiteSetting $setting) => $setting->value);
+        $homeHero = $settings->get('home_hero');
+        $homeDifferentials = $settings->get('home_differentials');
+        $homeNumbers = $settings->get('home_numbers');
+
+        $homeHero = is_array($homeHero) && $homeHero !== [] ? $homeHero : null;
+        $homeDifferentials = is_array($homeDifferentials) && $homeDifferentials !== [] ? $homeDifferentials : null;
+        $homeNumbers = is_array($homeNumbers) && $homeNumbers !== [] ? $homeNumbers : null;
 
         return Inertia::render('Admin/Cms/Home', [
-            'homeHero' => $settings['home_hero'] ?? [
+            'homeHero' => $homeHero ?? [
                 'title' => 'Encontre o lugar onde sua próxima história começa.',
                 'description' => 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.',
                 'slides' => [
                     ['image' => '/reference-assets/hero-home.jpg', 'title' => '', 'excerpt' => ''],
                 ],
             ],
-            'homeDifferentials' => $settings['home_differentials'] ?? [
+            'homeDifferentials' => $homeDifferentials ?? [
                 [
                     'title' => 'Arquitetura autoral',
                     'text' => 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.',
@@ -308,7 +320,7 @@ class CmsController extends Controller
                     'text' => 'Relacionamento próximo, transparente e focado em compreender cada cliente.',
                 ],
             ],
-            'homeNumbers' => $settings['home_numbers'] ?? $this->defaultHomeNumbers(),
+            'homeNumbers' => $homeNumbers ?? $this->defaultHomeNumbers(),
         ]);
     }
     public function updateHome(Request $request): RedirectResponse
