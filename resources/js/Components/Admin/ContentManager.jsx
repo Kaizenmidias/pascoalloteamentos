@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import Field from '../Forms/Field';
 import OverallProgressBar from '../RealEstate/OverallProgressBar';
+import Button from '../UI/Button';
 import SortableCollection from './SortableCollection';
 
 const blankPlan = { name: '', description: '', area: '', bedrooms: '', suites: '', bathrooms: '', parking_spaces: '', external_url: '', media_asset_id: '' };
@@ -15,7 +16,7 @@ export const fixedStageDefaults = (item, definitions = []) => definitions.map((d
 
 function Repeater({ title, rows, onChange, blank, render }) {
     const update = (index, key, value) => onChange(rows.map((row, rowIndex) => rowIndex === index ? { ...row, [key]: value } : row));
-    return <section className="rounded-xl border border-line bg-white p-6 shadow-sm"><div className="mb-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="text-lg font-medium text-ink">{title}</h2><p className="mt-1 text-sm text-muted">Arraste os itens para definir a ordem exibida no site.</p></div><button type="button" onClick={() => onChange([...rows, { ...blank, _key: crypto.randomUUID() }])} className="rounded-lg border border-brand px-4 py-2 text-xs font-medium uppercase text-brand">Adicionar</button></div><SortableCollection items={rows} onChange={onChange} getKey={(row, index) => row.id || row._key || `existing-${index}`} label="item" onRemove={(_, index) => onChange(rows.filter((__, rowIndex) => rowIndex !== index))} renderItem={(row, index) => <div className="bg-surface p-4">{render(row, index, update)}</div>} /></section>;
+    return <section className="rounded-xl border border-line bg-white p-6 shadow-sm"><div className="mb-5 flex flex-wrap items-center justify-between gap-4"><div><h2 className="text-lg font-medium text-ink">{title}</h2><p className="mt-1 text-sm text-muted">Arraste os itens para definir a ordem exibida no site.</p></div><Button type="button" onClick={() => onChange([...rows, { ...blank, _key: crypto.randomUUID() }])}>Adicionar</Button></div><SortableCollection items={rows} onChange={onChange} getKey={(row, index) => row.id || row._key || `existing-${index}`} label="item" onRemove={(_, index) => onChange(rows.filter((__, rowIndex) => rowIndex !== index))} renderItem={(row, index) => <div className="bg-surface p-4">{render(row, index, update)}</div>} /></section>;
 }
 
 function ConstructionStageGrid({ data, setData }) {

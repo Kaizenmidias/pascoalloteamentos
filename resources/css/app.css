@@ -64,6 +64,12 @@ img { display: block; max-width: 100%; }
     .brand-button { position: relative; display: inline-flex; min-height: 3rem; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--color-brand-dark); border-radius: .5rem; background: var(--color-brand); padding: .875rem 2rem; color: #fff !important; font-size: .8125rem; font-weight: 500; letter-spacing: .015em; text-transform: uppercase; transition: transform .2s ease, background .2s ease, border-color .2s ease; transform-origin: center; }
     .brand-button::before { content: ''; position: absolute; top: 7%; left: -25%; display: block; width: 24%; height: 86%; opacity: 0; background: #fff; box-shadow: 0 0 24px 10px rgb(255 255 255 / .7); transform: skewX(-20deg); pointer-events: none; }
     .brand-button:visited { color: #fff !important; }
+    .brand-button--secondary, .brand-button--secondary:visited { background: #fff; color: var(--color-brand) !important; }
+    .brand-button--secondary:hover { background: var(--color-brand); color: #fff !important; }
+    .brand-button:focus-visible { outline: 3px solid rgb(151 28 32 / .2); outline-offset: 3px; }
+    .brand-button:disabled, .brand-button[aria-disabled='true'] { cursor: not-allowed; opacity: .55; transform: none; }
+    .brand-button:disabled:hover, .brand-button[aria-disabled='true']:hover { transform: none; }
+    .brand-button:disabled:hover::before, .brand-button[aria-disabled='true']:hover::before { animation: none; }
     body[data-public-page='true'] .brand-button { background: var(--color-brand-deep); border-color: #5d090c; }
     body[data-public-page='true'][data-scrolled='true'] .brand-button { background: var(--color-brand); border-color: var(--color-brand-dark); }
     body[data-public-page='true'] .brand-button:hover { background: var(--color-brand); border-color: var(--color-brand-dark); transform: scale(1.04); }

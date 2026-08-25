@@ -1,2 +1,15 @@
 import { Link } from '@inertiajs/react';
-export default function Button({ href, type='button', variant='primary', className='', children, ...props }) { const classes=`brand-button inline-flex min-h-11 items-center justify-center rounded-[7px] px-6 py-2.5 text-xs font-medium uppercase tracking-[.015em] focus:outline-none focus:ring-3 focus:ring-brand/20 disabled:opacity-50 ${variant==='secondary'?'border border-brand bg-white text-brand hover:text-white':'bg-brand text-white'} ${className}`; return href?<Link href={href} className={classes} {...props}>{children}</Link>:<button type={type} className={classes} {...props}>{children}</button>; }
+
+const variants = {
+    primary: '',
+    secondary: 'brand-button--secondary',
+};
+
+export default function Button({ href, type = 'button', variant = 'primary', className = '', children, ...props }) {
+    const classes = `brand-button min-h-11 rounded-[7px] px-6 py-2.5 text-xs focus:outline-none ${variants[variant] || variants.primary} ${className}`;
+    const content = children || props['aria-label'] || props.title || 'Acao';
+
+    return href
+        ? <Link href={href} className={classes} {...props}>{content}</Link>
+        : <button type={type} className={classes} {...props}>{content}</button>;
+}
