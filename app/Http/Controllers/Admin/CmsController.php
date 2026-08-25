@@ -67,7 +67,9 @@ class CmsController extends Controller
                 'status' => $item?->status ?? $page['status'],
                 'sections_count' => $item?->sections_count ?? 0,
                 'locked' => $page['locked'],
-                'edit_url' => $item ? "/admin/pages/{$item->slug}/edit" : $page['path'],
+                'edit_url' => $page['slug'] === 'home'
+                    ? $page['path']
+                    : ($item ? '/admin/pages/' . $item->slug . '/edit' : $page['path']),
             ];
         })->values();
 
@@ -90,8 +92,12 @@ class CmsController extends Controller
         return Inertia::render('Admin/Pages/Form', ['item' => null]);
     }
 
-    public function editPage(Page $page): Response
+    public function editPage(Page $page): Response|RedirectResponse
     {
+        if ($page->slug === 'home') {
+            return redirect()->route('admin.pages.home');
+        }
+
         if ($page->sections()->doesntExist()) {
             foreach ($this->defaultSectionsFor($page->slug) as $index => $section) {
                 $page->sections()->create([
@@ -118,6 +124,10 @@ class CmsController extends Controller
 
     public function updatePage(Request $request, Page $page): RedirectResponse
     {
+        if ($page->slug === 'home') {
+            return redirect()->route('admin.pages.home');
+        }
+
         $this->savePage($request, $page);
 
         return back()->with('success', 'PÃƒÂ¡gina atualizada.');

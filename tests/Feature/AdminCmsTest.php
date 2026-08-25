@@ -120,4 +120,12 @@ class AdminCmsTest extends TestCase
 
         $this->get('/')->assertOk()->assertSee('21+');
     }
+
+    public function test_home_structural_page_uses_dedicated_editor_route(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+
+        $this->actingAs($user)->get('/admin/pages')->assertOk()->assertSee('/admin/pages/home');
+        $this->actingAs($user)->get('/admin/pages/home/edit')->assertRedirect('/admin/pages/home');
+    }
 }
