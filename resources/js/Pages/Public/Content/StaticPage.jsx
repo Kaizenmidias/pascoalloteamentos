@@ -1,7 +1,8 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import PublicLayout from '../../../Components/Layout/PublicLayout';
 import SeoHead from '../../../Components/SEO/SeoHead';
 import Container from '../../../Components/UI/Container';
+import SocialLinks from '../../../Components/UI/SocialLinks';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
 
 const fallbackAbout = [
@@ -107,6 +108,8 @@ function Paragraphs({ content, className = '' }) {
 }
 
 function SectionRenderer({ section, kind, reverse = false }) {
+    const { socialLinks = {} } = usePage().props;
+
     if (!section) return null;
 
     const type = section.type || 'content';
@@ -281,19 +284,12 @@ function SectionRenderer({ section, kind, reverse = false }) {
     }
 
     if (type === 'social') {
-        const links = Array.isArray(data.content) ? data.content : [];
         return (
             <section className="pb-[var(--section-space)]">
                 <Container>
                     {data.label && <p className="eyebrow">{data.label}</p>}
                     {data.title && <h2 className="section-title mt-2">{data.title}</h2>}
-                    <div className="mt-8 flex flex-wrap gap-4">
-                        {links.map(([label, href]) => (
-                            <a key={label} href={href} target="_blank" rel="noreferrer" className="brand-button inline-flex">
-                                {label}
-                            </a>
-                        ))}
-                    </div>
+                    <SocialLinks links={socialLinks} className="mt-8" linkClassName="border border-brand/25 text-brand hover:border-brand hover:bg-brand hover:text-white focus-visible:outline-brand/30" />
                 </Container>
             </section>
         );
@@ -399,7 +395,10 @@ function About({ page }) {
 }
 
 function Contact({ page }) {
-    const sections = page?.sections?.length ? page.sections : fallbackContact;
+    const storedSections = page?.sections?.length ? page.sections : fallbackContact;
+    const sections = storedSections.some((section) => section.type === 'social')
+        ? storedSections
+        : [...storedSections, { type: 'social', label: 'Redes sociais', is_active: true }];
 
     return (
         <>

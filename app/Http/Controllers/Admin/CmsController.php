@@ -13,6 +13,7 @@ use App\Models\SiteSetting;
 use App\Services\Media\MediaAssetService;
 use App\Support\HomeContent;
 use App\Support\SafeRichHtml;
+use App\Support\SocialLinks;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -246,7 +247,9 @@ class CmsController extends Controller
 
     public function settings(): Response
     {
-        return Inertia::render('Admin/Settings', ['settings' => SiteSetting::whereNot('group', 'integrations')->get()->pluck('value', 'key')]);
+        $settings = SiteSetting::whereNot('group', 'integrations')->get()->pluck('value', 'key')->all();
+
+        return Inertia::render('Admin/Settings', ['settings' => array_merge($settings, SocialLinks::all())]);
     }
 
     public function updateSettings(Request $request): RedirectResponse
@@ -259,6 +262,7 @@ class CmsController extends Controller
             'address' => 'nullable|string|max:500',
             'instagram_url' => 'nullable|url|max:2048',
             'facebook_url' => 'nullable|url|max:2048',
+            'youtube_url' => 'nullable|url|max:2048',
         ]);
 
         foreach ($data as $key => $value) {
@@ -577,7 +581,7 @@ class CmsController extends Controller
                 ['type' => 'hero', 'data' => ['label' => 'Contato', 'title' => 'Estamos prontos para ajudar vocÃƒÂª a encontrar o empreendimento ideal.', 'subtitle' => 'Fale com nossa equipe', 'content' => 'Nossa equipe estÃƒÂ¡ ÃƒÂ  disposiÃƒÂ§ÃƒÂ£o para esclarecer dÃƒÂºvidas, apresentar oportunidades e oferecer o suporte necessÃƒÂ¡rio.', 'image' => '/reference-assets/hero-contact.webp']],
                 ['type' => 'contact-data', 'data' => ['label' => 'Dados de contato', 'content' => [['EscritÃƒÂ³rio administrativo', "Av. Ministro Cirne Lima, nÃ‚Âº 3951\nJardim Coopagro\nToledo - PR\nCEP 85904-460"], ['Telefones', "Telefone Comercial\n(45) 3252-7023\n\nPlantÃƒÂ£o de Vendas\n(45) 9 9111-9653"], ['E-mail', 'contato@pascoalloteamentos.com.br']]]],
                 ['type' => 'contact-form', 'data' => ['label' => 'Formulário', 'title' => 'Fale com Nossa Equipe', 'subtitle' => 'Estamos disponíveis para atender você.', 'content' => 'Preencha o formulário abaixo e nossa equipe entrará em contato o mais breve possível para esclarecer suas dúvidas ou apresentar as melhores oportunidades disponíveis.', 'button_label' => 'Enviar mensagem', 'recipient_email' => 'contato@pascoalloteamentos.com.br']],
-                ['type' => 'social', 'data' => ['label' => 'Redes sociais', 'content' => [['Instagram', 'https://instagram.com'], ['Facebook', 'https://facebook.com']]]],
+                ['type' => 'social', 'data' => ['label' => 'Redes sociais', 'content' => [['Instagram', SocialLinks::DEFAULTS['instagram_url']], ['Facebook', SocialLinks::DEFAULTS['facebook_url']], ['YouTube', SocialLinks::DEFAULTS['youtube_url']]]],
             ],
             default => in_array($slug, ['condominios', 'loteamentos', 'imoveis'], true) ? [
                 ['type' => 'hero', 'data' => ['label' => ucfirst(str_replace('-', ' ', $slug)), 'title' => 'ConteÃƒÂºdo da listagem', 'subtitle' => 'Texto introdutÃƒÂ³rio da pÃƒÂ¡gina.', 'content' => 'Use esta ÃƒÂ¡rea para editar o cabeÃƒÂ§alho e o texto de apresentaÃƒÂ§ÃƒÂ£o.', 'image' => '/reference-assets/hero-home.jpg']],

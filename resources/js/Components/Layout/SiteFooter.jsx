@@ -1,9 +1,12 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import Container from '../UI/Container';
+import SocialLinks from '../UI/SocialLinks';
 
 const FooterLink = ({ href, children }) => <Link href={href} className="block py-1.5 text-xs font-light uppercase text-white/60 transition hover:text-white">{children}</Link>;
 
 export default function SiteFooter() {
+    const { socialLinks = {} } = usePage().props;
+
     return (
         <footer className="mt-auto bg-footer text-white">
             <section className="relative overflow-hidden border-b border-white/5 py-10">
@@ -19,7 +22,7 @@ export default function SiteFooter() {
                     <div>
                         <img src="/reference-assets/logo.png" alt="Pascoal Loteamentos" className="w-44" />
                         <p className="mt-5 max-w-[16rem] text-sm font-light leading-6 text-white/60">Construindo lugares onde pessoas vivem, investem e criam histórias há mais de três décadas.</p>
-                        <div className="mt-4 flex gap-3 text-white/70"><span>◎</span><span>ⓕ</span><span>◉</span></div>
+                        <SocialLinks links={socialLinks} className="mt-4" linkClassName="border border-white/20 text-white/70 hover:border-white/50 hover:bg-white/10 hover:text-white focus-visible:outline-white/70" />
                     </div>
                     <div><h3 className="mb-4 text-xs font-bold uppercase">Institucional</h3><span className="mb-3 block h-px w-10 bg-brand" /><FooterLink href="/">Home</FooterLink><FooterLink href="/sobre-nos">Sobre nós</FooterLink><FooterLink href="/condominios">Condomínios</FooterLink><FooterLink href="/loteamentos">Loteamentos</FooterLink><FooterLink href="/imoveis">Imóveis</FooterLink><FooterLink href="/blog">Blog</FooterLink><FooterLink href="/contato">Contato</FooterLink></div>
                     <div><h3 className="mb-4 text-xs font-bold uppercase">Empreendimentos</h3><span className="mb-3 block h-px w-10 bg-brand" /><FooterLink href="/condominios">Condomínios</FooterLink><FooterLink href="/loteamentos">Loteamentos</FooterLink><FooterLink href="/imoveis">Imóveis</FooterLink></div>

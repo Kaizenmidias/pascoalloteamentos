@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useForm } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '../../../Components/Layout/AdminLayout';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
@@ -61,6 +61,7 @@ const presets = {
 };
 
 const structuredTemplates = new Set(['home', 'institutional', 'listing', 'contact']);
+const socialProfiles = [['Instagram', 'instagram_url'], ['Facebook', 'facebook_url'], ['YouTube', 'youtube_url']];
 
 const createSection = (type = 'content', label = 'Conteúdo') => ({
     type,
@@ -165,6 +166,8 @@ const structuredSchemas = {
 };
 
 export default function Form({ item }) {
+    const { socialLinks = {} } = usePage().props;
+    const serializedSocialLinks = JSON.stringify(socialProfiles.map(([label, key]) => [label, socialLinks[key]]), null, 2);
     const editing = Boolean(item);
     const schema = structuredSchemas[item?.slug] || null;
     const isStructured = structuredTemplates.has(item?.template) || Boolean(schema);
@@ -253,7 +256,7 @@ export default function Form({ item }) {
                 label: section.data?.label || section.type || 'Conteúdo',
                 title: section.data?.title || '',
                 subtitle: section.data?.subtitle || '',
-                content: formatSectionContent(section),
+                content: normalizedType === 'social' ? serializedSocialLinks : formatSectionContent(section),
                 image: section.data?.image || '',
                 button_label: section.data?.button_label || '',
                 button_url: section.data?.button_url || '',
@@ -268,13 +271,14 @@ export default function Form({ item }) {
         if (presets[item?.slug]?.length) {
             return presets[item.slug].map((section, index) => ({
                 ...section,
+                content: section.type === 'social' ? serializedSocialLinks : section.content,
                 sort_order: index,
                 is_active: true,
             }));
         }
 
         return [createSection('content', 'Conteúdo')];
-    }, [item]);
+    }, [item, serializedSocialLinks]);
 
     const { data, setData, post, processing, errors } = useForm({
         _method: editing ? 'put' : undefined,
@@ -593,30 +597,17 @@ export default function Form({ item }) {
             }
 
             if (sectionType === 'social') {
-                const links = (() => {
-                    try {
-                        return Array.isArray(JSON.parse(section.content || '[]')) ? JSON.parse(section.content || '[]') : [];
-                    } catch {
-                        return [];
-                    }
-                })();
-                const setLink = (linkIndex, valueIndex, value) => {
-                    const next = links.map((row, currentIndex) => (currentIndex === linkIndex ? row.map((entry, entryIndex) => (entryIndex === valueIndex ? value : entry)) : row));
-                    updateSection(index, 'content', JSON.stringify(next, null, 2));
-                };
                 return (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-slate-200 bg-white p-4">
                             <p className="text-xs font-semibold uppercase tracking-[.08em] text-brand">{prettySectionName(sectionType)}</p>
-                            <p className="mt-1 text-sm text-gray-500">{sectionDescription(sectionType)}</p>
+                            <p className="mt-1 text-sm text-gray-500">Os links são compartilhados pelo Footer e pela página Contato. Edite-os somente em Configurações para manter uma fonte única.</p>
                         </div>
                         <Field label="Label da seção" value={section.label} onChange={(event) => updateSection(index, 'label', event.target.value)} />
-                        {links.map((row, linkIndex) => (
-                            <div key={linkIndex} className="grid gap-4 rounded-xl border border-gray-200 bg-white p-4 tablet:grid-cols-2">
-                                <Field label="Nome" value={row[0] || ''} onChange={(event) => setLink(linkIndex, 0, event.target.value)} />
-                                <Field label="URL" value={row[1] || ''} onChange={(event) => setLink(linkIndex, 1, event.target.value)} />
-                            </div>
-                        ))}
+                        <div className="grid gap-3 rounded-xl border border-gray-200 bg-white p-4">
+                            {socialProfiles.map(([label, key]) => <div key={key} className="flex flex-col gap-1 border-b border-gray-100 pb-3 last:border-0 last:pb-0 tablet:flex-row tablet:items-center tablet:justify-between"><strong className="text-sm text-gray-900">{label}</strong><a href={socialLinks[key]} target="_blank" rel="noopener noreferrer" className="break-all text-sm text-brand hover:underline">{socialLinks[key]}</a></div>)}
+                        </div>
+                        <Link href="/admin/settings" className="inline-flex text-sm font-medium text-brand hover:underline">Editar redes sociais em Configurações</Link>
                     </div>
                 );
             }

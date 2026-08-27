@@ -7,6 +7,7 @@ use App\Models\Condominium;
 use App\Models\DevelopmentStatus;
 use App\Models\Property;
 use App\Models\Subdivision;
+use App\Support\SocialLinks;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
@@ -31,6 +32,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'appName' => config('app.name'),
+            'socialLinks' => SocialLinks::all(),
             'mediaUpload' => [
                 'url' => config('media.upload_url') ?: null,
                 'maxKb' => config('media.max_upload_kb'),

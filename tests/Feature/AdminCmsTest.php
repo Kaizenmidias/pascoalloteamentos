@@ -10,8 +10,10 @@ use App\Models\MediaAsset;
 use App\Models\Property;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Support\SocialLinks;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class AdminCmsTest extends TestCase
@@ -25,6 +27,27 @@ class AdminCmsTest extends TestCase
         foreach (['/admin', '/admin/properties', '/admin/condominiums', '/admin/subdivisions', '/admin/pages', '/admin/blog/posts', '/admin/leads', '/admin/settings', '/admin/integrations', '/admin/users'] as $url) {
             $this->actingAs($user)->get($url)->assertOk();
         }
+    }
+
+    public function test_social_settings_are_saved_and_shared_with_public_pages(): void
+    {
+        $user = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+
+        $this->actingAs($user)
+            ->put('/admin/settings', SocialLinks::DEFAULTS)
+            ->assertRedirect();
+
+        foreach (SocialLinks::DEFAULTS as $key => $url) {
+            $setting = SiteSetting::query()->where('key', $key)->firstOrFail();
+            $this->assertSame($url, $setting->value);
+            $this->assertTrue($setting->is_public);
+        }
+
+        $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->where('socialLinks.instagram_url', SocialLinks::DEFAULTS['instagram_url'])
+            ->where('socialLinks.facebook_url', SocialLinks::DEFAULTS['facebook_url'])
+            ->where('socialLinks.youtube_url', SocialLinks::DEFAULTS['youtube_url'])
+        );
     }
 
     public function test_blog_post_creation_is_connected_to_public_blog(): void
