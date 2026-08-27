@@ -4,10 +4,16 @@ import { useEffect, useState } from 'react';
 const Icon = ({ children }) => <span className="grid size-5 place-items-center text-base" aria-hidden="true">{children}</span>;
 
 export default function AdminLayout({ title, children }) {
-    const { auth, flash } = usePage().props;
-    const { url } = usePage();
+    const page = usePage();
+    const { auth, flash } = page.props;
+    const { url } = page;
     const [open, setOpen] = useState(false);
+    const role = auth?.user?.role;
+    const isEditor = role === 'editor';
+    const isAdmin = role === 'admin';
+
     useEffect(() => setOpen(false), [url]);
+
     const initials = auth?.user?.name?.split(/\s+/).slice(0, 2).map((word) => word[0]).join('').toUpperCase() || 'U';
     const active = (href) => (href === '/admin' ? url === '/admin' : url.startsWith(href));
 
@@ -27,7 +33,7 @@ export default function AdminLayout({ title, children }) {
                 </div>
                 <nav className="flex-1 overflow-y-auto py-5 text-sm">
                     <Link href="/admin" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⌂</Icon>Início</Link>
-                    <Link href="/admin/pages" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/pages') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>¤</Icon>Páginas</Link>
+                    {!isEditor && <Link href="/admin/pages" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/pages') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>¤</Icon>Páginas</Link>}
                     <details open className="group">
                         <summary className="flex cursor-pointer list-none items-center gap-3 px-6 py-3 text-white/70 transition hover:bg-white/5 hover:text-white">
                             <Icon>⌂</Icon><span className="flex-1">Empreendimentos</span><span className="text-xs transition group-open:rotate-180">⌄</span>
@@ -37,7 +43,7 @@ export default function AdminLayout({ title, children }) {
                                 ['Condomínios', '/admin/condominiums'],
                                 ['Imóveis', '/admin/properties'],
                                 ['Loteamentos', '/admin/subdivisions'],
-                                ['Classificações', '/admin/classifications'],
+                                ...(isAdmin ? [['Classificações', '/admin/classifications']] : []),
                             ].map(([label, href]) => <Link key={href} href={href} className={`block rounded-l-lg px-4 py-2.5 ${active(href) ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}>{label}</Link>)}
                         </div>
                     </details>
@@ -46,14 +52,14 @@ export default function AdminLayout({ title, children }) {
                         <div className="pb-2 pl-14">
                             {[
                                 ['Posts', '/admin/blog/posts'],
-                                ['Categorias', '/admin/blog/categories'],
+                                ...(isAdmin ? [['Categorias', '/admin/blog/categories']] : []),
                             ].map(([label, href]) => <Link key={href} href={href} className={`block rounded-l-lg px-4 py-2.5 ${active(href) ? 'bg-brand text-white' : 'text-white/55 hover:bg-white/5 hover:text-white'}`}>{label}</Link>)}
                         </div>
                     </details>
                     <Link href="/admin/leads" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/leads') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>✉</Icon>Leads</Link>
-                    <Link href="/admin/settings" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/settings') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⚙</Icon>Configurações</Link>
-                    <Link href="/admin/integrations" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/integrations') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⌘</Icon>Integrações</Link>
-                    <Link href="/admin/users" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/users') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>♙</Icon>Usuários</Link>
+                    {isAdmin && <Link href="/admin/settings" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/settings') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⚙</Icon>Configurações</Link>}
+                    {isAdmin && <Link href="/admin/integrations" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/integrations') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>⌘</Icon>Integrações</Link>}
+                    {isAdmin && <Link href="/admin/users" className={`flex items-center gap-3 px-6 py-3 transition ${active('/admin/users') ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}><Icon>♙</Icon>Usuários</Link>}
                 </nav>
                 <div className="space-y-1 border-t border-white/10 p-5 text-sm">
                     <Link href="/logout" method="post" as="button" className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-white/60 hover:bg-white/5 hover:text-white"><Icon>↪</Icon>Sair</Link>

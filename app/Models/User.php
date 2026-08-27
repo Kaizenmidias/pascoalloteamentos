@@ -30,4 +30,19 @@ class User extends Authenticatable
             'is_active' => 'boolean',
         ];
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isEditor(): bool
+    {
+        return $this->role === 'editor';
+    }
+
+    public function canAccessAdmin(): bool
+    {
+        return $this->isAdmin() || $this->isEditor();
+    }
 }

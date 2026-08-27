@@ -235,15 +235,16 @@ class CmsController extends Controller
 
     public function leads(): Response
     {
-        $leads = Lead::with(['property', 'condominium', 'subdivision'])->latest()->get()->map(fn (Lead $lead) => $this->serializeLead($lead))->values();
+        $leads = Lead::with(['property', 'condominium', 'subdivision'])
+            ->latest()
+            ->get()
+            ->reject(fn (Lead $lead) => $lead->isSellYourPropertyLead())
+            ->map(fn (Lead $lead) => $this->serializeLead($lead))
+            ->values();
 
         return Inertia::render('Admin/Leads/Index', [
             'items' => $leads,
             'statusLabels' => Lead::STATUSES,
-            'tabs' => [
-                ['key' => 'all', 'label' => 'Leads'],
-                ['key' => 'sell', 'label' => 'Leads Venda seu Imóvel'],
-            ],
         ]);
     }
 
