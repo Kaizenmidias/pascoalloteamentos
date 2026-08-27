@@ -235,14 +235,87 @@ class CmsController extends Controller
 
     public function leads(): Response
     {
-        return Inertia::render('Admin/Leads/Index', ['items' => Lead::with(['property', 'condominium', 'subdivision'])->latest()->paginate(30)]);
+        $leads = Lead::with(['property', 'condominium', 'subdivision'])->latest()->get()->map(fn (Lead $lead) => $this->serializeLead($lead))->values();
+
+        return Inertia::render('Admin/Leads/Index', [
+            'items' => $leads,
+            'statusLabels' => Lead::STATUSES,
+            'tabs' => [
+                ['key' => 'all', 'label' => 'Leads'],
+                ['key' => 'sell', 'label' => 'Leads Venda seu Imóvel'],
+            ],
+        ]);
     }
 
     public function updateLead(Request $request, Lead $lead): RedirectResponse
     {
-        $lead->update($request->validate(['status' => ['required', Rule::in(['new', 'contacted', 'qualified', 'won', 'lost'])]]));
+        $data = $request->validate([
+            'status' => ['required', Rule::in(array_keys(Lead::STATUSES))],
+            'next_contact_at' => ['nullable', 'date'],
+        ]);
+
+        $lead->update($data);
 
         return back()->with('success', 'Lead atualizado.');
+    }
+
+    public function updateLeadStatus(Request $request, Lead $lead): RedirectResponse
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in(array_keys(Lead::STATUSES))],
+        ]);
+
+        $lead->update($data);
+
+        return back()->with('success', 'Status atualizado.');
+    }
+
+    private function serializeLead(Lead $lead): array
+    {
+        $metadata = is_array($lead->metadata) ? $lead->metadata : [];
+        $entityType = $lead->entityType();
+        $entitySlug = $lead->entitySlug();
+        $entityTitle = $lead->entityTitle();
+
+        return [
+            'id' => $lead->id,
+            'name' => $lead->name,
+            'phone' => $lead->phone,
+            'phone_digits' => preg_replace('/\D+/', '', (string) $lead->phone),
+            'email' => $lead->email,
+            'has_email' => filter_var((string) $lead->email, FILTER_VALIDATE_EMAIL) !== false,
+            'message' => $lead->sanitizedMessage(),
+            'source_url' => $lead->source_url,
+            'source_type' => $metadata['source_type'] ?? null,
+            'source_label' => $metadata['source_label'] ?? null,
+            'product_name' => $metadata['product_name'] ?? null,
+            'origin_label' => $lead->originLabel(),
+            'lead_type' => $lead->isSellYourPropertyLead() ? 'sell' : 'all',
+            'status' => $lead->status,
+            'status_label' => $lead->statusLabel(),
+            'created_at' => $lead->created_at?->toIso8601String(),
+            'created_at_label' => $lead->created_at?->format('d/m/Y H:i'),
+            'next_contact_at' => $lead->next_contact_at?->toIso8601String(),
+            'next_contact_at_label' => $lead->next_contact_at?->format('d/m/Y H:i'),
+            'entity_type' => $entityType,
+            'entity_title' => $entityTitle,
+            'entity_slug' => $entitySlug,
+            'entity_url' => $this->leadEntityUrl($entityType, $entitySlug),
+        ];
+    }
+
+    private function leadEntityUrl(?string $entityType, ?string $slug): ?string
+    {
+        if (! $entityType || ! $slug) {
+            return null;
+        }
+
+        return match ($entityType) {
+            'property' => '/admin/properties/'.$slug.'/edit',
+            'condominium' => '/admin/condominiums/'.$slug.'/edit',
+            'subdivision' => '/admin/subdivisions/'.$slug.'/edit',
+            default => null,
+        };
     }
 
     public function settings(): Response

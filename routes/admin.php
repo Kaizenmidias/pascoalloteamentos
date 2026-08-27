@@ -47,6 +47,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     });
     Route::get('leads', [CmsController::class, 'leads'])->name('leads.index');
     Route::patch('leads/{lead}', [CmsController::class, 'updateLead'])->name('leads.update');
+    Route::patch('leads/{lead}/status', [CmsController::class, 'updateLeadStatus'])->name('leads.status');
     Route::get('settings', [CmsController::class, 'settings'])->name('settings.edit');
     Route::put('settings', [CmsController::class, 'updateSettings'])->name('settings.update');
     Route::get('integrations', [CmsController::class, 'integrations'])->name('integrations.edit');
