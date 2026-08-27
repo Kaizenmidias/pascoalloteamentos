@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\BlogPost;
 use App\Models\Condominium;
+use App\Models\ConstructionStage;
 use App\Models\Page;
 use App\Models\Property;
 use App\Models\Subdivision;
@@ -30,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'property' => Property::class,
             'condominium' => Condominium::class,
+            'construction_stage' => ConstructionStage::class,
             'subdivision' => Subdivision::class,
             'page' => Page::class,
             'blog_post' => BlogPost::class,

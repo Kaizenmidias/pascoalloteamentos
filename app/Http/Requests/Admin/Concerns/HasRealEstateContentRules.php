@@ -38,6 +38,8 @@ trait HasRealEstateContentRules
             'construction_stages.*.is_public' => ['nullable', 'boolean'],
             'construction_stages.*.reference_date' => ['nullable', 'date'],
             'construction_stages.*.description' => ['nullable', 'string'],
+            'construction_stages.*.photos' => ['nullable', 'array', 'max:20'],
+            'construction_stages.*.photos.*' => ['file', 'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif,image/heic-sequence,image/heif-sequence', 'max:25600'],
             'faqs' => ['nullable', 'array', 'max:30'],
             'faqs.*.question' => ['required', 'string', 'max:255'],
             'faqs.*.answer' => ['required', 'string'],

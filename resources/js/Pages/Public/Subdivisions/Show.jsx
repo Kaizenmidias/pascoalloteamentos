@@ -11,14 +11,6 @@ import MediaLightbox, { MediaLightboxTrigger, MediaTile } from '../../../Compone
 import { whatsappUrl } from '../../../Support/whatsapp';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
 
-const defaultFaqs = [
-    ['O loteamento possui infraestrutura completa?', 'Os loteamentos s\u00e3o planejados com infraestrutura urbana completa. Consulte nossa equipe para conhecer os itens deste empreendimento.'],
-    ['\u00c9 poss\u00edvel financiar a compra de um lote?', 'As condi\u00e7\u00f5es variam por empreendimento. Nossa equipe apresenta as alternativas dispon\u00edveis.'],
-    ['Os lotes possuem escritura?', 'A documenta\u00e7\u00e3o e as condi\u00e7\u00f5es de escritura s\u00e3o apresentadas com transpar\u00eancia durante o atendimento.'],
-    ['Posso construir logo ap\u00f3s adquirir o lote?', 'O in\u00edcio depende do est\u00e1gio e das libera\u00e7\u00f5es aplic\u00e1veis ao empreendimento.'],
-    ['Quais s\u00e3o os tamanhos dos lotes dispon\u00edveis?', 'As medidas dispon\u00edveis podem ser consultadas nos materiais do empreendimento ou diretamente com nossa equipe.'],
-    ['Os loteamentos possuem \u00e1reas de lazer ou espa\u00e7os p\u00fablicos?', 'Cada projeto possui caracter\u00edsticas pr\u00f3prias, exibidas na se\u00e7\u00e3o de diferenciais.'],
-];
 
 const SectionContainer = ({ children, className = '' }) => <Container className={`max-w-[1280px] ${className}`}>{children}</Container>;
 const Eyebrow = ({ children, className = '' }) => <p className={`text-sm font-light uppercase tracking-[.03em] text-brand ${className}`}>{children}</p>;
@@ -82,7 +74,7 @@ function Gallery({ item }) {
     const [lightbox, setLightbox] = useState(null);
     const media = galleryMedia(item);
     if (!media.length) return null;
-    return <section className="py-14 tablet:py-16"><SectionContainer><Eyebrow>Galeria</Eyebrow><Title>Conhe&ccedil;a cada detalhe do loteamento</Title><Carousel label="Galeria do loteamento" className="mt-7" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null}>{media.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mÃ­dia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+    return <section className="py-14 tablet:py-16"><SectionContainer><Eyebrow>Fotos</Eyebrow><Title>Conhe&ccedil;a cada detalhe do loteamento</Title><Carousel label="Fotos do loteamento" className="mt-7" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null}>{media.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mÃ­dia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
 function LotsInfoSection({ item }) {
@@ -90,11 +82,8 @@ function LotsInfoSection({ item }) {
     return <section className="bg-surface py-14 tablet:py-[72px]"><SectionContainer className="grid gap-8 rounded-xl border border-line bg-white p-6 shadow-[0_6px_22px_rgba(17,17,17,.05)] tablet:grid-cols-[1.15fr_.85fr] tablet:items-center tablet:p-8"><div><Eyebrow>Informações dos lotes</Eyebrow><Title>Conheça as Plantas dos Lotes</Title><p className="mt-5 max-w-2xl text-base font-light leading-7 text-muted">Faça o download das plantas e tenha acesso aos detalhes do empreendimento, incluindo a divisão dos lotes, medidas e organização do projeto.</p></div><div className="rounded-2xl bg-ink p-6 text-white tablet:p-8"><p className="text-sm uppercase tracking-[.08em] text-white/70">Tudo o que você precisa em um só lugar</p><a href={item.lots_info_url} target="_blank" rel="noopener noreferrer" className="brand-button mt-5 inline-flex w-full justify-center tablet:w-auto">BAIXAR INFORMAÇÕES DOS LOTES</a></div></SectionContainer></section>;
 }
 
-function Faq() {
-    return <section className="bg-surface py-14 tablet:py-16"><SectionContainer><div className="text-center"><Eyebrow>Perguntas frequentes</Eyebrow><Title>Esclare&ccedil;a suas principais d&uacute;vidas</Title></div><div className="mt-9 grid gap-x-12 tablet:grid-cols-2">{defaultFaqs.map(([question, answer]) => <details key={question} className="group border-b border-line"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-sm font-medium text-ink"><span>{question}</span><span className="text-xl text-brand group-open:rotate-45">+</span></summary><p className="pb-5 text-sm font-light leading-6 text-muted">{answer}</p></details>)}</div></SectionContainer></section>;
-}
 
 export default function Show({ item, globalWhatsapp }) {
     const image = featuredMedia(item);
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><Features items={item.features} /><Promotions items={item.promotions} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><Gallery item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section><Faq /></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><Features items={item.features} /><Promotions items={item.promotions} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><Gallery item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section></PublicLayout>;
 }

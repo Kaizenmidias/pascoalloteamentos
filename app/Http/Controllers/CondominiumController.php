@@ -37,7 +37,7 @@ class CondominiumController extends Controller
     {
         abort_unless($condominium->status === 'published', 404);
 
-        $condominium->load(['city.state', 'condominiumType', 'developmentStatus', 'properties', 'features.iconMedia', 'mediaAssets', 'promotionMedia', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages', 'seo']);
+        $condominium->load(['city.state', 'condominiumType', 'developmentStatus', 'properties', 'features.iconMedia', 'mediaAssets', 'promotionMedia', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages.mediaAssets', 'seo']);
         $condominium->setRelation('constructionStages', ConstructionStageCatalog::applicableStages($condominium, $condominium->constructionStages));
 
         $globalWhatsapp = Schema::hasTable('site_settings')

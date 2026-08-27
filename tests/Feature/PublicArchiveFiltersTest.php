@@ -53,6 +53,33 @@ class PublicArchiveFiltersTest extends TestCase
         );
     }
 
+    public function test_public_archives_apply_the_requested_dynamic_filters(): void
+    {
+        [$city, $status] = $this->classifications();
+        $this->createPublishedEntities($city, $status);
+
+        $this->get('/condominios?city=toledo&status=em-obras')->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Condominiums/Index')
+            ->has('items.data', 1)
+            ->where('items.data.0.title', 'Vale da Mata')
+            ->where('statuses.0.slug', 'em-obras')
+        );
+
+        $this->get('/loteamentos?city=toledo&status=em-obras')->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Subdivisions/Index')
+            ->has('items.data', 1)
+            ->where('items.data.0.title', 'Rossetto')
+            ->where('cities.0.slug', 'toledo')
+        );
+
+        $this->get('/imoveis?city=toledo&type=apartamento')->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Properties/Index')
+            ->has('items.data', 1)
+            ->where('items.data.0.title', 'Apartamento 101')
+            ->where('types.0.slug', 'apartamento')
+        );
+    }
+
     private function classifications(): array
     {
         $state = State::create(['name' => 'Paraná', 'code' => 'PR']);

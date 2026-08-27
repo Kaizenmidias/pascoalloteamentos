@@ -405,23 +405,6 @@ function Contact({ page }) {
             {sections.map((section, index) => (
                 <SectionRenderer key={section.id || `${section.type}-${index}`} section={section} kind="contact" />
             ))}
-            <section className="pb-[var(--section-space)]">
-                <Container>
-                    <h2 className="section-title text-center">Perguntas Frequentes</h2>
-                    <div className="mt-8">
-                        {[
-                            ['Como posso agendar uma visita?', 'Entre em contato pelo telefone, WhatsApp ou preencha o formulário desta página. Nossa equipe agendará o melhor horário para você.'],
-                            ['Posso obter informações sobre financiamentos?', 'Sim. Nossa equipe pode orientar sobre as opções disponíveis.'],
-                            ['Vocês atendem apenas Toledo?', 'Atuamos em Toledo e outras cidades da região.'],
-                        ].map(([question, answer]) => (
-                            <details key={question} className="border-b border-line py-5">
-                                <summary className="cursor-pointer text-sm font-medium text-ink">{question}</summary>
-                                <p className="mt-4 text-sm leading-6 text-muted">{answer}</p>
-                            </details>
-                        ))}
-                    </div>
-                </Container>
-            </section>
         </>
     );
 }

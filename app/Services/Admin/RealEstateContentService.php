@@ -83,6 +83,7 @@ class RealEstateContentService
             if (is_array($stages)) {
                 $existingStages = $item->constructionStages()->get();
                 foreach (array_values($stages) as $index => $row) {
+                    $stagePhotos = Arr::pull($row, 'photos', []);
                     $definition = collect(ConstructionStageCatalog::definitionsFor($item))->firstWhere('code', $row['code'] ?? null);
                     $stage = $definition ? $existingStages->first(
                         fn ($existing) => ConstructionStageCatalog::matches($definition, (string) $existing->code, (string) $existing->name),
@@ -98,7 +99,19 @@ class RealEstateContentService
                         'sort_order' => $index,
                         'is_public' => true,
                     ];
-                    $stage ? $stage->update($payload) : $item->constructionStages()->create($payload);
+                    if ($stage) {
+                        $stage->update($payload);
+                    } else {
+                        $stage = $item->constructionStages()->create($payload);
+                    }
+                    foreach (array_values($stagePhotos ?: []) as $photoIndex => $photo) {
+                        $asset = $this->media->store($photo, 'real-estate/construction-progress');
+                        $stage->mediaAssets()->syncWithoutDetaching([$asset->id => [
+                            'collection' => 'construction-progress',
+                            'sort_order' => $stage->mediaAssets()->count() + $photoIndex,
+                            'is_featured' => false,
+                        ]]);
+                    }
                 }
             }
             if (is_array($faqs)) {

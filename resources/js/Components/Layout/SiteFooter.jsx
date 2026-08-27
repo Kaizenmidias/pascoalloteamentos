@@ -1,8 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
 import Container from '../UI/Container';
 import SocialLinks from '../UI/SocialLinks';
+import { WHATSAPP_NUMBER } from '../../Support/whatsapp';
 
-const FooterLink = ({ href, children }) => <Link href={href} className="block py-1.5 text-xs font-light uppercase text-white/60 transition hover:text-white">{children}</Link>;
+const FooterLink = ({ href, children, external = false }) => external
+    ? <a href={href} target="_blank" rel="noopener noreferrer" className="block py-1.5 text-xs font-light uppercase text-white/60 transition hover:text-white">{children}</a>
+    : <Link href={href} className="block py-1.5 text-xs font-light uppercase text-white/60 transition hover:text-white">{children}</Link>;
 
 export default function SiteFooter() {
     const { socialLinks = {} } = usePage().props;
@@ -26,7 +29,7 @@ export default function SiteFooter() {
                     </div>
                     <div><h3 className="mb-4 text-xs font-bold uppercase">Institucional</h3><span className="mb-3 block h-px w-10 bg-brand" /><FooterLink href="/">Home</FooterLink><FooterLink href="/sobre-nos">Sobre nós</FooterLink><FooterLink href="/condominios">Condomínios</FooterLink><FooterLink href="/loteamentos">Loteamentos</FooterLink><FooterLink href="/imoveis">Imóveis</FooterLink><FooterLink href="/blog">Blog</FooterLink><FooterLink href="/contato">Contato</FooterLink></div>
                     <div><h3 className="mb-4 text-xs font-bold uppercase">Empreendimentos</h3><span className="mb-3 block h-px w-10 bg-brand" /><FooterLink href="/condominios">Condomínios</FooterLink><FooterLink href="/loteamentos">Loteamentos</FooterLink><FooterLink href="/imoveis">Imóveis</FooterLink></div>
-                    <div><h3 className="mb-4 text-xs font-bold uppercase">Atendimento</h3><span className="mb-3 block h-px w-10 bg-brand" /><FooterLink href="/contato">Contato</FooterLink><FooterLink href="/contato">Suporte</FooterLink></div>
+                    <div><h3 className="mb-4 text-xs font-bold uppercase">Atendimento</h3><span className="mb-3 block h-px w-10 bg-brand" /><FooterLink href={`https://wa.me/${WHATSAPP_NUMBER}`} external>WhatsApp</FooterLink><FooterLink href="/contato">Contato</FooterLink></div>
                 </div>
                 <div className="mt-12 border-t border-white/10 pt-6 text-center text-[.68rem] text-white/55">© 2026 Pascoal Loteamentos. Todos os direitos reservados. Política de Privacidade.</div>
             </Container>
