@@ -8,6 +8,7 @@ import Map from '../../../Components/RealEstate/Map';
 import { featuredMedia, galleryMedia, WhatsAppCTA } from '../../../Components/RealEstate/DetailSections';
 import FeatureIcon from '../../../Components/RealEstate/FeatureIcon';
 import MediaLightbox, { MediaLightboxTrigger } from '../../../Components/RealEstate/MediaLightbox';
+import VisualSection from '../../../Components/RealEstate/VisualSection';
 import { whatsappUrl } from '../../../Support/whatsapp';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
 import PublicMediaGallery from '../../../Components/RealEstate/PublicMediaGallery';
@@ -115,5 +116,5 @@ export default function Show({ item, globalWhatsapp }) {
     const image = featuredMedia(item);
     const gallery = galleryMedia(item);
     const promotions = (item.promotions || []).filter((promotion) => promotion.is_active !== false && promotion.title);
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><CondominiumHero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu /><About item={item} image={image} /><Features items={item.features} /><Promotions promotions={promotions} /><GallerySection items={gallery} /><Plans item={item} /><Location item={item} />{image && <section aria-label="Imagem do empreendimento" className="relative h-[300px] bg-cover bg-center bg-no-repeat [background-attachment:scroll] tablet:h-[400px] desktop:h-[500px] desktop:[background-attachment:fixed]" style={{ backgroundImage: `url(${image.url})` }}><div className="absolute inset-0 bg-black/30" /></section>}<Progress item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="condominium" entityId={item.id} entityName={item.title} title="Tenho interesse neste condomínio" /></SectionContainer></section></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><CondominiumHero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu /><About item={item} image={image} /><Features items={item.features} /><Promotions promotions={promotions} /><GallerySection items={gallery} /><Plans item={item} /><VisualSection image={item.promotion_media || item.about_media} /><Location item={item} /><Progress item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="condominium" entityId={item.id} entityName={item.title} title="Tenho interesse neste condomínio" /></SectionContainer></section></PublicLayout>;
 }

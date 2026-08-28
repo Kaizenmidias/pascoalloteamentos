@@ -136,7 +136,7 @@ export default function Form({ item, options }) {
 
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <PromotionManager rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
-            <ContentManager data={data} setData={setData} item={item} showGallery={false} showPlans={false} showSpecialImages={false} showFaqs={false} showDocuments={false} showSeo={false} />
+            <ContentManager data={data} setData={setData} item={item} showGallery={false} showPlans={false} showSpecialImages={true} showFaqs={false} showDocuments={false} showSeo={false} />
 
         </ProductFormLayout>
     </AdminLayout>;
