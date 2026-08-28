@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import PublicLayout from '../../../Components/Layout/PublicLayout';
 import SeoHead from '../../../Components/SEO/SeoHead';
 import Container from '../../../Components/UI/Container';
@@ -7,9 +6,9 @@ import ConstructionProgress from '../../../Components/RealEstate/ConstructionPro
 import FeatureIcon from '../../../Components/RealEstate/FeatureIcon';
 import Map from '../../../Components/RealEstate/Map';
 import { featuredMedia, galleryMedia } from '../../../Components/RealEstate/DetailSections';
-import MediaLightbox, { MediaLightboxTrigger, MediaTile } from '../../../Components/RealEstate/MediaLightbox';
 import { whatsappUrl } from '../../../Support/whatsapp';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
+import PublicMediaGallery from '../../../Components/RealEstate/PublicMediaGallery';
 
 
 const SectionContainer = ({ children, className = '' }) => <Container className={`max-w-[1280px] ${className}`}>{children}</Container>;
@@ -66,15 +65,16 @@ function Location({ item, globalWhatsapp }) {
 }
 
 function Progress({ item }) {
-    if (!item.construction_stages?.length && !item.construction_progress_updates?.length) return null;
-    return <section className="bg-surface py-14 tablet:py-[72px]"><SectionContainer><ConstructionProgress items={item.construction_stages} updates={item.construction_progress_updates} /></SectionContainer></section>;
+    const stages = item.construction_stages || item.constructionStages || [];
+    const updates = item.construction_progress_updates || item.constructionProgressUpdates || [];
+    if (!stages.length && !updates.length) return null;
+    return <section className="bg-surface py-14 tablet:py-[72px]"><SectionContainer><ConstructionProgress items={stages} updates={updates} /></SectionContainer></section>;
 }
 
 function Gallery({ item }) {
-    const [lightbox, setLightbox] = useState(null);
     const media = galleryMedia(item);
     if (!media.length) return null;
-    return <section className="py-14 tablet:py-16"><SectionContainer><Carousel title="Fotos" label="Fotos do loteamento" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null} autoPlay={false}>{media.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mídia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+    return <section className="py-14 tablet:py-16"><SectionContainer><PublicMediaGallery items={media} label="Fotos do loteamento" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" /></SectionContainer></section>;
 }
 
 function LotsInfoSection({ item }) {

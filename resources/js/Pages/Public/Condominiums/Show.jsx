@@ -7,9 +7,10 @@ import ConstructionProgress from '../../../Components/RealEstate/ConstructionPro
 import Map from '../../../Components/RealEstate/Map';
 import { featuredMedia, galleryMedia, WhatsAppCTA } from '../../../Components/RealEstate/DetailSections';
 import FeatureIcon from '../../../Components/RealEstate/FeatureIcon';
-import MediaLightbox, { MediaLightboxTrigger, MediaTile } from '../../../Components/RealEstate/MediaLightbox';
+import MediaLightbox, { MediaLightboxTrigger } from '../../../Components/RealEstate/MediaLightbox';
 import { whatsappUrl } from '../../../Support/whatsapp';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
+import PublicMediaGallery from '../../../Components/RealEstate/PublicMediaGallery';
 
 
 const SectionContainer = ({ children, className = '' }) => <Container className={`max-w-[1120px] ${className}`}>{children}</Container>;
@@ -77,14 +78,9 @@ function Promotions({ promotions }) {
     return <section id="promocoes" className="scroll-mt-28 pb-14 tablet:pb-16"><SectionContainer>{promotions.length === 1 ? <PromotionCard promotion={promotions[0]} /> : <Carousel label="Promocoes" itemClassName="w-[94%] tablet:w-[86%]">{promotions.map((promotion) => <PromotionCard key={promotion.id} promotion={promotion} />)}</Carousel>}</SectionContainer></section>;
 }
 
-function GalleryItem({ asset, index, onOpen }) {
-    return <MediaLightboxTrigger index={index} onOpen={onOpen} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mídia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>;
-}
-
 function GallerySection({ items }) {
-    const [lightbox, setLightbox] = useState(null);
     if (!items.length) return null;
-    return <section id="galeria" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><div className="text-center"><Eyebrow>Fotos</Eyebrow><SectionTitle>Conheça cada detalhe do empreendimento</SectionTitle></div><Carousel className="mt-8" label="Fotos do condomínio" itemClassName="w-[88%] tablet:w-[calc((100%-1.25rem)/2)]" paused={lightbox !== null} autoPlay={false}>{items.map((asset, index) => <GalleryItem key={asset.id} asset={asset} index={index} onOpen={setLightbox} />)}</Carousel></SectionContainer><MediaLightbox items={items} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+    return <section id="galeria" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><PublicMediaGallery items={items} label="Fotos do condomínio" itemClassName="w-[88%] tablet:w-[calc((100%-1.25rem)/2)]" /></SectionContainer></section>;
 }
 
 function PlanCard({ plan, mediaIndex, onOpen }) {
