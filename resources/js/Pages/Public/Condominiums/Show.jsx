@@ -93,7 +93,8 @@ function PlanCard({ plan, mediaIndex, onOpen }) {
 
 function Plans({ item }) {
     const [lightbox, setLightbox] = useState(null);
-    const plans = (item.floor_plans || []).filter((plan) => plan.is_active !== false);
+    const rawPlans = item.floor_plans || item.floorPlans || [];
+    const plans = rawPlans.filter((plan) => plan && plan.is_active !== false);
     const media = plans.map((plan) => plan.media_asset && ({ ...plan.media_asset, alt_text: plan.media_asset.alt_text || plan.name })).filter(Boolean);
     if (!plans.length) return null;
     let mediaIndex = -1;

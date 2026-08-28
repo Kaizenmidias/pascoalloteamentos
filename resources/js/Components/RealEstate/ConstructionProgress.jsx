@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import Carousel from '../UI/Carousel';
+import { useEffect, useMemo, useState } from 'react';
 import MediaLightbox, { MediaLightboxTrigger, MediaTile } from './MediaLightbox';
 
 const clamp = (value) => Math.max(0, Math.min(100, Number(value) || 0));
@@ -20,10 +19,30 @@ function CircularStage({ item }) {
     </article>;
 }
 
-function MediaCard({ asset, index, onOpen }) {
-    return <MediaLightboxTrigger key={asset.id} index={index} onOpen={onOpen} className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-surface" label={`Ampliar mídia ${index + 1}`}>
-        <MediaTile item={asset} />
-    </MediaLightboxTrigger>;
+const sortByDateDesc = (left, right) => String(right?.progress_date || '').localeCompare(String(left?.progress_date || ''));
+
+function ProgressMediaGallery({ items, onOpen, lightbox, setLightbox }) {
+    const [active, setActive] = useState(0);
+    const media = items || [];
+
+    useEffect(() => { setActive(0); }, [media.length]);
+
+    if (!media.length) return null;
+
+    const current = media[active] || media[0];
+    const move = (direction) => setActive((index) => (index + direction + media.length) % media.length);
+
+    return <div className="mt-9">
+        <div className="relative overflow-hidden rounded-2xl bg-ink">
+            {media.length > 1 && <button type="button" onClick={() => move(-1)} aria-label="Mídia anterior" className="absolute left-3 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/65 text-2xl text-white transition hover:bg-brand tablet:left-5">&#8249;</button>}
+            {media.length > 1 && <button type="button" onClick={() => move(1)} aria-label="Próxima mídia" className="absolute right-3 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/65 text-2xl text-white transition hover:bg-brand tablet:right-5">&#8250;</button>}
+            <MediaLightboxTrigger index={active} onOpen={setLightbox} className="block" label={`Ampliar mídia ${active + 1}`}>
+                <div className="aspect-[16/10] w-full bg-ink tablet:aspect-[16/9]">{current && <MediaTile item={current} />}</div>
+            </MediaLightboxTrigger>
+            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white/90">{active + 1} / {media.length}</span>
+        </div>
+        {media.length > 1 && <div className="mt-3 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">{media.map((asset, index) => <button key={asset.id || index} type="button" onClick={() => setActive(index)} aria-label={`Exibir mídia ${index + 1}`} className={`shrink-0 overflow-hidden rounded-lg border-2 ${index === active ? 'border-brand' : 'border-transparent opacity-75'}`}><div className="h-20 w-28"><MediaTile item={asset} /></div></button>)}</div>}
+    </div>;
 }
 
 export default function ConstructionProgress({ items = [], updates = [] }) {
@@ -36,17 +55,27 @@ export default function ConstructionProgress({ items = [], updates = [] }) {
             progress_date: item.reference_date || item.updated_at,
             media_assets: item.media_assets,
         }));
-    const visibleUpdates = [...(updates.length ? updates : legacyUpdates)]
-        .filter((update) => update.media_assets?.length && update.progress_date)
-        .sort((left, right) => String(right.progress_date).localeCompare(String(left.progress_date)));
-    const [activeId, setActiveId] = useState(visibleUpdates[0]?.id || null);
+    const visibleUpdates = [...(Array.isArray(updates) ? updates : []), ...legacyUpdates]
+        .filter((update) => Array.isArray(update?.media_assets) && update.media_assets.length && update.progress_date)
+        .sort(sortByDateDesc);
+    const flattenedMedia = useMemo(() => {
+        const seen = new Set();
+        return visibleUpdates.flatMap((update) => (update.media_assets || []).map((asset, mediaIndex) => ({
+            ...asset,
+            progress_date: update.progress_date,
+            progress_update_id: update.id,
+            progress_sort_order: mediaIndex,
+        }))).filter((asset) => {
+            const key = `${asset.progress_update_id}:${asset.id}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [visibleUpdates]);
     const [lightbox, setLightbox] = useState(null);
-    useEffect(() => { setActiveId(visibleUpdates[0]?.id || null); }, [visibleUpdates.length, visibleUpdates[0]?.id]);
-    if (!publicItems.length && !visibleUpdates.length) return null;
+    if (!publicItems.length && !flattenedMedia.length) return null;
 
     const overall = publicItems.length ? Math.round(publicItems.reduce((total, item) => total + clamp(item.progress_percent), 0) / publicItems.length) : null;
-    const activeUpdate = visibleUpdates.find((update) => String(update.id) === String(activeId)) || visibleUpdates[0];
-    const activeMedia = activeUpdate?.media_assets || [];
 
     return (
         <div className="rounded-2xl bg-white p-5 shadow-[0_8px_30px_rgba(17,17,17,.06)] tablet:p-8">
@@ -55,12 +84,8 @@ export default function ConstructionProgress({ items = [], updates = [] }) {
                 {overall !== null && <p className="text-sm text-muted">Andamento geral da obra: <strong className="text-xl font-medium text-brand">{overall}%</strong></p>}
             </div>
             {publicItems.length > 0 && <div className="mt-9 flex gap-5 overflow-x-auto pb-4 [scrollbar-width:thin]">{publicItems.map((item) => <CircularStage key={item.id || item.name} item={item} />)}</div>}
-            {visibleUpdates.length > 0 && <div className="mt-9 border-t border-line pt-7">
-                <div className="text-center"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Selecionar o período</p></div>
-                <div className="mt-4 flex gap-3 overflow-x-auto pb-2" role="tablist" aria-label="Atualizações da obra">{visibleUpdates.map((update) => { const active = String(update.id) === String(activeUpdate?.id); const monthLabel = formatMonth(update.progress_date) || 'Atualização'; return <button key={update.id} type="button" role="tab" aria-selected={active} onClick={() => { setActiveId(update.id); setLightbox(null); }} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${active ? 'border-brand bg-brand text-white' : 'border-line bg-surface text-muted hover:border-brand hover:text-ink'}`}>{monthLabel}</button>; })}</div>
-                <Carousel key={activeUpdate?.id || 'progress'} label={`Fotos do andamento de ${formatMonth(activeUpdate?.progress_date) || 'obra'}`} className="mt-6" itemClassName="w-[88%] tablet:w-[calc((100%-1.25rem)/2)] desktop:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null} autoPlay={false}>{activeMedia.map((asset, index) => <MediaCard key={asset.id} asset={asset} index={index} onOpen={setLightbox} />)}</Carousel>
-                <MediaLightbox items={activeMedia} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} />
-            </div>}
+            {flattenedMedia.length > 0 && <ProgressMediaGallery items={flattenedMedia} lightbox={lightbox} setLightbox={setLightbox} />}
+            <MediaLightbox items={flattenedMedia} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} />
         </div>
     );
 }
