@@ -57,7 +57,8 @@ function SummaryFacts({ items = [] }) {
 }
 
 function About({ item, image }) {
-    return <><AboutContent item={item} image={image} /><SummaryFacts items={item.summary_facts} /></>;
+    const summaryFacts = Array.isArray(item.summary_facts) ? item.summary_facts : [];
+    return <><AboutContent item={item} image={image} /><SummaryFacts items={summaryFacts} /></>;
 }
 
 function Features({ items = [] }) {
@@ -106,8 +107,9 @@ function Location({ item }) {
 }
 
 function Progress({ item }) {
-    if (!item.construction_stages?.length && !item.construction_progress_updates?.length) return null;
-    return <section id="andamento" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><ConstructionProgress items={item.construction_stages} updates={item.construction_progress_updates} /></SectionContainer></section>;
+    const progressUpdates = item.construction_progress_updates || item.constructionProgressUpdates || [];
+    if (!item.construction_stages?.length && !progressUpdates.length) return null;
+    return <section id="andamento" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><ConstructionProgress items={item.construction_stages || []} updates={progressUpdates} /></SectionContainer></section>;
 }
 
 

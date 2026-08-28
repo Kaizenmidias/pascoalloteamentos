@@ -4,7 +4,11 @@ import MediaLightbox, { MediaLightboxTrigger, MediaTile } from './MediaLightbox'
 
 const clamp = (value) => Math.max(0, Math.min(100, Number(value) || 0));
 const monthFormatter = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric', timeZone: 'UTC' });
-const formatMonth = (value) => monthFormatter.format(new Date(value)).replace('.', '').replace(' de ', '/').replace(/^./, (letter) => letter.toUpperCase());
+const formatMonth = (value) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return monthFormatter.format(date).replace('.', '').replace(' de ', '/').replace(/^./, (letter) => letter.toUpperCase());
+};
 
 function CircularStage({ item }) {
     const percentage = clamp(item.progress_percent);
@@ -17,8 +21,9 @@ function CircularStage({ item }) {
 }
 
 export default function ConstructionProgress({ items = [], updates = [] }) {
-    const publicItems = items.filter((item) => item.is_public !== false);
-    const legacyUpdates = items
+    const sourceItems = Array.isArray(items) ? items : [];
+    const publicItems = sourceItems.filter((item) => item.is_public !== false);
+    const legacyUpdates = sourceItems
         .filter((item) => item.media_assets?.length && (item.reference_date || item.updated_at))
         .map((item) => ({
             id: `stage-${item.id}`,
@@ -30,7 +35,7 @@ export default function ConstructionProgress({ items = [], updates = [] }) {
         .sort((left, right) => String(right.progress_date).localeCompare(String(left.progress_date)));
     const [activeId, setActiveId] = useState(visibleUpdates[0]?.id || null);
     const [lightbox, setLightbox] = useState(null);
-    useEffect(() => { setActiveId(visibleUpdates[0]?.id || null); }, [visibleUpdates[0]?.id]);
+    useEffect(() => { setActiveId(visibleUpdates[0]?.id || null); }, [visibleUpdates.length, visibleUpdates[0]?.id]);
     if (!publicItems.length && !visibleUpdates.length) return null;
 
     const overall = publicItems.length ? Math.round(publicItems.reduce((total, item) => total + clamp(item.progress_percent), 0) / publicItems.length) : null;
@@ -45,8 +50,8 @@ export default function ConstructionProgress({ items = [], updates = [] }) {
             </div>
             {publicItems.length > 0 && <div className="mt-9 flex gap-5 overflow-x-auto pb-4 [scrollbar-width:thin]">{publicItems.map((item) => <CircularStage key={item.id || item.name} item={item} />)}</div>}
             {visibleUpdates.length > 0 && <div className="mt-9 border-t border-line pt-7">
-                <div className="flex gap-7 overflow-x-auto border-b border-line" role="tablist" aria-label="Atualizações da obra">{visibleUpdates.map((update) => { const active = String(update.id) === String(activeUpdate?.id); return <button key={update.id} type="button" role="tab" aria-selected={active} onClick={() => { setActiveId(update.id); setLightbox(null); }} className={`shrink-0 border-b-2 px-1 pb-3 text-sm font-medium uppercase transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${active ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'}`}>{formatMonth(update.progress_date)}</button>; })}</div>
-                <Carousel key={activeUpdate?.id} label={`Fotos do andamento de ${formatMonth(activeUpdate.progress_date)}`} className="mt-6" itemClassName="w-[88%] tablet:w-[calc((100%-1.25rem)/2)] desktop:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null} autoPlay={false}>{activeMedia.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-surface" label={`Ampliar foto ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel>
+                <div className="flex gap-7 overflow-x-auto border-b border-line" role="tablist" aria-label="Atualizações da obra">{visibleUpdates.map((update) => { const active = String(update.id) === String(activeUpdate?.id); const monthLabel = formatMonth(update.progress_date) || 'Atualização'; return <button key={update.id} type="button" role="tab" aria-selected={active} onClick={() => { setActiveId(update.id); setLightbox(null); }} className={`shrink-0 border-b-2 px-1 pb-3 text-sm font-medium uppercase transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${active ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'}`}>{monthLabel}</button>; })}</div>
+                <Carousel key={activeUpdate?.id || 'progress'} label={`Fotos do andamento de ${formatMonth(activeUpdate?.progress_date) || 'obra'}`} className="mt-6" itemClassName="w-[88%] tablet:w-[calc((100%-1.25rem)/2)] desktop:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null} autoPlay={false}>{activeMedia.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-surface" label={`Ampliar foto ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel>
                 <MediaLightbox items={activeMedia} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} />
             </div>}
         </div>
