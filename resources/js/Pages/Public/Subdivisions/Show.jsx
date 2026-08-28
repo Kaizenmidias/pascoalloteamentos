@@ -66,15 +66,15 @@ function Location({ item, globalWhatsapp }) {
 }
 
 function Progress({ item }) {
-    if (!item.construction_stages?.length) return null;
-    return <section className="py-14 tablet:py-[72px]"><SectionContainer><Eyebrow>Andamento da obra</Eyebrow><Title>Acompanhe nosso projeto em andamento</Title><div className="mt-8 rounded-xl border border-line bg-white p-6 shadow-[0_6px_22px_rgba(17,17,17,.05)] tablet:p-8"><ConstructionProgress items={item.construction_stages} completionDate={item.expected_delivery_date} /></div></SectionContainer></section>;
+    if (!item.construction_stages?.length && !item.construction_progress_updates?.length) return null;
+    return <section className="bg-surface py-14 tablet:py-[72px]"><SectionContainer><ConstructionProgress items={item.construction_stages} updates={item.construction_progress_updates} /></SectionContainer></section>;
 }
 
 function Gallery({ item }) {
     const [lightbox, setLightbox] = useState(null);
     const media = galleryMedia(item);
     if (!media.length) return null;
-    return <section className="py-14 tablet:py-16"><SectionContainer><Eyebrow>Fotos</Eyebrow><Title>Conhe&ccedil;a cada detalhe do loteamento</Title><Carousel label="Fotos do loteamento" className="mt-7" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null}>{media.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mÃ­dia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+    return <section className="py-14 tablet:py-16"><SectionContainer><Carousel title="Fotos" label="Fotos do loteamento" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null} autoPlay={false}>{media.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[1.16/1] w-full overflow-hidden rounded-lg bg-ink" label={`Ampliar mídia ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
 function LotsInfoSection({ item }) {

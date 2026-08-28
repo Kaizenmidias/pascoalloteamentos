@@ -18,12 +18,6 @@ const SectionTitle = ({ children, className = '' }) => <h2 className={`mt-3 text
 
 function CondominiumHero({ item, image, globalWhatsapp }) {
     const whatsapp = whatsappUrl({ type: 'condominium', title: item.title });
-    const facts = [
-        ['Tipo', item.condominium_type?.name],
-        ['Área mínima', item.minimum_unit_area ? `${Number(item.minimum_unit_area).toLocaleString('pt-BR')} m²` : null],
-        ['Unidades', item.properties?.length || null],
-        ['Disponibilidade', item.commercial_status],
-    ].filter(([, value]) => value !== null && value !== undefined && value !== '');
     return <section className="relative flex min-h-[570px] items-center overflow-hidden bg-ink pb-24 pt-32 text-white tablet:min-h-[590px]">
         {image && <img src={image.url} alt={image.alt_text || item.title} className="absolute inset-0 h-full w-full object-cover" />}
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.78)_0%,rgba(0,0,0,.58)_42%,rgba(0,0,0,.2)_78%,rgba(0,0,0,.36)_100%)]" />
@@ -32,7 +26,6 @@ function CondominiumHero({ item, image, globalWhatsapp }) {
                 <div className="mb-4 flex flex-wrap gap-1.5 text-[.62rem] font-medium uppercase"><span className="rounded-sm bg-brand px-3 py-1.5">{item.city?.name || 'Condom\u00ednio'}</span>{item.development_status?.name && <span className="rounded-sm bg-white px-3 py-1.5 text-ink">{item.development_status.name}</span>}</div>
                 <h1 className="max-w-[560px] text-[2.55rem] font-light leading-[.98] tracking-[-.035em] tablet:text-[3.5rem] desktop:text-[3.75rem]">{item.title}</h1>
                 {item.card_summary && <p className="mt-6 max-w-[600px] text-base font-light leading-[1.7] text-white/90 tablet:text-lg">{item.card_summary}</p>}
-                {facts.length > 0 && <div className="mt-6 grid max-w-2xl grid-cols-2 gap-2 tablet:grid-cols-4">{facts.map(([label, value]) => <div key={label} className="rounded-lg border border-white/20 bg-black/20 p-3 backdrop-blur-sm"><span className="block text-[.6rem] uppercase text-white/65">{label}</span><strong className="mt-1 block text-sm font-medium text-white">{value}</strong></div>)}</div>}
                 <a href={whatsapp} target="_blank" rel="noreferrer" className="brand-button mt-6 gap-2"><svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current"><path d="M12 2a9.7 9.7 0 0 0-8.4 14.6L2.3 21.7l5.2-1.3A9.7 9.7 0 1 0 12 2Zm0 17.5a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-3.1.8.8-3-.2-.3A7.7 7.7 0 1 1 12 19.5Zm4.2-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1l-.7.9c-.1.2-.3.2-.5.1-1.4-.7-2.4-1.3-3.4-3-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1.1 1.9-.8 3 .4 2.2 2 4.2 4.1 5.5 1.6 1 4.1 1.9 5.5.7.4-.4.7-1 .8-1.6 0-.2 0-.4-.2-.5l-.9-.6Z" /></svg>Falar no WhatsApp</a>
             </div>
         </SectionContainer>
@@ -45,9 +38,26 @@ function InternalMenu() {
     return <SectionContainer className="relative z-30 -mt-12"><nav aria-label="Secoes do condominio" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label], index) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><svg viewBox="0 0 24 24" aria-hidden="true" className="mx-auto mb-2 size-6 fill-none stroke-brand stroke-[1.35]" strokeLinecap="round" strokeLinejoin="round"><path d={paths[index]} /></svg>{label}</span></a>)}</nav></SectionContainer>;
 }
 
-function About({ item, image }) {
+function AboutContent({ item, image }) {
     if (!item.about_title && !item.about_text) return null;
     return <section id="sobre" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.88fr_1.12fr] tablet:items-center"><div><Eyebrow>Sobre o empreendimento</Eyebrow><SectionTitle>{item.about_title}</SectionTitle>{item.about_text && <p className="mt-5 whitespace-pre-line text-sm font-light leading-[1.75] text-muted">{item.about_text}</p>}</div>{image && <img src={image.url} alt={image.alt_text || item.about_title || item.title} className="aspect-[1.45/1] w-full rounded-xl object-cover" />}</SectionContainer></section>;
+}
+
+const factIcons = {
+    building: 'M4 21V5l8-3 8 3v16M8 9h2m4 0h2M8 13h2m4 0h2M8 17h2m4 0h2',
+    units: 'M4 5h16v14H4zM4 10h16M9 5v14',
+    area: 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5',
+    availability: 'm5 12 4 4L19 6',
+};
+
+function SummaryFacts({ items = [] }) {
+    const facts = items.filter((item) => item?.label?.trim() && item?.value?.trim()).slice(0, 4);
+    if (!facts.length) return null;
+    return <SectionContainer className="pb-14 tablet:pb-16"><div className="grid overflow-hidden rounded-xl bg-white p-3 shadow-[0_12px_32px_rgba(17,17,17,.1)] tablet:grid-cols-2 desktop:grid-cols-4">{facts.map((fact) => <article key={`${fact.label}-${fact.value}`} className="flex min-h-24 items-center gap-4 rounded-lg border border-line px-5 py-4"><svg viewBox="0 0 24 24" aria-hidden="true" className="size-8 shrink-0 fill-none stroke-brand stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round"><path d={factIcons[fact.icon] || factIcons.building} /></svg><div><span className="block text-[.65rem] uppercase text-muted">{fact.label}</span><strong className="mt-1 block text-lg font-medium text-brand">{fact.value}</strong></div></article>)}</div></SectionContainer>;
+}
+
+function About({ item, image }) {
+    return <><AboutContent item={item} image={image} /><SummaryFacts items={item.summary_facts} /></>;
 }
 
 function Features({ items = [] }) {
@@ -73,7 +83,7 @@ function GalleryItem({ asset, index, onOpen }) {
 function GallerySection({ items }) {
     const [lightbox, setLightbox] = useState(null);
     if (!items.length) return null;
-    return <section id="galeria" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><Eyebrow>Fotos</Eyebrow><SectionTitle>Conhe&ccedil;a cada detalhe do empreendimento</SectionTitle><Carousel label="Fotos do condominio" className="mt-7" itemClassName="w-[82%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null}>{items.map((asset, index) => <GalleryItem key={asset.id} asset={asset} index={index} onOpen={setLightbox} />)}</Carousel></SectionContainer><MediaLightbox items={items} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+    return <section id="galeria" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><Carousel title="Fotos" label="Fotos do condomínio" itemClassName="w-[82%] tablet:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null} autoPlay={false}>{items.map((asset, index) => <GalleryItem key={asset.id} asset={asset} index={index} onOpen={setLightbox} />)}</Carousel></SectionContainer><MediaLightbox items={items} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
 function PlanCard({ plan, mediaIndex, onOpen }) {
@@ -86,7 +96,7 @@ function Plans({ item }) {
     const media = plans.map((plan) => plan.media_asset && ({ ...plan.media_asset, alt_text: plan.media_asset.alt_text || plan.name })).filter(Boolean);
     if (!plans.length) return null;
     let mediaIndex = -1;
-    return <section id="plantas" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer><div className="mb-8"><Eyebrow>Plantas</Eyebrow><SectionTitle>{item.floor_plans_title || 'Conhe\u00e7a as plantas dispon\u00edveis'}</SectionTitle></div><Carousel label="Plantas disponiveis" itemClassName="w-[94%]" paused={lightbox !== null}>{plans.map((plan) => { if (plan.media_asset) mediaIndex += 1; return <PlanCard key={plan.id} plan={plan} mediaIndex={mediaIndex} onOpen={setLightbox} />; })}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+    return <section id="plantas" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer><div className="mb-10 text-center"><Eyebrow>Plantas</Eyebrow><SectionTitle>Conheça as plantas disponíveis</SectionTitle></div><Carousel label="Plantas disponíveis" itemClassName="w-[94%] tablet:w-[calc((100%-1.25rem)/2)]" paused={lightbox !== null} autoPlay={false}>{plans.map((plan) => { if (plan.media_asset) mediaIndex += 1; return <PlanCard key={plan.id} plan={plan} mediaIndex={mediaIndex} onOpen={setLightbox} />; })}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
 function Location({ item }) {
@@ -96,8 +106,8 @@ function Location({ item }) {
 }
 
 function Progress({ item }) {
-    if (!item.construction_stages?.length) return null;
-    return <section id="andamento" className="scroll-mt-28 py-14 tablet:py-16"><SectionContainer><Eyebrow>Andamento da obra</Eyebrow><SectionTitle>Acompanhe nosso projeto em andamento</SectionTitle><div className="mt-8 rounded-xl border border-line bg-white p-6 shadow-[0_6px_22px_rgba(17,17,17,.05)] tablet:p-8"><ConstructionProgress items={item.construction_stages} completionDate={item.expected_delivery_date} /></div></SectionContainer></section>;
+    if (!item.construction_stages?.length && !item.construction_progress_updates?.length) return null;
+    return <section id="andamento" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><ConstructionProgress items={item.construction_stages} updates={item.construction_progress_updates} /></SectionContainer></section>;
 }
 
 

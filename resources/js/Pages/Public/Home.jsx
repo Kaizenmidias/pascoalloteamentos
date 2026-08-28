@@ -157,7 +157,7 @@ export default function Home({ featuredItems = [], homeEntities = [], posts = []
                 <Container>
                     {previewItems.length ? (
                         <Carousel key={`${filters.category}-${filters.cityId}`} label="Empreendimentos em destaque">
-                            {previewItems.map((item) => <EntityCard key={`${item.category}-${item.id}`} item={item} href={item.href} />)}
+                            {previewItems.map((item) => <EntityCard key={`${item.category}-${item.id}`} item={item} href={item.href} hideType={item.category === 'condominiums'} />)}
                         </Carousel>
                     ) : (
                         <EmptyState title="Nenhum empreendimento encontrado">Tente selecionar outra categoria ou cidade.</EmptyState>

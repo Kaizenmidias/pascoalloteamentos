@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Models\ConstructionStage;
+use App\Models\ConstructionProgressUpdate;
 use App\Models\Document;
 use App\Models\Faq;
 use App\Models\FloorPlan;
@@ -40,6 +41,12 @@ trait HasRealEstateContent
     public function constructionStages(): MorphMany
     {
         return $this->morphMany(ConstructionStage::class, 'owner')->orderBy('sort_order');
+    }
+
+    public function constructionProgressUpdates(): MorphMany
+    {
+        return $this->morphMany(ConstructionProgressUpdate::class, 'progressable')
+            ->latest('progress_date');
     }
 
     public function constructionProgressPercentage(): ?int

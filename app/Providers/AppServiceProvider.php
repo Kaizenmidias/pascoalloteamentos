@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\BlogPost;
 use App\Models\Condominium;
 use App\Models\ConstructionStage;
+use App\Models\ConstructionProgressUpdate;
 use App\Models\Page;
 use App\Models\Property;
 use App\Models\Subdivision;
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
             'property' => Property::class,
             'condominium' => Condominium::class,
             'construction_stage' => ConstructionStage::class,
+            'construction_progress_update' => ConstructionProgressUpdate::class,
             'subdivision' => Subdivision::class,
             'page' => Page::class,
             'blog_post' => BlogPost::class,

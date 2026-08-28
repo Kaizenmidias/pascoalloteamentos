@@ -2,7 +2,7 @@ import { Link } from '@inertiajs/react';
 import OverallProgressBar from './OverallProgressBar';
 import ResponsiveImage from './ResponsiveImage';
 
-export default function EntityCard({ item, href }) {
+export default function EntityCard({ item, href, hideType = false }) {
     const image = item.media_assets?.find((media) => media.pivot?.is_featured) || item.media_assets?.[0];
     const type = item.property_type?.name || item.condominium_type?.name || item.subdivision_type?.name;
     const status = item.development_status?.name;
@@ -17,7 +17,7 @@ export default function EntityCard({ item, href }) {
                 <div className="relative aspect-[1.12] overflow-hidden bg-surface">
                     <ResponsiveImage src={image?.url} alt={image?.alt_text || item.title} className="h-full w-full object-cover" />
                     <div className="absolute left-3 top-3 flex flex-wrap gap-1 text-[.625rem] font-medium uppercase">
-                        {type && <span className="rounded-[6px] bg-brand px-2.5 py-1 text-white">{type}</span>}
+                        {!hideType && type && <span className="rounded-[6px] bg-brand px-2.5 py-1 text-white">{type}</span>}
                         {city && <span className="rounded-[6px] bg-white/95 px-2.5 py-1 text-ink">{city}</span>}
                         {status && <span className="rounded-[6px] bg-white/95 px-2.5 py-1 text-ink">{status}</span>}
                     </div>

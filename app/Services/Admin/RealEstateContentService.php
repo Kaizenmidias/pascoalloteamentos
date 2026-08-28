@@ -32,6 +32,7 @@ class RealEstateContentService
             $promotionImage = Arr::pull($data, 'promotion_image');
             $floorPlans = Arr::pull($data, 'floor_plans');
             $stages = Arr::pull($data, 'construction_stages');
+            $progressUpdates = Arr::pull($data, 'progress_updates');
             $faqs = Arr::pull($data, 'faqs');
             $documents = Arr::pull($data, 'documents');
             $promotions = Arr::pull($data, 'promotions');
@@ -113,6 +114,38 @@ class RealEstateContentService
                         ]]);
                     }
                 }
+            }
+            if (is_array($progressUpdates)) {
+                $keptUpdateIds = [];
+                foreach (array_values($progressUpdates) as $row) {
+                    $photos = Arr::pull($row, 'photos', []);
+                    $removeMediaIds = Arr::pull($row, 'remove_media_ids', []);
+                    $mediaOrder = Arr::pull($row, 'media_order', []);
+                    $update = ! empty($row['id'])
+                        ? $item->constructionProgressUpdates()->findOrFail($row['id'])
+                        : $item->constructionProgressUpdates()->create(['progress_date' => $row['progress_date']]);
+                    $update->update(['progress_date' => $row['progress_date']]);
+                    $keptUpdateIds[] = $update->id;
+
+                    if ($removeMediaIds) {
+                        $update->mediaAssets()->detach($removeMediaIds);
+                    }
+                    foreach (array_values($photos ?: []) as $photoIndex => $photo) {
+                        $asset = $this->media->store($photo, 'real-estate/construction-progress');
+                        $update->mediaAssets()->syncWithoutDetaching([$asset->id => [
+                            'collection' => 'construction-progress',
+                            'sort_order' => $update->mediaAssets()->count() + $photoIndex,
+                            'is_featured' => false,
+                        ]]);
+                    }
+                    foreach (array_values($mediaOrder ?: []) as $mediaIndex => $mediaId) {
+                        $update->mediaAssets()->updateExistingPivot($mediaId, ['sort_order' => $mediaIndex]);
+                    }
+                }
+                $item->constructionProgressUpdates()->whereNotIn('id', $keptUpdateIds)->get()->each(function ($update) {
+                    $update->mediaAssets()->detach();
+                    $update->delete();
+                });
             }
             if (is_array($faqs)) {
                 $item->faqs()->delete();

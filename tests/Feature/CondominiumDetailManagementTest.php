@@ -26,6 +26,10 @@ class CondominiumDetailManagementTest extends TestCase
             'postal_code' => '85801-000',
             'about_title' => 'Sobre o condomínio',
             'about_text' => 'Texto institucional.',
+            'summary_facts' => [
+                ['label' => 'Torres', 'value' => '2', 'icon' => 'building'],
+                ['label' => 'Unidades', 'value' => '48', 'icon' => 'units'],
+            ],
             'floor_plans_title' => 'Plantas disponíveis',
             'floor_plans_support_text' => 'Escolha a planta ideal.',
             'status' => 'published',
@@ -60,6 +64,8 @@ class CondominiumDetailManagementTest extends TestCase
         $this->assertNull($condominium->starting_price);
         $this->assertNull($condominium->promotion_price);
         $this->assertNull($condominium->minimum_unit_area);
+        $this->assertSame('Torres', $condominium->summary_facts[0]['label']);
+        $this->assertSame('48', $condominium->summary_facts[1]['value']);
         $this->assertTrue($condominium->features->contains($feature));
         $this->assertDatabaseHas('condominium_promotions', ['condominium_id' => $condominium->id, 'title' => 'Condição especial', 'is_active' => true]);
         $this->assertDatabaseHas('floor_plans', ['owner_id' => $condominium->id, 'name' => 'Residência Tipo B', 'is_active' => true]);

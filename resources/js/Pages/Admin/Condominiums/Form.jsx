@@ -6,6 +6,7 @@ import SelectField from '../../../Components/Forms/SelectField';
 import ContentManager, { contentDefaults } from '../../../Components/Admin/ContentManager';
 import LocationFields from '../../../Components/Forms/LocationFields';
 import CondominiumPromotions from '../../../Components/Admin/CondominiumPromotions';
+import CondominiumSummaryFacts, { emptySummaryFacts } from '../../../Components/Admin/CondominiumSummaryFacts';
 import Map from '../../../Components/RealEstate/Map';
 import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
 import { ProductFormLayout, PublicationCard, SeoCard, SidebarMediaIntro } from '../../../Components/Admin/ProductFormUI';
@@ -29,7 +30,7 @@ export default function Form({ item, options }) {
         _method: editing ? 'put' : undefined,
         title: item?.title || '', slug: item?.slug || '', reference_code: item?.reference_code || '',
         condominium_type_id: item?.condominium_type_id || '', development_status_id: item?.development_status_id || '',
-        business_type_id: item?.business_type_id || '', city_id: item?.city_id || '', summary: item?.summary || item?.excerpt || '',
+        business_type_id: item?.business_type_id || '', city_id: item?.city_id || '', summary: item?.summary || item?.excerpt || '', summary_facts: item?.summary_facts || emptySummaryFacts(),
         description: item?.description || '', address: item?.address || '', address_number: item?.address_number || '',
         complement: item?.complement || '', neighborhood: item?.neighborhood || '', postal_code: item?.postal_code || '',
         latitude: item?.latitude || '', longitude: item?.longitude || '', whatsapp_contact: item?.whatsapp_contact || '',
@@ -92,6 +93,7 @@ export default function Form({ item, options }) {
             </section>
 
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Sobre o empreendimento</h2><p className="mt-1 text-sm text-muted">A imagem usada ser&aacute; automaticamente a imagem principal.</p></div><Field label={'T\u00edtulo'} value={data.about_title} onChange={(event) => setData('about_title', event.target.value)} /><Field label="Texto" as="textarea" value={data.about_text} onChange={(event) => setData('about_text', event.target.value)} /></section>
+            <CondominiumSummaryFacts value={data.summary_facts} onChange={(rows) => setData('summary_facts', rows)} />
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <CondominiumPromotions rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Se&ccedil;&atilde;o Plantas</h2></div><Field label={'T\u00edtulo'} value={data.floor_plans_title} onChange={(event) => setData('floor_plans_title', event.target.value)} /><Field label="Texto de apoio" as="textarea" value={data.floor_plans_support_text} onChange={(event) => setData('floor_plans_support_text', event.target.value)} /></section>

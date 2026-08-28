@@ -52,7 +52,7 @@ class CondominiumController extends Controller
 
     public function edit(Condominium $condominium): Response
     {
-        return Inertia::render('Admin/Condominiums/Form', ['item' => $condominium->load(['city.state', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages.mediaAssets', 'seo']), 'options' => $this->options()]);
+        return Inertia::render('Admin/Condominiums/Form', ['item' => $condominium->load(['city.state', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'promotions.mediaAsset', 'constructionStages.mediaAssets', 'constructionProgressUpdates.mediaAssets', 'seo']), 'options' => $this->options()]);
     }
 
     public function update(UpdateCondominiumRequest $request, Condominium $condominium): RedirectResponse
