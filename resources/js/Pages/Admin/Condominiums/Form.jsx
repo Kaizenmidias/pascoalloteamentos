@@ -5,7 +5,6 @@ import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
 import ContentManager, { contentDefaults } from '../../../Components/Admin/ContentManager';
 import LocationFields from '../../../Components/Forms/LocationFields';
-import CondominiumPromotions from '../../../Components/Admin/CondominiumPromotions';
 import CondominiumSummaryFacts, { emptySummaryFacts } from '../../../Components/Admin/CondominiumSummaryFacts';
 import Map from '../../../Components/RealEstate/Map';
 import AsyncMediaUploader from '../../../Components/Admin/AsyncMediaUploader';
@@ -36,10 +35,9 @@ export default function Form({ item, options }) {
         latitude: item?.latitude || '', longitude: item?.longitude || '', whatsapp_contact: item?.whatsapp_contact || '',
         commercial_purpose: item?.commercial_purpose || '', commercial_status: item?.commercial_status || '',
         floor_plans_support_text: item?.floor_plans_support_text || '', floor_plans_title: item?.floor_plans_title || '',
-        promotion_headline: item?.promotion_headline || '', promotion_url: item?.promotion_url || '',
         expected_delivery_date: item?.expected_delivery_date ? String(item.expected_delivery_date).slice(0, 10) : '',
         status: item?.status || 'draft', featured: Boolean(item?.featured), price_on_request: Boolean(item?.price_on_request),
-        feature_ids: item?.features?.map((feature) => feature.id) || [], promotions: item?.promotions || [],
+        feature_ids: item?.features?.map((feature) => feature.id) || [],
         uploaded_media_ids: [],
         ...contentDefaults(item, options.stageDefinitions),
     });
@@ -95,7 +93,6 @@ export default function Form({ item, options }) {
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Sobre o empreendimento</h2><p className="mt-1 text-sm text-muted">A imagem usada ser&aacute; automaticamente a imagem principal.</p></div><Field label={'T\u00edtulo'} value={data.about_title} onChange={(event) => setData('about_title', event.target.value)} /><Field label="Texto" as="textarea" value={data.about_text} onChange={(event) => setData('about_text', event.target.value)} /></section>
             <CondominiumSummaryFacts value={data.summary_facts} onChange={(rows) => setData('summary_facts', rows)} />
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
-            <CondominiumPromotions rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Se&ccedil;&atilde;o Plantas</h2></div><Field label={'T\u00edtulo'} value={data.floor_plans_title} onChange={(event) => setData('floor_plans_title', event.target.value)} /><Field label="Texto de apoio" as="textarea" value={data.floor_plans_support_text} onChange={(event) => setData('floor_plans_support_text', event.target.value)} /></section>
             <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showSpecialImages={false} showFaqs={false} showDocuments={false} showSeo={false} /></div>
 

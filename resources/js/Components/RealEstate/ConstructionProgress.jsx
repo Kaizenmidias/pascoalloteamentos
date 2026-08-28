@@ -20,6 +20,12 @@ function CircularStage({ item }) {
     </article>;
 }
 
+function MediaCard({ asset, index, onOpen }) {
+    return <MediaLightboxTrigger key={asset.id} index={index} onOpen={onOpen} className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-surface" label={`Ampliar mídia ${index + 1}`}>
+        <MediaTile item={asset} />
+    </MediaLightboxTrigger>;
+}
+
 export default function ConstructionProgress({ items = [], updates = [] }) {
     const sourceItems = Array.isArray(items) ? items : [];
     const publicItems = sourceItems.filter((item) => item.is_public !== false);
@@ -50,8 +56,9 @@ export default function ConstructionProgress({ items = [], updates = [] }) {
             </div>
             {publicItems.length > 0 && <div className="mt-9 flex gap-5 overflow-x-auto pb-4 [scrollbar-width:thin]">{publicItems.map((item) => <CircularStage key={item.id || item.name} item={item} />)}</div>}
             {visibleUpdates.length > 0 && <div className="mt-9 border-t border-line pt-7">
-                <div className="flex gap-7 overflow-x-auto border-b border-line" role="tablist" aria-label="Atualizações da obra">{visibleUpdates.map((update) => { const active = String(update.id) === String(activeUpdate?.id); const monthLabel = formatMonth(update.progress_date) || 'Atualização'; return <button key={update.id} type="button" role="tab" aria-selected={active} onClick={() => { setActiveId(update.id); setLightbox(null); }} className={`shrink-0 border-b-2 px-1 pb-3 text-sm font-medium uppercase transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${active ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'}`}>{monthLabel}</button>; })}</div>
-                <Carousel key={activeUpdate?.id || 'progress'} label={`Fotos do andamento de ${formatMonth(activeUpdate?.progress_date) || 'obra'}`} className="mt-6" itemClassName="w-[88%] tablet:w-[calc((100%-1.25rem)/2)] desktop:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null} autoPlay={false}>{activeMedia.map((asset, index) => <MediaLightboxTrigger key={asset.id} index={index} onOpen={setLightbox} className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-surface" label={`Ampliar foto ${index + 1}`}><MediaTile item={asset} /></MediaLightboxTrigger>)}</Carousel>
+                <div className="text-center"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Selecionar o período</p></div>
+                <div className="mt-4 flex gap-3 overflow-x-auto pb-2" role="tablist" aria-label="Atualizações da obra">{visibleUpdates.map((update) => { const active = String(update.id) === String(activeUpdate?.id); const monthLabel = formatMonth(update.progress_date) || 'Atualização'; return <button key={update.id} type="button" role="tab" aria-selected={active} onClick={() => { setActiveId(update.id); setLightbox(null); }} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${active ? 'border-brand bg-brand text-white' : 'border-line bg-surface text-muted hover:border-brand hover:text-ink'}`}>{monthLabel}</button>; })}</div>
+                <Carousel key={activeUpdate?.id || 'progress'} label={`Fotos do andamento de ${formatMonth(activeUpdate?.progress_date) || 'obra'}`} className="mt-6" itemClassName="w-[88%] tablet:w-[calc((100%-1.25rem)/2)] desktop:w-[calc((100%-2.5rem)/3)]" paused={lightbox !== null} autoPlay={false}>{activeMedia.map((asset, index) => <MediaCard key={asset.id} asset={asset} index={index} onOpen={setLightbox} />)}</Carousel>
                 <MediaLightbox items={activeMedia} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} />
             </div>}
         </div>
