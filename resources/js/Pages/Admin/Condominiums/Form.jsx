@@ -94,7 +94,7 @@ export default function Form({ item, options }) {
             <CondominiumSummaryFacts value={data.summary_facts} onChange={(rows) => setData('summary_facts', rows)} />
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Se&ccedil;&atilde;o Plantas</h2></div><Field label={'T\u00edtulo'} value={data.floor_plans_title} onChange={(event) => setData('floor_plans_title', event.target.value)} /><Field label="Texto de apoio" as="textarea" value={data.floor_plans_support_text} onChange={(event) => setData('floor_plans_support_text', event.target.value)} /></section>
-            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showSpecialImages={false} showFaqs={false} showDocuments={false} showSeo={false} /></div>
+            <ContentManager data={data} setData={setData} item={item} showGallery={false} showSpecialImages={false} showFaqs={false} showDocuments={false} showSeo={false} />
 
         </ProductFormLayout>
     </AdminLayout>;

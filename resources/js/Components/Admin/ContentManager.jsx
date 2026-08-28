@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Field from '../Forms/Field';
 import OverallProgressBar from '../RealEstate/OverallProgressBar';
 import Button from '../UI/Button';
@@ -27,15 +27,22 @@ function ConstructionStageGrid({ data, setData }) {
 }
 
 function ProgressUpdatesManager({ data, setData, limit }) {
-    const rows = data.progress_updates || [];
+    const rows = Array.isArray(data.progress_updates) ? data.progress_updates.filter(Boolean) : [];
     const updateRows = (nextRows) => setData('progress_updates', nextRows);
     const update = (index, changes) => updateRows(rows.map((row, rowIndex) => rowIndex === index ? { ...row, ...changes } : row));
     const moveMedia = (rowIndex, mediaIndex, direction) => {
-        const assets = [...(rows[rowIndex].media_assets || [])];
+        const assets = [...(Array.isArray(rows[rowIndex]?.media_assets) ? rows[rowIndex].media_assets : [])];
         const destination = mediaIndex + direction;
         if (destination < 0 || destination >= assets.length) return;
         [assets[mediaIndex], assets[destination]] = [assets[destination], assets[mediaIndex]];
         update(rowIndex, { media_assets: assets, media_order: assets.map((asset) => asset.id) });
+    };
+    const movePendingMedia = (rowIndex, mediaIndex, direction) => {
+        const photos = [...(Array.isArray(rows[rowIndex]?.photos) ? rows[rowIndex].photos : [])];
+        const destination = mediaIndex + direction;
+        if (destination < 0 || destination >= photos.length) return;
+        [photos[mediaIndex], photos[destination]] = [photos[destination], photos[mediaIndex]];
+        update(rowIndex, { photos });
     };
 
     return (
@@ -46,22 +53,39 @@ function ProgressUpdatesManager({ data, setData, limit }) {
             </div>
             <div className="mt-5 space-y-4">
                 {rows.map((row, index) => {
-                    const removed = row.remove_media_ids || [];
-                    const assets = (row.media_assets || []).filter((asset) => !removed.includes(asset.id));
+                    const removed = Array.isArray(row.remove_media_ids) ? row.remove_media_ids : [];
+                    const assets = (Array.isArray(row.media_assets) ? row.media_assets : []).filter((asset) => asset && !removed.includes(asset.id));
+                    const pending = Array.isArray(row.photos) ? row.photos.filter(Boolean) : [];
                     return (
                         <article key={row.id || row._key || index} className="rounded-xl border border-line bg-surface p-4">
                             <div className="flex items-start justify-between gap-4">
                                 <label className="w-full max-w-xs"><span className="admin-label">Mês e ano</span><input className="admin-input" type="month" value={row.progress_date ? String(row.progress_date).slice(0, 7) : ''} onChange={(event) => update(index, { progress_date: event.target.value ? `${event.target.value}-01` : '' })} /></label>
                                 <button type="button" className="text-xs font-medium text-red-700" onClick={() => updateRows(rows.filter((_, rowIndex) => rowIndex !== index))}>Remover período</button>
                             </div>
-                            <div className="mt-4"><UploadDropZone label="Imagens e vídeos do período" description="JPG, PNG, WebP, HEIC, MP4, WebM ou MOV." accept="image/jpeg,image/png,image/webp,.heic,.heif,video/mp4,video/webm,video/quicktime" multiple limit={limit} onFiles={(files) => update(index, { photos: files.slice(0, 15) })} /></div>
+                            <div className="mt-4"><UploadDropZone label="Imagens e vídeos do período" description="JPG, PNG, WebP, HEIC, MP4, WebM ou MOV." accept="image/jpeg,image/png,image/webp,.heic,.heif,video/mp4,video/webm,video/quicktime" multiple limit={limit} onFiles={(files) => update(index, { photos: [...pending, ...files].slice(0, Math.max(0, limit - assets.length)) })} /></div>
                             {assets.length > 0 && <div className="mt-4 grid gap-3 tablet:grid-cols-3 desktop:grid-cols-4">{assets.map((asset, mediaIndex) => <div key={asset.id} className="overflow-hidden rounded-lg border border-line bg-white">{asset.mime_type?.startsWith('video/') ? <video src={asset.url} poster={asset.poster_url || undefined} controls className="aspect-[4/3] w-full object-cover" /> : <img src={asset.url} alt={asset.alt_text || ''} className="aspect-[4/3] w-full object-cover" />}<div className="flex items-center justify-between gap-2 p-2 text-xs"><button type="button" disabled={mediaIndex === 0} onClick={() => moveMedia(index, mediaIndex, -1)}>Anterior</button><button type="button" disabled={mediaIndex === assets.length - 1} onClick={() => moveMedia(index, mediaIndex, 1)}>Próxima</button><button type="button" className="text-red-700" onClick={() => update(index, { remove_media_ids: [...removed, asset.id] })}>Remover</button></div></div>)}</div>}
+                            {pending.length > 0 && <div className="mt-4 grid gap-3 tablet:grid-cols-3 desktop:grid-cols-4">{pending.map((file, mediaIndex) => <PendingMediaPreview key={`${file.name}-${file.size}-${file.lastModified}-${mediaIndex}`} file={file} onPrevious={() => movePendingMedia(index, mediaIndex, -1)} onNext={() => movePendingMedia(index, mediaIndex, 1)} onRemove={() => update(index, { photos: pending.filter((_, pendingIndex) => pendingIndex !== mediaIndex) })} previousDisabled={mediaIndex === 0} nextDisabled={mediaIndex === pending.length - 1} />)}</div>}
                         </article>
                     );
                 })}
             </div>
         </section>
     );
+}
+
+function PendingMediaPreview({ file, onPrevious, onNext, onRemove, previousDisabled, nextDisabled }) {
+    const [url, setUrl] = useState('');
+
+    useEffect(() => {
+        const objectUrl = URL.createObjectURL(file);
+        setUrl(objectUrl);
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [file]);
+
+    return <div className="overflow-hidden rounded-lg border border-line bg-white">
+        {file.type?.startsWith('video/') ? <video src={url} controls className="aspect-[4/3] w-full object-cover" /> : <img src={url} alt={file.name || ''} className="aspect-[4/3] w-full object-cover" />}
+        <div className="flex items-center justify-between gap-2 p-2 text-xs"><button type="button" disabled={previousDisabled} onClick={onPrevious}>Anterior</button><button type="button" disabled={nextDisabled} onClick={onNext}>Próxima</button><button type="button" className="text-red-700" onClick={onRemove}>Remover</button></div>
+    </div>;
 }
 
 function MediaOrderManager({ items, setData }) {
@@ -99,7 +123,7 @@ function UploadDropZone({ label, description, accept, multiple, limit, onFiles }
     </label>;
 }
 
-export default function ContentManager({ data, setData, item, showPlans = true, showStages = true, showSpecialImages = true, showFaqs = true, showDocuments = true, showFeaturedUpload = false, showSeo = true, showPromotions = true }) {
+export default function ContentManager({ data, setData, item, showPlans = true, showStages = true, showSpecialImages = true, showFaqs = true, showDocuments = true, showFeaturedUpload = false, showSeo = true, showPromotions = true, showGallery = true }) {
     const { mediaUpload = {} } = usePage().props;
     const mediaLimit = Number(mediaUpload.maxItems || 50);
     const media = item?.media_assets || [];
@@ -110,7 +134,7 @@ export default function ContentManager({ data, setData, item, showPlans = true, 
         <MediaOrderManager items={visibleMedia} setData={setData} />
         {showSpecialImages && <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Imagens das seções</h2><p className="mt-1 text-sm text-muted">Imagens independentes da capa e da galeria.</p></div>{[['about_image', 'Imagem de Sobre', item?.about_media], ['promotion_image', 'Imagem promocional', item?.promotion_media]].map(([key, label, current]) => <label key={key}><span className="admin-label">{label}</span>{current?.url && <img src={current.url} alt="" className="mb-3 aspect-video w-full rounded-lg object-cover" />}<input type="file" accept="image/jpeg,image/png,image/webp,.heic,.heif" onChange={(event) => setData(key, event.target.files?.[0] || null)} className="admin-input" /></label>)}</section>}
         {showFeaturedUpload && <section className="rounded-xl border border-line bg-white p-6 shadow-sm"><h2 className="text-lg font-medium text-ink">Imagem de destaque</h2><p className="mt-1 text-sm text-muted">Usada no card, Hero, Sobre o empreendimento e banner em largura total.</p>{visibleMedia.find((asset) => asset.pivot?.is_featured) && <img src={visibleMedia.find((asset) => asset.pivot?.is_featured).url} alt="" className="mt-5 aspect-video w-full max-w-xl rounded-card object-cover" />}<input type="file" accept="image/jpeg,image/png,image/webp,.heic,.heif" onChange={(event) => setData('featured_image', event.target.files?.[0] || null)} className="admin-input mt-5" /></section>}
-        <section className="rounded-xl border border-line bg-white p-6 shadow-sm"><h2 className="text-lg font-medium text-ink">Galeria multimídia</h2><p className="mt-1 text-sm text-muted">Imagens JPG, PNG, WebP ou HEIC convertido; vídeos MP4, WebM ou MOV.</p><div className="mt-5 grid gap-4 tablet:grid-cols-2"><UploadDropZone label="Imagens" description="JPG, PNG, WebP ou HEIC convertido." accept="image/jpeg,image/png,image/webp,.heic,.heif" multiple limit={mediaLimit} onFiles={(files) => setData('gallery_images', files.slice(0, mediaLimit))} /><UploadDropZone label="Vídeos" description="MP4, WebM ou MOV." accept="video/mp4,video/webm,video/quicktime" multiple limit={mediaLimit} onFiles={(files) => setData('gallery_videos', files.slice(0, mediaLimit))} /><label className="tablet:col-span-2"><span className="admin-label">URLs de vídeos externos, uma por linha</span><textarea className="admin-input min-h-24" value={(data.gallery_video_urls || []).join('\n')} onChange={(event) => setData('gallery_video_urls', event.target.value.split('\n').map((value) => value.trim()).filter(Boolean))} /></label></div>{visibleMedia.length > 0 && <div className="mt-5 grid gap-4 tablet:grid-cols-3 desktop:grid-cols-4">{visibleMedia.map((asset) => <article key={asset.id} className="overflow-hidden rounded-xl border border-line">{asset.mime_type?.startsWith('video/') ? <video src={asset.url} className="aspect-[4/3] w-full object-cover" muted /> : <img src={asset.url} alt={asset.alt_text || ''} className="aspect-[4/3] w-full object-cover" />}<div className="space-y-2 p-3 text-xs">{!asset.mime_type?.startsWith('video/') && <label className="flex gap-2"><input type="radio" checked={String(data.featured_media_id || '') === String(asset.id)} onChange={() => setData('featured_media_id', asset.id)} /> Destaque</label>}<button type="button" className="text-red-700" onClick={() => setData('remove_media_ids', [...removed, asset.id])}>Remover</button></div></article>)}</div>}</section>
+        {showGallery && <section className="rounded-xl border border-line bg-white p-6 shadow-sm"><h2 className="text-lg font-medium text-ink">Galeria multimídia</h2><p className="mt-1 text-sm text-muted">Imagens JPG, PNG, WebP ou HEIC convertido; vídeos MP4, WebM ou MOV.</p><div className="mt-5 grid gap-4 tablet:grid-cols-2"><UploadDropZone label="Imagens" description="JPG, PNG, WebP ou HEIC convertido." accept="image/jpeg,image/png,image/webp,.heic,.heif" multiple limit={mediaLimit} onFiles={(files) => setData('gallery_images', files.slice(0, mediaLimit))} /><UploadDropZone label="Vídeos" description="MP4, WebM ou MOV." accept="video/mp4,video/webm,video/quicktime" multiple limit={mediaLimit} onFiles={(files) => setData('gallery_videos', files.slice(0, mediaLimit))} /><label className="tablet:col-span-2"><span className="admin-label">URLs de vídeos externos, uma por linha</span><textarea className="admin-input min-h-24" value={(data.gallery_video_urls || []).join('\n')} onChange={(event) => setData('gallery_video_urls', event.target.value.split('\n').map((value) => value.trim()).filter(Boolean))} /></label></div>{visibleMedia.length > 0 && <div className="mt-5 grid gap-4 tablet:grid-cols-3 desktop:grid-cols-4">{visibleMedia.map((asset) => <article key={asset.id} className="overflow-hidden rounded-xl border border-line">{asset.mime_type?.startsWith('video/') ? <video src={asset.url} className="aspect-[4/3] w-full object-cover" muted /> : <img src={asset.url} alt={asset.alt_text || ''} className="aspect-[4/3] w-full object-cover" />}<div className="space-y-2 p-3 text-xs">{!asset.mime_type?.startsWith('video/') && <label className="flex gap-2"><input type="radio" checked={String(data.featured_media_id || '') === String(asset.id)} onChange={() => setData('featured_media_id', asset.id)} /> Destaque</label>}<button type="button" className="text-red-700" onClick={() => setData('remove_media_ids', [...removed, asset.id])}>Remover</button></div></article>)}</div>}</section>}
         {showPlans && <Repeater title="Plantas disponíveis" rows={data.floor_plans || []} onChange={(rows) => setData('floor_plans', rows)} blank={{ ...blankPlan, is_active: true, image: null }} render={(row, index, update) => <div className="grid gap-4 tablet:grid-cols-2 desktop:grid-cols-4"><Field label="Título da planta" value={row.name} onChange={(e) => update(index, 'name', e.target.value)} /><Field label="Área privativa (m²)" type="number" value={row.area || ''} onChange={(e) => update(index, 'area', e.target.value)} />{[['bedrooms', 'Quartos'], ['bathrooms', 'Banheiros'], ['parking_spaces', 'Vagas'], ['suites', 'Suítes']].map(([key, label]) => <Field key={key} label={label} type="number" value={row[key] || ''} onChange={(e) => update(index, key, e.target.value)} />)}<label><span className="admin-label">Imagem da planta</span>{row.media_asset?.url && <img src={row.media_asset.url} alt="" className="mb-2 aspect-[4/3] w-40 rounded-lg object-cover" />}<input type="file" accept="image/jpeg,image/png,image/webp,.heic,.heif" className="admin-input" onChange={(e) => update(index, 'image', e.target.files?.[0] || null)} /></label><Field label="Link/arquivo externo" type="url" value={row.external_url || ''} onChange={(e) => update(index, 'external_url', e.target.value)} /><label className="flex items-center gap-2"><input type="checkbox" checked={row.is_active !== false} onChange={(e) => update(index, 'is_active', e.target.checked)} /> Exibir no site</label><Field label="Descrição" as="textarea" value={row.description || ''} onChange={(e) => update(index, 'description', e.target.value)} /></div>} />}
         {showStages && <ConstructionStageGrid data={data} setData={setData} />}
         {showStages && <ProgressUpdatesManager data={data} setData={setData} limit={Math.min(mediaLimit, 15)} />}

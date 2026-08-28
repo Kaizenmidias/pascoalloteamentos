@@ -136,7 +136,7 @@ export default function Form({ item, options }) {
 
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <PromotionManager rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
-            <div className="[&>section:has(input[accept*='video/mp4'])]:hidden"><ContentManager data={data} setData={setData} item={item} showPlans={false} showSpecialImages={false} showFaqs={false} showDocuments={false} showSeo={false} /></div>
+            <ContentManager data={data} setData={setData} item={item} showGallery={false} showPlans={false} showSpecialImages={false} showFaqs={false} showDocuments={false} showSeo={false} />
 
         </ProductFormLayout>
     </AdminLayout>;

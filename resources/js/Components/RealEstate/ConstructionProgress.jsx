@@ -1,13 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import MediaLightbox, { MediaLightboxTrigger, MediaTile } from './MediaLightbox';
 
 const clamp = (value) => Math.max(0, Math.min(100, Number(value) || 0));
-const monthFormatter = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric', timeZone: 'UTC' });
-const formatMonth = (value) => {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '';
-    return monthFormatter.format(date).replace('.', '').replace(' de ', '/').replace(/^./, (letter) => letter.toUpperCase());
-};
 
 function CircularStage({ item }) {
     const percentage = clamp(item.progress_percent);
@@ -19,9 +13,33 @@ function CircularStage({ item }) {
     </article>;
 }
 
-const sortByDateDesc = (left, right) => String(right?.progress_date || '').localeCompare(String(left?.progress_date || ''));
+const dateValue = (value) => {
+    const timestamp = Date.parse(value || '');
+    return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+};
+const sortByDateDesc = (left, right) => dateValue(right?.progress_date) - dateValue(left?.progress_date);
+const mediaKey = (asset, fallback) => asset?.id != null ? `id:${asset.id}` : asset?.url ? `url:${asset.url}` : fallback;
 
-function ProgressMediaGallery({ items, onOpen, lightbox, setLightbox }) {
+export function combineProgressMedia(updates = [], stages = []) {
+    const periods = Array.isArray(updates) ? [...updates].sort(sortByDateDesc) : [];
+    const legacy = (Array.isArray(stages) ? stages : []).map((stage) => ({
+        id: `stage-${stage?.id ?? stage?.code ?? stage?.name ?? 'legacy'}`,
+        progress_date: stage?.reference_date || stage?.updated_at || '',
+        media_assets: stage?.media_assets,
+    }));
+    const seen = new Set();
+
+    return [...periods, ...legacy].flatMap((period) => Array.isArray(period?.media_assets) ? period.media_assets : [])
+        .filter((asset, index) => {
+            if (!asset) return false;
+            const key = mediaKey(asset, `anonymous:${index}`);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+}
+
+function ProgressMediaGallery({ items, setLightbox }) {
     const [active, setActive] = useState(0);
     const media = items || [];
 
@@ -29,49 +47,27 @@ function ProgressMediaGallery({ items, onOpen, lightbox, setLightbox }) {
 
     if (!media.length) return null;
 
-    const current = media[active] || media[0];
+    const activeIndex = Math.min(active, media.length - 1);
+    const current = media[activeIndex];
     const move = (direction) => setActive((index) => (index + direction + media.length) % media.length);
 
     return <div className="mt-9">
         <div className="relative overflow-hidden rounded-2xl bg-ink">
             {media.length > 1 && <button type="button" onClick={() => move(-1)} aria-label="Mídia anterior" className="absolute left-3 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/65 text-2xl text-white transition hover:bg-brand tablet:left-5">&#8249;</button>}
             {media.length > 1 && <button type="button" onClick={() => move(1)} aria-label="Próxima mídia" className="absolute right-3 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-black/65 text-2xl text-white transition hover:bg-brand tablet:right-5">&#8250;</button>}
-            <MediaLightboxTrigger index={active} onOpen={setLightbox} className="block" label={`Ampliar mídia ${active + 1}`}>
+            <MediaLightboxTrigger index={activeIndex} onOpen={setLightbox} className="block" label={`Ampliar mídia ${activeIndex + 1}`}>
                 <div className="aspect-[16/10] w-full bg-ink tablet:aspect-[16/9]">{current && <MediaTile item={current} />}</div>
             </MediaLightboxTrigger>
-            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white/90">{active + 1} / {media.length}</span>
+            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white/90">{activeIndex + 1} / {media.length}</span>
         </div>
-        {media.length > 1 && <div className="mt-3 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">{media.map((asset, index) => <button key={asset.id || index} type="button" onClick={() => setActive(index)} aria-label={`Exibir mídia ${index + 1}`} className={`shrink-0 overflow-hidden rounded-lg border-2 ${index === active ? 'border-brand' : 'border-transparent opacity-75'}`}><div className="h-20 w-28"><MediaTile item={asset} /></div></button>)}</div>}
+        {media.length > 1 && <div className="mt-3 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">{media.map((asset, index) => <button key={mediaKey(asset, index)} type="button" onClick={() => setActive(index)} aria-label={`Exibir mídia ${index + 1}`} className={`shrink-0 overflow-hidden rounded-lg border-2 ${index === activeIndex ? 'border-brand' : 'border-transparent opacity-75'}`}><div className="h-20 w-28"><MediaTile item={asset} /></div></button>)}</div>}
     </div>;
 }
 
 export default function ConstructionProgress({ items = [], updates = [] }) {
     const sourceItems = Array.isArray(items) ? items : [];
     const publicItems = sourceItems.filter((item) => item.is_public !== false);
-    const legacyUpdates = sourceItems
-        .filter((item) => item.media_assets?.length && (item.reference_date || item.updated_at))
-        .map((item) => ({
-            id: `stage-${item.id}`,
-            progress_date: item.reference_date || item.updated_at,
-            media_assets: item.media_assets,
-        }));
-    const visibleUpdates = [...(Array.isArray(updates) ? updates : []), ...legacyUpdates]
-        .filter((update) => Array.isArray(update?.media_assets) && update.media_assets.length && update.progress_date)
-        .sort(sortByDateDesc);
-    const flattenedMedia = useMemo(() => {
-        const seen = new Set();
-        return visibleUpdates.flatMap((update) => (update.media_assets || []).map((asset, mediaIndex) => ({
-            ...asset,
-            progress_date: update.progress_date,
-            progress_update_id: update.id,
-            progress_sort_order: mediaIndex,
-        }))).filter((asset) => {
-            const key = `${asset.progress_update_id}:${asset.id}`;
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-        });
-    }, [visibleUpdates]);
+    const flattenedMedia = combineProgressMedia(updates, sourceItems);
     const [lightbox, setLightbox] = useState(null);
     if (!publicItems.length && !flattenedMedia.length) return null;
 
@@ -84,7 +80,7 @@ export default function ConstructionProgress({ items = [], updates = [] }) {
                 {overall !== null && <p className="text-sm text-muted">Andamento geral da obra: <strong className="text-xl font-medium text-brand">{overall}%</strong></p>}
             </div>
             {publicItems.length > 0 && <div className="mt-9 flex gap-5 overflow-x-auto pb-4 [scrollbar-width:thin]">{publicItems.map((item) => <CircularStage key={item.id || item.name} item={item} />)}</div>}
-            {flattenedMedia.length > 0 && <ProgressMediaGallery items={flattenedMedia} lightbox={lightbox} setLightbox={setLightbox} />}
+            {flattenedMedia.length > 0 && <ProgressMediaGallery items={flattenedMedia} setLightbox={setLightbox} />}
             <MediaLightbox items={flattenedMedia} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} />
         </div>
     );
