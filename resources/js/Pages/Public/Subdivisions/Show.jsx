@@ -68,13 +68,13 @@ function Progress({ item }) {
     const stages = item.construction_stages || item.constructionStages || [];
     const updates = item.construction_progress_updates || item.constructionProgressUpdates || [];
     if (!stages.length && !updates.length) return null;
-    return <section className="bg-surface py-14 tablet:py-[72px]"><SectionContainer><ConstructionProgress items={stages} updates={updates} /></SectionContainer></section>;
+    return <section id="andamento" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><ConstructionProgress items={stages} updates={updates} /></SectionContainer></section>;
 }
 
 function Gallery({ item }) {
     const media = galleryMedia(item);
     if (!media.length) return null;
-    return <section className="py-14 tablet:py-16"><SectionContainer><PublicMediaGallery items={media} label="Fotos do loteamento" itemClassName="w-[84%] tablet:w-[calc((100%-2.5rem)/3)]" /></SectionContainer></section>;
+    return <section id="galeria" className="scroll-mt-28 bg-surface py-14 tablet:py-16"><SectionContainer><PublicMediaGallery items={media} label="Fotos do loteamento" itemClassName="w-[88%] tablet:w-[calc((100%-1.25rem)/2)]" /></SectionContainer></section>;
 }
 
 function LotsInfoSection({ item }) {

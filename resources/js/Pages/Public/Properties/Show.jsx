@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import PublicLayout from '../../../Components/Layout/PublicLayout';
 import Container from '../../../Components/UI/Container';
 import SeoHead from '../../../Components/SEO/SeoHead';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
+import EntityCard from '../../../Components/RealEstate/EntityCard';
+import FeatureIcon from '../../../Components/RealEstate/FeatureIcon';
+import Map from '../../../Components/RealEstate/Map';
 import { galleryMedia } from '../../../Components/RealEstate/DetailSections';
 import MediaLightbox, { MediaLightboxTrigger, MediaTile } from '../../../Components/RealEstate/MediaLightbox';
 import { whatsappUrl } from '../../../Support/whatsapp';
@@ -10,43 +14,87 @@ import { whatsappUrl } from '../../../Support/whatsapp';
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value)) : null;
 const formatNumber = (value) => Number(value).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 const present = (value) => value !== null && value !== undefined && value !== '' && Number(value) !== 0;
+const normalize = (value = '') => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-function PropertyGallery({ items }) {
-    const [start, setStart] = useState(0);
-    const [paused, setPaused] = useState(false);
+function PropertyGallery({ items = [] }) {
+    const media = Array.isArray(items) ? items.filter(Boolean) : [];
     const [lightbox, setLightbox] = useState(null);
-    useEffect(() => {
-        if (items.length < 2 || paused || lightbox !== null || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-        const timer = window.setInterval(() => setStart((current) => (current + 1) % items.length), 5000);
-        return () => window.clearInterval(timer);
-    }, [items.length, lightbox, paused]);
-    if (!items.length) return null;
-    const visible = [0, 1, 2].map((offset) => ({ media: items[(start + offset) % items.length], index: (start + offset) % items.length })).filter((entry, index, list) => entry.media && list.findIndex((candidate) => candidate.media === entry.media) === index);
-    const move = (direction) => setStart((current) => (current + direction + items.length) % items.length);
-    return <section className="relative overflow-hidden bg-ink pt-[76px]" aria-label="Galeria do imóvel" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}><div className="grid h-[340px] gap-1 tablet:h-[470px] tablet:grid-cols-2 desktop:h-[520px] desktop:grid-cols-3">{visible.map(({ media, index: mediaIndex }, index) => <MediaLightboxTrigger key={media.id || mediaIndex} index={mediaIndex} onOpen={setLightbox} className={`h-full w-full ${index > 0 ? 'hidden tablet:block' : ''} ${index > 1 ? 'tablet:hidden desktop:block' : ''}`} label={`Ampliar mídia ${mediaIndex + 1}`}><MediaTile item={media} /></MediaLightboxTrigger>)}</div>{items.length > 1 && <><button type="button" onClick={() => move(-1)} aria-label="Mídia anterior" className="absolute bottom-5 right-20 grid size-11 place-items-center rounded-md bg-brand text-2xl text-white">&#8249;</button><button type="button" onClick={() => move(1)} aria-label="Próxima mídia" className="absolute bottom-5 right-5 grid size-11 place-items-center rounded-md bg-brand text-2xl text-white">&#8250;</button></>}<MediaLightbox items={items} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
+    if (!media.length) return <div className="grid min-h-[320px] place-items-center rounded-2xl bg-surface text-sm text-muted">Imagens em atualização</div>;
+
+    const visible = media.slice(0, 5);
+    const [featured, ...thumbnails] = visible;
+    return <div className="relative overflow-hidden rounded-2xl bg-ink shadow-[0_18px_45px_rgba(17,17,17,.12)]">
+        <div className={`grid gap-1 desktop:h-[620px] ${thumbnails.length ? 'desktop:grid-cols-[1.35fr_.85fr]' : ''}`}>
+            <MediaLightboxTrigger index={0} onOpen={setLightbox} className="aspect-[4/3] min-h-0 w-full overflow-hidden desktop:aspect-auto" label="Ampliar mídia 1"><MediaTile item={featured} /></MediaLightboxTrigger>
+            {thumbnails.length > 0 && <div className="grid grid-cols-2 gap-1 desktop:grid-cols-2 desktop:grid-rows-2">{thumbnails.map((asset, offset) => { const index = offset + 1; return <MediaLightboxTrigger key={asset.id || asset.url || index} index={index} onOpen={setLightbox} className="relative aspect-[4/3] min-h-0 w-full overflow-hidden desktop:aspect-auto" label={`Ampliar mídia ${index + 1}`}><MediaTile item={asset} />{index === visible.length - 1 && media.length > visible.length && <span className="absolute inset-0 grid place-items-center bg-black/55 px-3 text-center text-xs font-medium text-white">Ver mais {media.length - visible.length} mídia(s)</span>}</MediaLightboxTrigger>; })}</div>}
+        </div>
+        <MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} />
+    </div>;
 }
 
-const InfoCell = ({ label, value }) => present(value) ? <div className="rounded-xl border border-line px-4 py-3"><span className="block text-xs uppercase text-muted">{label}</span><strong className="mt-1 block font-medium text-brand">{value}</strong></div> : null;
-const Row = ({ label, value }) => value ? <div className="flex items-center justify-between gap-4 rounded-xl border border-line px-4 py-3"><span className="text-xs uppercase text-muted">{label}</span><strong className="text-sm font-medium text-ink">{value}</strong></div> : null;
+function Fact({ label, value }) {
+    if (!present(value)) return null;
+    return <div className="border-b border-line pb-3"><strong className="block text-lg font-medium text-ink">{value}</strong><span className="mt-1 block text-[.65rem] uppercase tracking-[.04em] text-muted">{label}</span></div>;
+}
 
-export default function Show({ item, globalWhatsapp }) {
-    const gallery = galleryMedia(item);
-    const address = [item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code, item.postal_code].filter(Boolean).join(', ');
-    const facts = [['Quartos', item.bedrooms], ['Suítes', item.suites], ['Banheiros', item.bathrooms], ['Lavabos', item.lavatories], ['Vagas', item.parking_spaces], ['Área total', present(item.total_area) ? `${formatNumber(item.total_area)} m²` : null]];
-    const conditions = [['Aceita permuta', item.accepts_exchange], ['Aceita financiamento', item.accepts_financing], ['Mobiliado', item.furnished], ['Imóvel novo', item.is_new]];
-    const areas = [['Área total', item.total_area], ['Área útil', item.usable_area], ['Área construída', item.built_area], ['Área do terreno', item.land_area]].filter(([, value]) => present(value));
-    const planDocument = item.documents?.find((document) => document.kind === 'property_plan') || item.documents?.find((document) => document.media_asset?.mime_type === 'application/pdf');
-    const planLink = planDocument?.media_asset?.url || (item.floor_plans || []).find((plan) => plan.is_active !== false && plan.external_url)?.external_url;
-    const whatsapp = whatsappUrl({ type: 'property', title: item.title });
+function FeatureSection({ title, items }) {
+    if (!items.length) return null;
+    return <section className="border-t border-line pt-9"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">{title}</p><div className="mt-5 grid gap-x-8 gap-y-4 tablet:grid-cols-2 desktop:grid-cols-3">{items.map((feature) => <div key={feature.id || feature.slug || feature.name} className="flex items-center gap-3 text-sm text-ink"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand/10 text-brand"><FeatureIcon feature={feature} className="size-4" />{!feature.icon && !feature.icon_media && <span aria-hidden="true">&#10003;</span>}</span><span>{feature.name}</span></div>)}</div></section>;
+}
+
+function PriceBlock({ item }) {
     const salePrice = item.sale_price || item.regular_price;
     const showSale = item.commercial_purpose !== 'rent' && present(salePrice);
     const showRent = ['rent', 'sale_rent', 'season'].includes(item.commercial_purpose) && present(item.rent_price);
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} /><PropertyGallery items={gallery} /><section className="bg-surface py-10 tablet:py-14"><Container className="grid max-w-[1120px] gap-6 desktop:grid-cols-[minmax(0,1.85fr)_minmax(310px,1fr)] desktop:items-start"><main className="space-y-5">
-        <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><p className="text-sm uppercase text-muted">{item.business_type?.name || 'Imóvel'}</p><h1 className="mt-2 text-3xl font-normal leading-tight tablet:text-4xl">{item.title}</h1>{address && <p className="mt-2 text-base text-muted">{address}</p>}{(item.condominium?.title || item.condominium_name) && <p className="mt-1 text-sm text-muted">{item.condominium?.title || item.condominium_name}</p>}<div className="mt-6 grid grid-cols-2 gap-3 tablet:grid-cols-3">{facts.map(([label, value]) => <InfoCell key={label} label={label} value={value} />)}</div></article>
-        {(item.description || item.excerpt) && <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><h2 className="text-2xl font-normal">Descrição do Imóvel</h2><div className="mt-5 max-w-none whitespace-pre-line font-light leading-7 text-muted" dangerouslySetInnerHTML={{ __html: item.description || item.excerpt }} /></article>}
-        {conditions.some(([, value]) => value) && <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><h2 className="text-2xl font-normal">Condições Comerciais</h2><div className="mt-5 grid gap-3 tablet:grid-cols-2">{conditions.map(([label, value]) => <Row key={label} label={label} value={value ? 'Sim' : 'Não'} />)}</div></article>}
-        {areas.length > 0 && <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><h2 className="text-2xl font-normal">Áreas</h2><div className="mt-5 grid gap-3 tablet:grid-cols-2">{areas.map(([label, value]) => <Row key={label} label={label} value={`${formatNumber(value)} m²`} />)}</div></article>}
-        {planLink && <article className="rounded-2xl bg-white p-6 shadow-card tablet:p-8"><h2 className="text-2xl font-normal">Planta do imóvel</h2><p className="mt-3 max-w-xl text-sm leading-6 text-muted">{item.floor_plans_support_text || 'Faça o download da planta e tenha acesso aos detalhes do imóvel, incluindo a distribuição dos ambientes, medidas e organização do projeto.'}</p><a href={planLink} target="_blank" rel="noreferrer" className="brand-button mt-5 inline-flex">{planDocument ? 'Baixar planta' : 'Ver planta'}</a></article>}
-        <a href="/imoveis" className="brand-button inline-flex">&#8592; Voltar</a>
-    </main><aside className="space-y-4 desktop:sticky desktop:top-24"><div className="rounded-2xl bg-white p-6 shadow-card"><div className="flex flex-wrap gap-2 text-[.65rem] uppercase"><span className="rounded-md bg-brand px-3 py-1.5 text-white">{item.property_type?.name || 'Imóvel'}</span>{item.development_status?.name && <span className="rounded-md bg-surface px-3 py-1.5">{item.development_status.name}</span>}</div><div className="mt-4 space-y-4 rounded-xl border border-line p-4">{item.price_on_request ? <><span className="text-xs font-medium uppercase">Valor</span><strong className="block text-3xl font-medium text-brand">Sob consulta</strong></> : <>{showSale && <div>{item.regular_price && item.sale_price && Number(item.regular_price) !== Number(item.sale_price) && <p className="text-lg text-muted line-through">{money(item.regular_price)}</p>}<span className="text-xs font-medium uppercase">Venda</span><strong className="block text-3xl font-medium text-brand">{money(salePrice)}</strong></div>}{showRent && <div><span className="text-xs font-medium uppercase">Locação</span><strong className="block text-3xl font-medium text-brand">{money(item.rent_price)} <small className="text-sm font-normal">/ mês</small></strong></div>}{!showSale && !showRent && <strong className="block text-2xl font-medium text-brand">Sob consulta</strong>}</>}</div><div className="mt-4 space-y-2 border-t border-line pt-4"><Row label="Condomínio" value={money(item.condominium_fee)} /><Row label="IPTU" value={money(item.iptu)} /></div></div><LeadForm entityType="property" entityId={item.id} entityName={item.title} title="Tenho interesse" />{whatsapp && <a href={whatsapp} target="_blank" rel="noreferrer" className="brand-button flex w-full justify-center">Falar no WhatsApp</a>}</aside></Container></section></PublicLayout>;
+    return <div className="border-t border-line pt-6">{item.price_on_request ? <strong className="text-3xl font-medium text-brand">Valor sob consulta</strong> : <div className="space-y-4">{showSale && <div>{item.regular_price && item.sale_price && Number(item.regular_price) !== Number(item.sale_price) && <p className="text-sm text-muted line-through">{money(item.regular_price)}</p>}<span className="text-[.65rem] uppercase tracking-[.06em] text-muted">Venda</span><strong className="mt-1 block text-3xl font-medium text-brand">{money(salePrice)}</strong></div>}{showRent && <div><span className="text-[.65rem] uppercase tracking-[.06em] text-muted">Locação</span><strong className="mt-1 block text-3xl font-medium text-brand">{money(item.rent_price)} <small className="text-sm font-normal">/ mês</small></strong></div>}{!showSale && !showRent && <strong className="text-2xl font-medium text-brand">Valor sob consulta</strong>}</div>}{(present(item.condominium_fee) || present(item.iptu)) && <div className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4 text-sm">{present(item.condominium_fee) && <div><span className="block text-[.65rem] uppercase text-muted">Condomínio</span><strong className="mt-1 block font-medium">{money(item.condominium_fee)}</strong></div>}{present(item.iptu) && <div><span className="block text-[.65rem] uppercase text-muted">IPTU</span><strong className="mt-1 block font-medium">{money(item.iptu)}</strong></div>}</div>}</div>;
+}
+
+export default function Show({ item, similar = [] }) {
+    const gallery = galleryMedia(item);
+    const features = Array.isArray(item.features) ? item.features.filter((feature) => feature?.name) : [];
+    const leisure = features.filter((feature) => /lazer|leisure|recrea|amenidade|piscina|academia|churrasqueira|playground|salao|quadra|sauna|spa|gourmet|fitness|brinquedoteca/.test(normalize(`${feature.category} ${feature.name}`)));
+    const external = features.filter((feature) => !leisure.includes(feature) && /extern|infraestrutura|condomin|jardim|portaria|elevador|interfone|seguranca|monitoramento|acesso|estacionamento|agua|gas/.test(normalize(`${feature.category} ${feature.name}`)));
+    const otherFeatures = features.filter((feature) => !leisure.includes(feature) && !external.includes(feature));
+    const address = [item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code, item.postal_code].filter(Boolean).join(', ');
+    const facts = [['Área privativa', item.usable_area && `${formatNumber(item.usable_area)} m²`], ['Área total', item.total_area && `${formatNumber(item.total_area)} m²`], ['Quartos', item.bedrooms], ['Suítes', item.suites], ['Banheiros', item.bathrooms], ['Lavabos', item.lavatories], ['Salas', item.rooms], ['Vagas', item.parking_spaces]];
+    const conditions = [['Mobiliado', item.furnished], ['Aceita financiamento', item.accepts_financing], ['Aceita permuta', item.accepts_exchange], ['Imóvel novo', item.is_new]].filter(([, value]) => value);
+    const areas = [['Área útil', item.usable_area], ['Área total', item.total_area], ['Área construída', item.built_area], ['Área do terreno', item.land_area]].filter(([, value]) => present(value));
+    const planDocument = item.documents?.find((document) => document.kind === 'property_plan') || item.documents?.find((document) => document.media_asset?.mime_type === 'application/pdf');
+    const planLink = planDocument?.media_asset?.url || item.floor_plans?.find((plan) => plan?.is_active !== false && plan?.external_url)?.external_url;
+    const whatsapp = whatsappUrl({ type: 'property', title: item.title });
+
+    return <PublicLayout>
+        <SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} />
+        <section className="bg-white pb-14 pt-[120px] tablet:pb-20 tablet:pt-[150px]">
+            <Container className="grid max-w-[1280px] gap-10 desktop:grid-cols-[minmax(0,1.3fr)_minmax(360px,.7fr)] desktop:items-start">
+                <PropertyGallery items={gallery} />
+                <aside className="desktop:sticky desktop:top-28">
+                    <nav aria-label="Navegação estrutural" className="flex flex-wrap items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-brand">Home</Link><span aria-hidden="true">/</span><Link href="/imoveis" className="hover:text-brand">Imóveis</Link><span aria-hidden="true">/</span><span className="line-clamp-1 text-ink">{item.title}</span></nav>
+                    <div className="mt-7 flex flex-wrap gap-2 text-[.65rem] font-medium uppercase"><span className="rounded-md bg-brand px-3 py-1.5 text-white">{item.property_type?.name || 'Imóvel'}</span>{item.business_type?.name && <span className="rounded-md bg-surface px-3 py-1.5 text-ink">{item.business_type.name}</span>}{item.development_status?.name && <span className="rounded-md bg-surface px-3 py-1.5 text-ink">{item.development_status.name}</span>}</div>
+                    <h1 className="mt-5 text-[2.35rem] font-light leading-[1.04] tracking-[-.03em] text-ink tablet:text-[3rem] desktop:text-[3.35rem]">{item.title}</h1>
+                    {address && <p className="mt-4 text-sm font-light leading-6 text-muted">{address}</p>}
+                    {(item.condominium?.title || item.condominium_name) && <p className="mt-2 text-sm text-muted">{item.condominium?.title || item.condominium_name}</p>}
+                    <div className="mt-7 grid grid-cols-2 gap-x-5 gap-y-4 tablet:grid-cols-3 desktop:grid-cols-2">{facts.map(([label, value]) => <Fact key={label} label={label} value={value} />)}</div>
+                    <div className="mt-7"><PriceBlock item={item} /></div>
+                    <div className="mt-7 grid gap-3 tablet:grid-cols-2 desktop:grid-cols-1"><a href={whatsapp} target="_blank" rel="noreferrer" className="brand-button flex justify-center">Falar no WhatsApp</a></div>
+                </aside>
+            </Container>
+        </section>
+
+        <section className="bg-surface py-14 tablet:py-20"><Container className="max-w-[1120px] space-y-10">
+            {(item.description || item.excerpt) && <article><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Descrição do imóvel</p><div className="rich-public-content mt-5 max-w-[900px] text-base font-light leading-[1.8] text-muted" dangerouslySetInnerHTML={{ __html: item.description || item.excerpt }} /></article>}
+            <FeatureSection title="Características externas" items={external} />
+            <FeatureSection title="Lazer" items={leisure} />
+            <FeatureSection title="Diferenciais do imóvel" items={otherFeatures} />
+            {(areas.length > 0 || conditions.length > 0) && <section className="grid gap-8 border-t border-line pt-9 tablet:grid-cols-2">{areas.length > 0 && <div><h2 className="text-xl font-light text-ink">Áreas</h2><dl className="mt-4 space-y-3">{areas.map(([label, value]) => <div key={label} className="flex justify-between gap-4 border-b border-line pb-2 text-sm"><dt className="text-muted">{label}</dt><dd className="font-medium text-ink">{formatNumber(value)} m²</dd></div>)}</dl></div>}{conditions.length > 0 && <div><h2 className="text-xl font-light text-ink">Condições</h2><div className="mt-4 flex flex-wrap gap-2">{conditions.map(([label]) => <span key={label} className="rounded-full border border-line bg-white px-4 py-2 text-sm text-ink">{label}</span>)}</div></div>}</section>}
+            {planLink && <section className="flex flex-wrap items-center justify-between gap-6 border-t border-line pt-9"><div><h2 className="text-xl font-light text-ink">Planta do imóvel</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{item.floor_plans_support_text || 'Consulte a distribuição, as medidas e a organização dos ambientes.'}</p></div><a href={planLink} target="_blank" rel="noreferrer" className="brand-button inline-flex">{planDocument ? 'Baixar planta' : 'Ver planta'}</a></section>}
+            {(address || item.latitude || item.longitude) && <section className="grid gap-7 border-t border-line pt-9 desktop:grid-cols-[.7fr_1.3fr] desktop:items-center"><div><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Localização</p>{address && <p className="mt-4 text-sm font-light leading-6 text-muted">{address}</p>}</div><div className="min-h-[340px] overflow-hidden rounded-2xl"><Map latitude={item.latitude} longitude={item.longitude} address={address} title={`Localização de ${item.title}`} /></div></section>}
+        </Container></section>
+
+        <section className="bg-white py-14 tablet:py-16"><Container className="max-w-2xl"><LeadForm entityType="property" entityId={item.id} entityName={item.title} title="Tenho interesse neste imóvel" /></Container></section>
+
+        <section className="bg-brand py-14 text-white tablet:py-20"><Container className="grid max-w-[1120px] gap-8 tablet:grid-cols-[1fr_auto] tablet:items-center"><div><p className="text-xs uppercase tracking-[.1em] text-white/70">Atendimento personalizado</p><h2 className="mt-3 text-[2rem] font-light leading-tight tablet:text-[2.7rem]">Não encontrou o imóvel ideal?</h2><p className="mt-4 max-w-2xl font-light leading-7 text-white/80">Nossa equipe ajuda você a encontrar uma opção que combine com seus planos, necessidades e momento.</p></div><a href={whatsapp} target="_blank" rel="noreferrer" className="inline-flex justify-center rounded-lg bg-white px-6 py-3 text-sm font-medium uppercase text-brand transition hover:bg-surface">Encontrar meu imóvel</a></Container></section>
+
+        {Array.isArray(similar) && similar.length > 0 && <section className="bg-white py-14 tablet:py-20"><Container className="max-w-[1280px]"><div className="text-center"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Continue explorando</p><h2 className="mt-3 text-[2rem] font-light tracking-[-.02em] text-ink tablet:text-[2.7rem]">Imóveis similares</h2></div><div className="mt-9 grid gap-6 tablet:grid-cols-2 desktop:grid-cols-4">{similar.map((property) => <EntityCard key={property.id} item={property} href={`/imoveis/${property.slug}`} />)}</div></Container></section>}
+    </PublicLayout>;
 }

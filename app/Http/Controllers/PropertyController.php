@@ -35,10 +35,25 @@ class PropertyController extends Controller
     {
         abort_unless($property->status === 'published', 404);
 
+        $relations = ['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features.iconMedia', 'mediaAssets', 'floorPlans.mediaAsset', 'documents.mediaAsset', 'seo'];
+        $similar = Property::query()
+            ->published()
+            ->whereKeyNot($property->id)
+            ->with(['city.state', 'propertyType', 'developmentStatus', 'mediaAssets'])
+            ->when($property->commercial_purpose, fn ($query, $purpose) => $query->orderByRaw('CASE WHEN commercial_purpose = ? THEN 0 ELSE 1 END', [$purpose]))
+            ->when($property->property_type_id, fn ($query, $type) => $query->orderByRaw('CASE WHEN property_type_id = ? THEN 0 ELSE 1 END', [$type]))
+            ->when($property->city_id, fn ($query, $city) => $query->orderByRaw('CASE WHEN city_id = ? THEN 0 ELSE 1 END', [$city]))
+            ->when($property->sale_price ?? $property->regular_price ?? $property->rent_price, fn ($query, $price) => $query
+                ->orderByRaw('CASE WHEN COALESCE(sale_price, regular_price, rent_price) IS NULL THEN 1 ELSE 0 END')
+                ->orderByRaw('ABS(COALESCE(sale_price, regular_price, rent_price, 0) - ?) ASC', [(float) $price]))
+            ->latest('published_at')
+            ->limit(4)
+            ->get();
+
         $globalWhatsapp = Schema::hasTable('site_settings')
             ? SiteSetting::query()->where('key', 'whatsapp')->first()?->value
             : null;
 
-        return Inertia::render('Public/Properties/Show', ['item' => $property->load(['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features', 'mediaAssets', 'floorPlans.mediaAsset', 'documents.mediaAsset', 'seo']), 'globalWhatsapp' => $globalWhatsapp]);
+        return Inertia::render('Public/Properties/Show', ['item' => $property->load($relations), 'similar' => $similar, 'globalWhatsapp' => $globalWhatsapp]);
     }
 }
