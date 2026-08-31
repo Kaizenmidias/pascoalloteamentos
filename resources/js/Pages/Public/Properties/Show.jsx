@@ -14,6 +14,13 @@ import { whatsappUrl } from '../../../Support/whatsapp';
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value)) : null;
 const formatNumber = (value) => Number(value).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 const present = (value) => value !== null && value !== undefined && value !== '';
+const moneyOrUnavailable = (value) => {
+    const numeric = Number(value);
+
+    if (!present(value) || Number.isNaN(numeric) || numeric === 0) return 'Valor indisponível';
+
+    return money(numeric);
+};
 const normalize = (value = '') => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 function PropertyGallery({ items = [] }) {
@@ -60,7 +67,7 @@ function FeatureSection({ title, items }) {
     return <section className="border-t border-line pt-9"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">{title}</p><div className="mt-5 grid gap-x-8 gap-y-4 tablet:grid-cols-2 desktop:grid-cols-3">{items.map((feature) => <div key={feature.id || feature.slug || feature.name} className="flex items-center gap-3 text-sm text-ink"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand/10 text-brand"><FeatureIcon feature={feature} className="size-4" />{!feature.icon && !feature.icon_media && <span aria-hidden="true">&#10003;</span>}</span><span>{feature.name}</span></div>)}</div></section>;
 }
 
-const SidebarRow = ({ label, value }) => value ? <div className="flex items-center justify-between gap-4 rounded-xl border border-line px-4 py-3"><span className="text-xs uppercase text-muted">{label}</span><strong className="text-sm font-medium text-ink">{value}</strong></div> : null;
+const SidebarRow = ({ label, value, unavailable = 'Valor indisponível' }) => <div className="flex items-center justify-between gap-4 rounded-xl border border-line px-4 py-3"><span className="text-xs uppercase text-muted">{label}</span><strong className={`text-sm font-medium ${value === unavailable ? 'text-muted' : 'text-ink'}`}>{value || unavailable}</strong></div>;
 
 function SimilarSection({ similar = [] }) {
     if (!Array.isArray(similar) || !similar.length) return null;
@@ -124,8 +131,8 @@ export default function Show({ item, similar = [] }) {
                                 {item.price_on_request ? <><span className="text-xs font-medium uppercase">Valor</span><strong className="block text-3xl font-medium text-brand">Sob consulta</strong></> : <>{showSale && <div>{item.regular_price && item.sale_price && Number(item.regular_price) !== Number(item.sale_price) && <p className="text-lg text-muted line-through">{money(item.regular_price)}</p>}<span className="text-xs font-medium uppercase">Venda</span><strong className="block text-3xl font-medium text-brand">{money(salePrice)}</strong></div>}{showRent && <div><span className="text-xs font-medium uppercase">Locação</span><strong className="block text-3xl font-medium text-brand">{money(item.rent_price)} <small className="text-sm font-normal">/ mês</small></strong></div>}{!showSale && !showRent && <strong className="block text-2xl font-medium text-brand">Sob consulta</strong>}</>}
                             </div>
                             <div className="mt-4 space-y-2 border-t border-line pt-4">
-                                <SidebarRow label="Condomínio" value={money(item.condominium_fee)} />
-                                <SidebarRow label="IPTU" value={money(item.iptu)} />
+                                <SidebarRow label="Condomínio" value={moneyOrUnavailable(item.condominium_fee)} />
+                                <SidebarRow label="IPTU" value={moneyOrUnavailable(item.iptu)} />
                             </div>
                         </div>
 
