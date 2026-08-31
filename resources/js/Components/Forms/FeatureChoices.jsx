@@ -73,9 +73,11 @@ export default function FeatureChoices({ features = [], selected = [], onChange 
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar diferencial..."
             />
-            <div className="space-y-8">
+            <div className="space-y-6">
                 <FeatureGroup title={featureBuckets[0].title} features={visible.external} selected={selected} onToggle={toggle} />
+                {visible.leisure.length > 0 && visible.external.length > 0 && <div className="border-t border-gray-200" aria-hidden="true" />}
                 <FeatureGroup title={featureBuckets[1].title} features={visible.leisure} selected={selected} onToggle={toggle} />
+                {visible.other.length > 0 && (visible.external.length > 0 || visible.leisure.length > 0) && <div className="border-t border-gray-200" aria-hidden="true" />}
                 {visible.other.length > 0 && (
                     <FeatureGroup
                         title="Outros diferenciais"
