@@ -22,13 +22,30 @@ function PropertyGallery({ items = [] }) {
 
     if (!media.length) return <div className="grid min-h-[360px] place-items-center rounded-2xl bg-surface text-sm text-muted">Imagens em atualização</div>;
 
-    const visible = media.slice(0, 6);
-    const [featured, ...rest] = visible;
-    const right = rest.slice(0, 4);
-    const hiddenCount = Math.max(0, media.length - visible.length);
+    const visible = media.slice(0, 7);
+    const [featured, ...secondary] = visible;
+    const desktopColumns = secondary.length === 1 ? 'grid-cols-1' : secondary.length === 2 ? 'grid-cols-2' : secondary.length === 3 ? 'grid-cols-3' : secondary.length === 4 ? 'grid-cols-2' : 'grid-cols-3';
+    const renderTile = (asset, index, showMore = false, className = '') => <MediaLightboxTrigger key={asset.id || asset.url || index} index={index} onOpen={setLightbox} className={`relative h-full min-h-0 w-full overflow-hidden ${className}`} label={`Ampliar mídia ${index + 1}`}><MediaTile item={asset} />{showMore && <span className="absolute inset-0 grid place-items-center bg-black/55 px-4 text-center text-sm font-medium text-white">Ver mais fotos</span>}</MediaLightboxTrigger>;
 
-    return <div className="overflow-hidden rounded-2xl bg-white shadow-[0_18px_45px_rgba(17,17,17,.10)]">
-        {right.length > 0 ? <div className="grid gap-1 desktop:grid-cols-[1.34fr_.86fr]"><MediaLightboxTrigger index={0} onOpen={setLightbox} className="min-h-[290px] w-full overflow-hidden desktop:min-h-[600px]" label="Ampliar mídia 1"><MediaTile item={featured} /></MediaLightboxTrigger><div className="grid grid-cols-2 gap-1">{right.map((asset, index) => { const mediaIndex = index + 1; const isLastTile = hiddenCount > 0 && index === right.length - 1; return <MediaLightboxTrigger key={asset.id || asset.url || mediaIndex} index={mediaIndex} onOpen={setLightbox} className="relative min-h-[145px] w-full overflow-hidden desktop:min-h-[299px]" label={`Ampliar mídia ${mediaIndex + 1}`}><MediaTile item={asset} />{isLastTile && <span className="absolute inset-0 grid place-items-center bg-black/55 px-4 text-center text-sm font-medium text-white">Ver mais fotos</span>}</MediaLightboxTrigger>; })}</div></div> : <MediaLightboxTrigger index={0} onOpen={setLightbox} className="block min-h-[360px] w-full overflow-hidden" label="Ampliar mídia 1"><MediaTile item={featured} /></MediaLightboxTrigger>}
+    return <div className="w-full overflow-hidden bg-ink">
+        <div className="flex h-[300px] snap-x snap-mandatory gap-[3px] overflow-x-auto tablet:hidden">
+            {visible.map((asset, index) => renderTile(asset, index, media.length > visible.length && index === visible.length - 1, visible.length === 1 ? 'w-full shrink-0' : 'w-[86vw] shrink-0 snap-center first:w-[94vw]'))}
+        </div>
+
+        <div className={`hidden h-[420px] gap-[3px] tablet:grid desktop:hidden ${secondary.length > 0 ? 'grid-cols-[45%_55%]' : 'grid-cols-1'}`}>
+            {renderTile(featured, 0)}
+            {secondary.length > 0 && <div className={`grid min-h-0 gap-[3px] ${secondary.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} ${secondary.length <= 2 ? 'grid-rows-1' : 'grid-rows-2'}`}>
+                {secondary.slice(0, 4).map((asset, index, tabletMedia) => renderTile(asset, index + 1, media.length > 5 && index === tabletMedia.length - 1))}
+            </div>}
+        </div>
+
+        <div className={`hidden h-[clamp(420px,27vw,520px)] gap-[3px] desktop:grid ${secondary.length > 0 ? 'grid-cols-[40%_60%]' : 'grid-cols-1'}`}>
+            {renderTile(featured, 0)}
+            {secondary.length > 0 && <div className={`grid min-h-0 gap-[3px] ${desktopColumns} ${secondary.length <= 3 ? 'grid-rows-1' : 'grid-rows-2'}`}>
+                {secondary.map((asset, index) => renderTile(asset, index + 1, media.length > visible.length && index === secondary.length - 1))}
+            </div>}
+        </div>
+
         <MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} />
     </div>;
 }
@@ -84,9 +101,9 @@ export default function Show({ item, similar = [] }) {
     return <PublicLayout>
         <SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} />
         <section className="bg-white pt-[120px] tablet:pt-[150px]">
-            <Container className="max-w-[1280px]">
+            <div className="w-full px-[3px]">
                 <PropertyGallery items={gallery} />
-            </Container>
+            </div>
         </section>
 
         <section className="bg-white py-10 tablet:py-12">
