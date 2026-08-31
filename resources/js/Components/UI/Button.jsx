@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 
 const variants = {
-    primary: '',
+    primary: 'bg-brand text-white border-brand-dark hover:bg-brand-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60',
     secondary: 'brand-button--secondary',
 };
 
