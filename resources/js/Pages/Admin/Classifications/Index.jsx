@@ -11,7 +11,14 @@ const emptyForm = {
     sort_order: 0,
     is_active: true,
     icon: '',
+    category: '',
 };
+
+const featureCategories = [
+    { id: '', name: 'Sem categoria' },
+    { id: 'external_features', name: 'Características externas' },
+    { id: 'leisure_features', name: 'Lazer' },
+];
 
 function GroupCard({ group }) {
     const { data, setData, post, processing, reset, errors } = useForm(emptyForm);
@@ -36,6 +43,7 @@ function GroupCard({ group }) {
                 <Field label="Slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} error={errors.slug} />
                 <Field label="Ordem" type="number" min="0" value={data.sort_order} onChange={(e) => setData('sort_order', e.target.value)} error={errors.sort_order} />
                 {group.slug === 'features' && <Field label="Ícone (nome ou classe)" value={data.icon} onChange={(e) => setData('icon', e.target.value)} error={errors.icon} />}
+                {group.slug === 'features' && <SelectField label="Categoria" options={featureCategories} value={data.category} onChange={(e) => setData('category', e.target.value)} error={errors.category} />}
                 <SelectField
                     label="Situação"
                     options={[
@@ -88,6 +96,7 @@ function QuickEdit({ group, item }) {
         sort_order: item.sort_order,
         is_active: Boolean(item.is_active),
         icon: item.icon || '',
+        category: item.category || '',
     });
 
     const submit = (e) => {
@@ -110,6 +119,7 @@ function QuickEdit({ group, item }) {
                 <input className="admin-input w-24" type="number" min="0" value={data.sort_order} onChange={(e) => setData('sort_order', e.target.value)} />
             </label>
             {group === 'features' && <label className="block"><span className="admin-label">Ícone</span><input className="admin-input w-40" value={data.icon} onChange={(e) => setData('icon', e.target.value)} /></label>}
+            {group === 'features' && <SelectField label="Categoria" options={featureCategories} value={data.category} onChange={(e) => setData('category', e.target.value)} />}
             <Button type="submit" variant="secondary" disabled={processing}>Salvar</Button>
         </form>
     );

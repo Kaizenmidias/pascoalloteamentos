@@ -77,9 +77,9 @@ function SimilarSection({ similar = [] }) {
 export default function Show({ item, similar = [] }) {
     const gallery = galleryMedia(item);
     const features = Array.isArray(item.features) ? item.features.filter((feature) => feature?.name) : [];
-    const leisure = features.filter((feature) => /lazer|leisure|recrea|amenidade|piscina|academia|churrasqueira|playground|salao|quadra|sauna|spa|gourmet|fitness|brinquedoteca/.test(normalize(`${feature.category} ${feature.name}`)));
-    const external = features.filter((feature) => !leisure.includes(feature) && /extern|infraestrutura|condomin|jardim|portaria|elevador|interfone|seguranca|monitoramento|acesso|estacionamento|agua|gas/.test(normalize(`${feature.category} ${feature.name}`)));
-    const otherFeatures = features.filter((feature) => !leisure.includes(feature) && !external.includes(feature));
+    const external = features.filter((feature) => /external_features|extern|infraestrutura|condomin|jardim|paisag|portaria|elevador|interfone|seguranca|monitoramento|acesso|estacionamento|agua|gas|pcd|entrada|hall|deposito|biciclet|zelador|cameras|cerca|controle|fechadura|fibra|internet|energia|gerador/.test(normalize(`${feature.category} ${feature.name}`)));
+    const leisure = features.filter((feature) => !external.includes(feature) && /leisure_features|lazer|leisure|recrea|amenidade|piscina|academia|churrasqueira|playground|salao|quadra|sauna|spa|gourmet|fitness|brinquedoteca|pet|coworking|cinema|biblioteca|terraço|terraco|lounge|praça|praca/.test(normalize(`${feature.category} ${feature.name}`)));
+    const otherFeatures = features.filter((feature) => !external.includes(feature) && !leisure.includes(feature));
     const address = [item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code, item.postal_code].filter(Boolean).join(', ');
     const facts = [
         ['Área privativa', item.usable_area && `${formatNumber(item.usable_area)} m²`, 'M4 9V4h16v16H4zM8 4v16M4 10h16'],

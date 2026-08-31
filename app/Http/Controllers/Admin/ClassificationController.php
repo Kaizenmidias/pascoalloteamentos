@@ -116,6 +116,7 @@ class ClassificationController extends Controller
         ];
         if ($modelClass === Feature::class) {
             $rules['icon'] = ['nullable', 'string', 'max:255'];
+            $rules['category'] = ['nullable', 'string', 'max:255'];
         }
 
         $validated = $request->validate($rules);
@@ -123,6 +124,9 @@ class ClassificationController extends Controller
         $validated['slug'] = $request->filled('slug') ? Str::slug($request->string('slug')->toString()) : UniqueSlug::for($table, $request->string('name')->toString(), $record?->id, 'classificacao');
         $validated['sort_order'] = (int) $request->input('sort_order', 0);
         $validated['is_active'] = $request->boolean('is_active', true);
+        if ($modelClass !== Feature::class) {
+            unset($validated['category']);
+        }
 
         return $validated;
     }
