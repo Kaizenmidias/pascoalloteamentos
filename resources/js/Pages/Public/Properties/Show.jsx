@@ -100,37 +100,25 @@ export default function Show({ item, similar = [] }) {
 
     return <PublicLayout>
         <SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} />
-        <section className="bg-white pt-[120px] tablet:pt-[150px]">
+        <section className="bg-white pt-[92px]">
             <div className="w-full px-[3px]">
                 <PropertyGallery items={gallery} />
             </div>
         </section>
 
-        <section className="bg-white py-10 tablet:py-12">
-            <Container className="max-w-[1280px]">
-                <nav aria-label="Navegação estrutural" className="flex flex-wrap items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-brand">Home</Link><span aria-hidden="true">/</span><Link href="/imoveis" className="hover:text-brand">Imóveis</Link><span aria-hidden="true">/</span><span className="line-clamp-1 text-ink">{item.title}</span></nav>
-                <div className="mt-6 flex flex-wrap gap-2 text-[.65rem] font-medium uppercase"><span className="rounded-md bg-brand px-3 py-1.5 text-white">{item.property_type?.name || 'Imóvel'}</span>{item.business_type?.name && <span className="rounded-md bg-surface px-3 py-1.5 text-ink">{item.business_type.name}</span>}{item.development_status?.name && <span className="rounded-md bg-surface px-3 py-1.5 text-ink">{item.development_status.name}</span>}</div>
-                <h1 className="mt-5 max-w-4xl text-[2.35rem] font-light leading-[1.04] tracking-[-.03em] text-ink tablet:text-[3rem] desktop:text-[3.35rem]">{item.title}</h1>
-                {address && <p className="mt-4 text-sm font-light leading-6 text-muted">{address}</p>}
-                {(item.condominium?.title || item.condominium_name) && <p className="mt-2 text-sm text-muted">{item.condominium?.title || item.condominium_name}</p>}
-            </Container>
-        </section>
-
-        <section className="bg-surface py-14 tablet:py-20">
+        <section className="bg-white py-10 tablet:py-14">
             <Container className="max-w-[1280px]">
                 <div className="grid gap-10 desktop:grid-cols-[minmax(0,1fr)_360px] desktop:items-start">
-                    <div className="space-y-10">
-                        {facts.length > 0 && <div className="grid gap-5 tablet:grid-cols-2 desktop:grid-cols-4">{facts.map(([label, value, icon]) => <Fact key={label} label={label} value={value} icon={icon} />)}</div>}
-                        {descriptionHtml && <article><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Descrição do imóvel</p><div className="rich-public-content mt-5 max-w-[900px] text-base font-light leading-[1.8] text-muted" dangerouslySetInnerHTML={{ __html: descriptionHtml }} /></article>}
-                        <FeatureSection title="Características externas" items={external} />
-                        <FeatureSection title="Lazer" items={leisure} />
-                        <FeatureSection title="Diferenciais do imóvel" items={otherFeatures} />
-                        {(areas.length > 0 || conditions.length > 0) && <section className="grid gap-8 border-t border-line pt-9 tablet:grid-cols-2">{areas.length > 0 && <div><h2 className="text-xl font-light text-ink">Áreas</h2><dl className="mt-4 space-y-3">{areas.map(([label, value]) => <div key={label} className="flex justify-between gap-4 border-b border-line pb-2 text-sm"><dt className="text-muted">{label}</dt><dd className="font-medium text-ink">{formatNumber(value)} m²</dd></div>)}</dl></div>}{conditions.length > 0 && <div><h2 className="text-xl font-light text-ink">Condições</h2><div className="mt-4 flex flex-wrap gap-2">{conditions.map(([label]) => <span key={label} className="rounded-full border border-line bg-white px-4 py-2 text-sm text-ink">{label}</span>)}</div></div>}</section>}
-                        {planLink && <section className="flex flex-wrap items-center justify-between gap-6 border-t border-line pt-9"><div><h2 className="text-xl font-light text-ink">Planta do imóvel</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{item.floor_plans_support_text || 'Consulte a distribuição, as medidas e a organização dos ambientes.'}</p></div><a href={planLink} target="_blank" rel="noreferrer" className="brand-button inline-flex">{planDocument ? 'Baixar planta' : 'Ver planta'}</a></section>}
-                        {(address || item.latitude || item.longitude) && <section className="grid gap-7 border-t border-line pt-9 desktop:grid-cols-[.7fr_1.3fr] desktop:items-center"><div><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Localização</p>{address && <p className="mt-4 text-sm font-light leading-6 text-muted">{address}</p>}</div><div className="min-h-[340px] overflow-hidden rounded-2xl"><Map latitude={item.latitude} longitude={item.longitude} address={address} title={`Localização de ${item.title}`} /></div></section>}
+                    <div className="desktop:col-start-1 desktop:row-start-1">
+                        <nav aria-label="Navegação estrutural" className="flex flex-wrap items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-brand">Home</Link><span aria-hidden="true">/</span><Link href="/imoveis" className="hover:text-brand">Imóveis</Link><span aria-hidden="true">/</span><span className="line-clamp-1 text-ink">{item.title}</span></nav>
+                        <div className="mt-6 flex flex-wrap gap-2 text-[.65rem] font-medium uppercase"><span className="rounded-md bg-brand px-3 py-1.5 text-white">{item.property_type?.name || 'Imóvel'}</span>{item.business_type?.name && <span className="rounded-md bg-surface px-3 py-1.5 text-ink">{item.business_type.name}</span>}{item.development_status?.name && <span className="rounded-md bg-surface px-3 py-1.5 text-ink">{item.development_status.name}</span>}</div>
+                        <h1 className="mt-5 max-w-4xl text-[2.35rem] font-light leading-[1.04] tracking-[-.03em] text-ink tablet:text-[3rem] desktop:text-[3.35rem]">{item.title}</h1>
+                        {address && <p className="mt-4 text-sm font-light leading-6 text-muted">{address}</p>}
+                        {(item.condominium?.title || item.condominium_name) && <p className="mt-2 text-sm text-muted">{item.condominium?.title || item.condominium_name}</p>}
+                        {facts.length > 0 && <div className="mt-8 grid gap-5 tablet:grid-cols-2 desktop:grid-cols-4">{facts.map(([label, value, icon]) => <Fact key={label} label={label} value={value} icon={icon} />)}</div>}
                     </div>
 
-                    <aside className="space-y-5 desktop:sticky desktop:top-28">
+                    <aside className="space-y-5 desktop:sticky desktop:top-28 desktop:col-start-2 desktop:row-span-2 desktop:row-start-1 desktop:self-start">
                         <div className="overflow-hidden rounded-2xl bg-white shadow-[0_18px_45px_rgba(17,17,17,.10)]">
                             <div className="border-b border-line bg-brand px-6 py-5 text-white">
                                 <p className="text-[.65rem] font-medium uppercase tracking-[.08em] text-white/70">Atendimento personalizado</p>
@@ -148,6 +136,17 @@ export default function Show({ item, similar = [] }) {
 
                         <LeadForm entityType="property" entityId={item.id} entityName={item.title} title="Tenho interesse neste imóvel" />
                     </aside>
+
+                    <div className="space-y-10 desktop:col-start-1 desktop:row-start-2">
+                        {descriptionHtml && <article><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Descrição do imóvel</p><div className="rich-public-content mt-5 max-w-[900px] text-base font-light leading-[1.8] text-muted" dangerouslySetInnerHTML={{ __html: descriptionHtml }} /></article>}
+                        <FeatureSection title="Características externas" items={external} />
+                        <FeatureSection title="Lazer" items={leisure} />
+                        <FeatureSection title="Diferenciais do imóvel" items={otherFeatures} />
+                        {(areas.length > 0 || conditions.length > 0) && <section className="grid gap-8 border-t border-line pt-9 tablet:grid-cols-2">{areas.length > 0 && <div><h2 className="text-xl font-light text-ink">Áreas</h2><dl className="mt-4 space-y-3">{areas.map(([label, value]) => <div key={label} className="flex justify-between gap-4 border-b border-line pb-2 text-sm"><dt className="text-muted">{label}</dt><dd className="font-medium text-ink">{formatNumber(value)} m²</dd></div>)}</dl></div>}{conditions.length > 0 && <div><h2 className="text-xl font-light text-ink">Condições</h2><div className="mt-4 flex flex-wrap gap-2">{conditions.map(([label]) => <span key={label} className="rounded-full border border-line bg-white px-4 py-2 text-sm text-ink">{label}</span>)}</div></div>}</section>}
+                        {planLink && <section className="flex flex-wrap items-center justify-between gap-6 border-t border-line pt-9"><div><h2 className="text-xl font-light text-ink">Planta do imóvel</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{item.floor_plans_support_text || 'Consulte a distribuição, as medidas e a organização dos ambientes.'}</p></div><a href={planLink} target="_blank" rel="noreferrer" className="brand-button inline-flex">{planDocument ? 'Baixar planta' : 'Ver planta'}</a></section>}
+                        {(address || item.latitude || item.longitude) && <section className="grid gap-7 border-t border-line pt-9 desktop:grid-cols-[.7fr_1.3fr] desktop:items-center"><div><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Localização</p>{address && <p className="mt-4 text-sm font-light leading-6 text-muted">{address}</p>}</div><div className="min-h-[340px] overflow-hidden rounded-2xl"><Map latitude={item.latitude} longitude={item.longitude} address={address} title={`Localização de ${item.title}`} /></div></section>}
+                    </div>
+
                 </div>
             </Container>
         </section>
