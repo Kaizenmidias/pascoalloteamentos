@@ -33,15 +33,17 @@ function FeatureGroup({ title, features, selected, onToggle }) {
     return (
         <section className="space-y-3">
             <p className="text-xs font-medium uppercase tracking-[.08em] text-brand">{title}</p>
-            <div className="grid gap-3 tablet:grid-cols-2 desktop:grid-cols-3">
-                {features.map((feature) => (
-                    <FeatureItem
-                        key={feature.id}
-                        feature={feature}
-                        checked={selected.includes(feature.id)}
-                        onToggle={() => onToggle(feature.id)}
-                    />
-                ))}
+            <div className="max-h-[320px] overflow-y-auto overflow-x-hidden pr-1">
+                <div className="grid gap-3 tablet:grid-cols-2 desktop:grid-cols-3">
+                    {features.map((feature) => (
+                        <FeatureItem
+                            key={feature.id}
+                            feature={feature}
+                            checked={selected.includes(feature.id)}
+                            onToggle={() => onToggle(feature.id)}
+                        />
+                    ))}
+                </div>
             </div>
         </section>
     );
