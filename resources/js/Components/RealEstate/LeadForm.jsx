@@ -15,7 +15,7 @@ export default function LeadForm({ entityType, entityId, entityName = '', title 
             {[['name', 'Nome', 'text'], ['email', 'E-mail', 'email'], ['phone', 'Telefone', 'tel']].map(([key, label, type]) => <label key={key} className="block"><span className="sr-only">{label}</span><input type={type} className="admin-input bg-surface" value={data[key]} onChange={(event) => setData(key, event.target.value)} placeholder={label} required={key !== 'email'} />{errors[key] && <span className="text-xs text-red-700">{errors[key]}</span>}</label>)}
             <label className="block"><span className="sr-only">Mensagem</span><textarea className="admin-input min-h-28 bg-surface" value={data.message} onChange={(event) => setData('message', event.target.value)} placeholder="Mensagem" /></label>
             <label className="flex gap-2 text-[.65rem] text-muted"><input type="checkbox" checked={data.consent} onChange={(event) => setData('consent', event.target.checked)} required /> Autorizo o uso dos dados para retorno do contato.</label>
-            <button type="submit" disabled={processing || recentlySuccessful} className="brand-button w-full">{processing ? 'Enviando...' : recentlySuccessful ? 'Contato enviado' : 'Enviar'}</button>
+            <button type="submit" disabled={processing || recentlySuccessful} className="brand-button w-full bg-brand text-white border-brand-dark hover:bg-brand-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60">{processing ? 'Enviando...' : recentlySuccessful ? 'Contato enviado' : 'Enviar'}</button>
         </form>
     );
 }
