@@ -2,7 +2,6 @@ import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import PublicLayout from '../../../Components/Layout/PublicLayout';
 import Container from '../../../Components/UI/Container';
-import Button from '../../../Components/UI/Button';
 import SeoHead from '../../../Components/SEO/SeoHead';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
 import EntityCard from '../../../Components/RealEstate/EntityCard';
@@ -165,7 +164,7 @@ export default function Show({ item, similar = [] }) {
                     <h2 className="mt-3 text-[2rem] font-light leading-tight tablet:text-[2.7rem]">Não encontrou o imóvel ideal?</h2>
                     <p className="mt-4 max-w-2xl font-light leading-7 text-white/80">Nossa equipe ajuda você a encontrar uma opção que combine com seus planos, necessidades e momento.</p>
                 </div>
-                <Button href={whatsapp} variant="secondary" className="inline-flex justify-center px-6 py-3 text-sm font-medium uppercase">Encontrar meu imóvel</Button>
+                <a href={whatsapp} target="_blank" rel="noreferrer" className="inline-flex justify-center rounded-lg !bg-white px-6 py-3 text-sm font-medium uppercase !text-brand transition hover:!bg-surface hover:!text-brand-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand active:!bg-white active:!text-brand disabled:opacity-60">Encontrar meu imóvel</a>
             </Container>
         </section>
 
