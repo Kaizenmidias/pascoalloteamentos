@@ -17,6 +17,24 @@ const SectionContainer = ({ children, className = '' }) => <Container className=
 const Eyebrow = ({ children, className = '' }) => <p className={`text-sm font-light uppercase tracking-[.03em] text-brand ${className}`}>{children}</p>;
 const Title = ({ children, className = '' }) => <h2 className={`mt-3 text-[2rem] font-light leading-[1.08] tracking-[-.025em] text-ink tablet:text-[2.7rem] desktop:text-[3.15rem] ${className}`}>{children}</h2>;
 const hasValue = (value) => value !== null && value !== undefined && value !== '';
+const quickLinkIcons = {
+    sobre: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm0-13v8m0-11v1',
+    diferenciais: 'M4 6h6v6H4zM14 6h6v6h-6zM4 16h6v6H4zM14 16h6v6h-6z',
+    galeria: 'M4 7h16v10H4zM8 11l2.5 2.5L15 9m-3 1.5h.01',
+    plantas: 'M5 19h14M7 5h10v14H7zM10 8h4M10 11h4M10 14h3',
+    visual: 'M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Zm9 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+    localizacao: 'M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11Zm0-8a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z',
+    andamento: 'M4 19h16M7 15v-3m5 3V8m5 7v-5',
+    'lotes-info': 'M6 3h9l3 3v15H6zM8 11h8M8 15h8',
+};
+
+function QuickLinkIcon({ id }) {
+    const path = quickLinkIcons[id];
+
+    if (!path) return null;
+
+    return <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 shrink-0 fill-none stroke-current stroke-[1.7]" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>;
+}
 
 function WhatsAppButton({ item, className = '' }) {
     return <a href={whatsappUrl({ type: 'subdivision', title: item.title })} target="_blank" rel="noreferrer" className={`brand-button ${className}`}>Falar no WhatsApp</a>;
@@ -74,7 +92,7 @@ function InternalMenu({ item, hasGallery, hasPlans, hasVisual, hasLocation, hasP
 
     if (!links.length) return null;
 
-    return <SectionContainer className="relative z-30 -mt-12"><nav aria-label="Seções do loteamento" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label]) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span>{label}</span></a>)}</nav></SectionContainer>;
+    return <SectionContainer className="relative z-30 -mt-12"><nav aria-label="Seções do loteamento" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label]) => <a key={id} href={`#${id}`} className="group grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span className="flex flex-col items-center gap-2"><QuickLinkIcon id={id} /><span>{label}</span></span></a>)}</nav></SectionContainer>;
 }
 
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : null;
