@@ -60,13 +60,7 @@ function FeatureSection({ title, items }) {
     return <section className="border-t border-line pt-9"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">{title}</p><div className="mt-5 grid gap-x-8 gap-y-4 tablet:grid-cols-2 desktop:grid-cols-3">{items.map((feature) => <div key={feature.id || feature.slug || feature.name} className="flex items-center gap-3 text-sm text-ink"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand/10 text-brand"><FeatureIcon feature={feature} className="size-4" />{!feature.icon && !feature.icon_media && <span aria-hidden="true">&#10003;</span>}</span><span>{feature.name}</span></div>)}</div></section>;
 }
 
-function PriceBlock({ item }) {
-    const salePrice = item.sale_price || item.regular_price;
-    const showSale = item.commercial_purpose !== 'rent' && present(salePrice);
-    const showRent = ['rent', 'sale_rent', 'season'].includes(item.commercial_purpose) && present(item.rent_price);
-
-    return <div className="border-t border-line pt-6">{item.price_on_request ? <strong className="text-3xl font-medium text-brand">Valor sob consulta</strong> : <div className="space-y-4">{showSale && <div>{item.regular_price && item.sale_price && Number(item.regular_price) !== Number(item.sale_price) && <p className="text-sm text-muted line-through">{money(item.regular_price)}</p>}<span className="text-[.65rem] uppercase tracking-[.06em] text-muted">Venda</span><strong className="mt-1 block text-3xl font-medium text-brand">{money(salePrice)}</strong></div>}{showRent && <div><span className="text-[.65rem] uppercase tracking-[.06em] text-muted">Locação</span><strong className="mt-1 block text-3xl font-medium text-brand">{money(item.rent_price)} <small className="text-sm font-normal">/ mês</small></strong></div>}{!showSale && !showRent && <strong className="text-2xl font-medium text-brand">Valor sob consulta</strong>}</div>}{(present(item.condominium_fee) || present(item.iptu)) && <div className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4 text-sm">{present(item.condominium_fee) && <div><span className="block text-[.65rem] uppercase text-muted">Condomínio</span><strong className="mt-1 block font-medium">{money(item.condominium_fee)}</strong></div>}{present(item.iptu) && <div><span className="block text-[.65rem] uppercase text-muted">IPTU</span><strong className="mt-1 block font-medium">{money(item.iptu)}</strong></div>}</div>}</div>;
-}
+const SidebarRow = ({ label, value }) => value ? <div className="flex items-center justify-between gap-4 rounded-xl border border-line px-4 py-3"><span className="text-xs uppercase text-muted">{label}</span><strong className="text-sm font-medium text-ink">{value}</strong></div> : null;
 
 function SimilarSection({ similar = [] }) {
     if (!Array.isArray(similar) || !similar.length) return null;
@@ -96,7 +90,9 @@ export default function Show({ item, similar = [] }) {
     const planLink = planDocument?.media_asset?.url || item.floor_plans?.find((plan) => plan?.is_active !== false && plan?.external_url)?.external_url;
     const whatsapp = whatsappUrl({ type: 'property', title: item.title });
     const descriptionHtml = item.description || item.excerpt || '';
-    const sidebarFacts = facts.slice(0, 4);
+    const salePrice = item.sale_price || item.regular_price;
+    const showSale = item.commercial_purpose !== 'rent' && present(salePrice) && Number(salePrice) !== 0;
+    const showRent = ['rent', 'sale_rent', 'season'].includes(item.commercial_purpose) && present(item.rent_price) && Number(item.rent_price) !== 0;
 
     return <PublicLayout>
         <SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.excerpt} />
@@ -118,23 +114,26 @@ export default function Show({ item, similar = [] }) {
                         {facts.length > 0 && <div className="mt-8 grid gap-5 tablet:grid-cols-2 desktop:grid-cols-4">{facts.map(([label, value, icon]) => <Fact key={label} label={label} value={value} icon={icon} />)}</div>}
                     </div>
 
-                    <aside className="space-y-5 desktop:sticky desktop:top-28 desktop:col-start-2 desktop:row-span-2 desktop:row-start-1 desktop:self-start">
-                        <div className="overflow-hidden rounded-2xl bg-white shadow-[0_18px_45px_rgba(17,17,17,.10)]">
-                            <div className="border-b border-line bg-brand px-6 py-5 text-white">
-                                <p className="text-[.65rem] font-medium uppercase tracking-[.08em] text-white/70">Atendimento personalizado</p>
-                                <h2 className="mt-2 text-2xl font-light leading-tight">Fale com a equipe Pascoal</h2>
+                    <aside className="space-y-4 desktop:sticky desktop:top-28 desktop:col-start-2 desktop:row-span-2 desktop:row-start-1 desktop:self-start">
+                        <div className="rounded-2xl bg-white p-6 shadow-card">
+                            <div className="flex flex-wrap gap-2 text-[.65rem] uppercase">
+                                <span className="rounded-md bg-brand px-3 py-1.5 text-white">{item.property_type?.name || 'Imóvel'}</span>
+                                {item.development_status?.name && <span className="rounded-md bg-surface px-3 py-1.5">{item.development_status.name}</span>}
                             </div>
-                            <div className="space-y-6 px-6 py-6">
-                                <PriceBlock item={item} />
-                                <div className="space-y-3">
-                                    {sidebarFacts.map(([label, value]) => <div key={label} className="flex items-center justify-between gap-4 rounded-xl border border-line px-4 py-3 text-sm"><span className="text-muted">{label}</span><strong className="text-ink">{value}</strong></div>)}
-                                </div>
-                                <a href={whatsapp} target="_blank" rel="noreferrer" className="brand-button flex justify-center">Falar no WhatsApp</a>
-                                <div className="rounded-xl bg-surface p-4 text-sm leading-6 text-muted">Nos envie uma mensagem para confirmar disponibilidade, condições comerciais e tirar dúvidas sobre este imóvel.</div>
+                            <div className="mt-4 space-y-4 rounded-xl border border-line p-4">
+                                {item.price_on_request ? <><span className="text-xs font-medium uppercase">Valor</span><strong className="block text-3xl font-medium text-brand">Sob consulta</strong></> : <>{showSale && <div>{item.regular_price && item.sale_price && Number(item.regular_price) !== Number(item.sale_price) && <p className="text-lg text-muted line-through">{money(item.regular_price)}</p>}<span className="text-xs font-medium uppercase">Venda</span><strong className="block text-3xl font-medium text-brand">{money(salePrice)}</strong></div>}{showRent && <div><span className="text-xs font-medium uppercase">Locação</span><strong className="block text-3xl font-medium text-brand">{money(item.rent_price)} <small className="text-sm font-normal">/ mês</small></strong></div>}{!showSale && !showRent && <strong className="block text-2xl font-medium text-brand">Sob consulta</strong>}</>}
+                            </div>
+                            <div className="mt-4 space-y-2 border-t border-line pt-4">
+                                <SidebarRow label="Condomínio" value={money(item.condominium_fee)} />
+                                <SidebarRow label="IPTU" value={money(item.iptu)} />
                             </div>
                         </div>
 
-                        <LeadForm entityType="property" entityId={item.id} entityName={item.title} title="Tenho interesse neste imóvel" />
+                        <section className="space-y-4">
+                            <p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Atendimento personalizado</p>
+                            <LeadForm entityType="property" entityId={item.id} entityName={item.title} title="Tenho interesse" />
+                            {whatsapp && <a href={whatsapp} target="_blank" rel="noreferrer" className="brand-button flex w-full justify-center">Falar no WhatsApp</a>}
+                        </section>
                     </aside>
 
                     <div className="space-y-10 desktop:col-start-1 desktop:row-start-2">
