@@ -104,11 +104,11 @@ export default function Show({ item, similar = [] }) {
 
         <section className="bg-white py-10 tablet:py-14">
             <Container className="max-w-[1280px]">
-                <div className="grid gap-10 desktop:grid-cols-[minmax(0,1fr)_360px] desktop:items-start">
+                <div className="grid gap-8 desktop:grid-cols-[minmax(0,1fr)_340px] desktop:items-start">
                     <div className="desktop:col-start-1 desktop:row-start-1">
                         <nav aria-label="Navegação estrutural" className="flex flex-wrap items-center gap-2 text-xs text-muted"><Link href="/" className="hover:text-brand">Home</Link><span aria-hidden="true">/</span><Link href="/imoveis" className="hover:text-brand">Imóveis</Link><span aria-hidden="true">/</span><span className="line-clamp-1 text-ink">{item.title}</span></nav>
                         <div className="mt-6 flex flex-wrap gap-2 text-[.65rem] font-medium uppercase"><span className="rounded-md bg-brand px-3 py-1.5 text-white">{item.property_type?.name || 'Imóvel'}</span>{item.business_type?.name && <span className="rounded-md bg-surface px-3 py-1.5 text-ink">{item.business_type.name}</span>}{item.development_status?.name && <span className="rounded-md bg-surface px-3 py-1.5 text-ink">{item.development_status.name}</span>}</div>
-                        <h1 className="mt-5 max-w-4xl text-[2.35rem] font-light leading-[1.04] tracking-[-.03em] text-ink tablet:text-[3rem] desktop:text-[3.35rem]">{item.title}</h1>
+                        <h1 className="mt-5 max-w-4xl text-[2.25rem] font-light leading-[1.05] tracking-[-.03em] text-ink tablet:text-[2.95rem] desktop:text-[3.1rem]">{item.title}</h1>
                         {address && <p className="mt-4 text-sm font-light leading-6 text-muted">{address}</p>}
                         {(item.condominium?.title || item.condominium_name) && <p className="mt-2 text-sm text-muted">{item.condominium?.title || item.condominium_name}</p>}
                         {facts.length > 0 && <div className="mt-8 grid gap-5 tablet:grid-cols-2 desktop:grid-cols-4">{facts.map(([label, value, icon]) => <Fact key={label} label={label} value={value} icon={icon} />)}</div>}
