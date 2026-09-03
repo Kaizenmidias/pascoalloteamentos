@@ -22,8 +22,16 @@ class MediaAsset extends Model
         return Attribute::get(fn () => match ($this->disk) {
             'reference' => asset('reference-assets/'.ltrim($this->path, '/')),
             'external' => $this->path,
-            default => Storage::disk($this->disk)->url($this->path),
+            default => $this->versionedUrl(),
         });
+    }
+
+    private function versionedUrl(): string
+    {
+        $url = Storage::disk($this->disk)->url($this->path);
+        $version = $this->updated_at?->getTimestamp() ?: $this->getKey();
+
+        return $version ? $url.'?v='.$version : $url;
     }
 
     protected function posterUrl(): Attribute
