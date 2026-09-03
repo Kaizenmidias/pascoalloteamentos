@@ -96,7 +96,7 @@ function InternalMenu({ item, hasGallery, hasPlans, hasVisual, hasLocation, hasP
 
     if (!links.length) return null;
 
-    return <SectionContainer className="relative z-30 mt-8"><nav aria-label="Seções do loteamento" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label]) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><QuickLinkIcon id={id} />{label}</span></a>)}</nav></SectionContainer>;
+    return <SectionContainer className="relative z-30 -mt-12"><nav aria-label="Seções do loteamento" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label]) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><QuickLinkIcon id={id} />{label}</span></a>)}</nav></SectionContainer>;
 }
 
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : null;
