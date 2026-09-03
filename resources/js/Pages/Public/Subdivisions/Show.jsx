@@ -41,12 +41,7 @@ function WhatsAppButton({ item, className = '' }) {
 }
 
 function Hero({ item, image, globalWhatsapp }) {
-    const facts = [
-        ['Total de lotes', item.total_lots, 'M4 6h9M4 12h9M4 18h9M17 5h3v6h-3m0 8h3m-3-3h3'],
-        ['Lotes disponÃ­veis', item.available_lots, 'm4 6 2 2 4-5M4 13l2 2 4-5m3-4h7m-7 7h7m-7 7h7'],
-        ['Ãrea mÃ­nima', item.minimum_lot_area && Number(item.minimum_lot_area).toLocaleString('pt-BR'), 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm5 12 4 4M3 8V3h5M14 3h5v5'],
-        ['Ãrea mÃ¡xima', item.maximum_lot_area && Number(item.maximum_lot_area).toLocaleString('pt-BR'), 'M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm4 10 6 6m-10-9V7m-2 2h4M2 8V3h5'],
-    ].filter(([, value]) => hasValue(value));
+
 
     return <>
         <section className="relative flex min-h-[650px] items-center overflow-hidden bg-ink pb-24 pt-32 text-white tablet:min-h-[720px]">
@@ -84,7 +79,7 @@ function About({ item, image }) {
 
 function Features({ items = [] }) {
     if (!items.length) return null;
-    return <section id="diferenciais" className="bg-surface py-14 tablet:py-16"><SectionContainer><div className="text-center"><Eyebrow>Diferenciais</Eyebrow><Title>Tudo o que vocÃª precisa em um sÃ³ lugar</Title></div><div className="mt-8 grid grid-cols-2 gap-3 tablet:grid-cols-4 desktop:grid-cols-6">{items.map((feature) => <article key={feature.id} className="grid min-h-28 place-items-center rounded-xl bg-white p-4 text-center shadow-[0_5px_18px_rgba(17,17,17,.05)]"><div><FeatureIcon feature={feature} className="mx-auto mb-3 size-9" /><h3 className="text-xs font-normal leading-5 text-ink">{feature.name}</h3></div></article>)}</div></SectionContainer></section>;
+    return <section id="diferenciais" className="bg-surface py-14 tablet:py-16"><SectionContainer><div className="text-center"><Eyebrow>Diferenciais</Eyebrow><Title>Tudo o que você precisa em um só lugar</Title></div><div className="mt-8 grid grid-cols-2 gap-3 tablet:grid-cols-4 desktop:grid-cols-6">{items.map((feature) => <article key={feature.id} className="grid min-h-28 place-items-center rounded-xl bg-white p-4 text-center shadow-[0_5px_18px_rgba(17,17,17,.05)]"><div><FeatureIcon feature={feature} className="mx-auto mb-3 size-9" /><h3 className="text-xs font-normal leading-5 text-ink">{feature.name}</h3></div></article>)}</div></SectionContainer></section>;
 }
 
 function InternalMenu({ item, hasGallery, hasPlans, hasVisual, hasLocation, hasProgress, hasLotsInfo }) {
@@ -94,14 +89,14 @@ function InternalMenu({ item, hasGallery, hasPlans, hasVisual, hasLocation, hasP
         ['galeria', 'Fotos', hasGallery],
         ['plantas', 'Plantas', hasPlans],
         ['visual', 'Imagem', hasVisual],
-        ['localizacao', 'LocalizaÃ§Ã£o', hasLocation],
+        ['localizacao', 'Localização', hasLocation],
         ['andamento', 'Andamento da obra', hasProgress],
         ['lotes-info', 'Lotes', hasLotsInfo],
     ].filter(([, , visible]) => visible);
 
     if (!links.length) return null;
 
-    return <SectionContainer className="relative z-30 mt-8"><nav aria-label="SeÃ§Ãµes do loteamento" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label]) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><QuickLinkIcon id={id} />{label}</span></a>)}</nav></SectionContainer>;
+    return <SectionContainer className="relative z-30 mt-8"><nav aria-label="Seções do loteamento" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label]) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><QuickLinkIcon id={id} />{label}</span></a>)}</nav></SectionContainer>;
 }
 
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : null;
@@ -113,7 +108,7 @@ function PromotionCard({ promotion }) {
 function Promotions({ items = [] }) {
     const visible = items.filter((item) => item.is_active !== false && item.title);
     if (!visible.length) return null;
-    return <section className="py-14 tablet:py-16"><SectionContainer>{visible.length === 1 ? <PromotionCard promotion={visible[0]} /> : <Carousel label="PromoÃ§Ãµes de lotes" itemClassName="w-[94%] tablet:w-[86%]">{visible.map((promotion) => <PromotionCard key={promotion.id} promotion={promotion} />)}</Carousel>}</SectionContainer></section>;
+    return <section className="py-14 tablet:py-16"><SectionContainer>{visible.length === 1 ? <PromotionCard promotion={visible[0]} /> : <Carousel label="Promoções de lotes" itemClassName="w-[94%] tablet:w-[86%]">{visible.map((promotion) => <PromotionCard key={promotion.id} promotion={promotion} />)}</Carousel>}</SectionContainer></section>;
 }
 
 function Gallery({ item }) {
@@ -135,7 +130,7 @@ function Plans({ item }) {
 function Location({ item, globalWhatsapp }) {
     if (!item.address && !item.latitude && !item.longitude) return null;
     const address = [item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code].filter(Boolean).join(', ');
-    return <section id="localizacao" className="scroll-mt-28 bg-surface py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.82fr_1.18fr] tablet:items-center"><div><Eyebrow>LocalizaÃ§Ã£o</Eyebrow><Title>LocalizaÃ§Ã£o estratÃ©gica para facilitar seu dia a dia</Title>{address && <p className="mt-5 max-w-xl text-base leading-7 text-muted">{address}</p>}<WhatsAppButton item={item} className="mt-7" /></div><div className="min-h-[360px] overflow-hidden rounded-xl"><Map latitude={item.latitude} longitude={item.longitude} address={address} title={`LocalizaÃ§Ã£o de ${item.title}`} /></div></SectionContainer></section>;
+    return <section id="localizacao" className="scroll-mt-28 bg-surface py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.82fr_1.18fr] tablet:items-center"><div><Eyebrow>Localização</Eyebrow><Title>Localização estratÃ©gica para facilitar seu dia a dia</Title>{address && <p className="mt-5 max-w-xl text-base leading-7 text-muted">{address}</p>}<WhatsAppButton item={item} className="mt-7" /></div><div className="min-h-[360px] overflow-hidden rounded-xl"><Map latitude={item.latitude} longitude={item.longitude} address={address} title={`Localização de ${item.title}`} /></div></SectionContainer></section>;
 }
 
 function Progress({ item }) {
@@ -147,7 +142,7 @@ function Progress({ item }) {
 
 function LotsInfoSection({ item }) {
     if (!item.lots_info_url) return null;
-    return <section id="lotes-info" className="scroll-mt-28 bg-surface py-14 tablet:py-[72px]"><SectionContainer className="grid gap-8 rounded-xl border border-line bg-white p-6 shadow-[0_6px_22px_rgba(17,17,17,.05)] tablet:grid-cols-[1.15fr_.85fr] tablet:items-center tablet:p-8"><div><Eyebrow>InformaÃ§Ãµes dos lotes</Eyebrow><Title>ConheÃ§a as Plantas dos Lotes</Title><p className="mt-5 max-w-2xl text-base font-light leading-7 text-muted">FaÃ§a o download das plantas e tenha acesso aos detalhes do empreendimento, incluindo a divisÃ£o dos lotes, medidas e organizaÃ§Ã£o do projeto.</p></div><div className="rounded-2xl bg-ink p-6 text-white tablet:p-8"><p className="text-sm uppercase tracking-[.08em] text-white/70">Tudo o que vocÃª precisa em um sÃ³ lugar</p><a href={item.lots_info_url} target="_blank" rel="noopener noreferrer" className="brand-button mt-5 inline-flex w-full justify-center tablet:w-auto">BAIXAR INFORMAÃ‡Ã•ES DOS LOTES</a></div></SectionContainer></section>;
+    return <section id="lotes-info" className="scroll-mt-28 bg-surface py-14 tablet:py-[72px]"><SectionContainer className="grid gap-8 rounded-xl border border-line bg-white p-6 shadow-[0_6px_22px_rgba(17,17,17,.05)] tablet:grid-cols-[1.15fr_.85fr] tablet:items-center tablet:p-8"><div><Eyebrow>InformaÃ§Ãµes dos lotes</Eyebrow><Title>ConheÃ§a as Plantas dos Lotes</Title><p className="mt-5 max-w-2xl text-base font-light leading-7 text-muted">FaÃ§a o download das plantas e tenha acesso aos detalhes do empreendimento, incluindo a divisÃ£o dos lotes, medidas e organizaÃ§Ã£o do projeto.</p></div><div className="rounded-2xl bg-ink p-6 text-white tablet:p-8"><p className="text-sm uppercase tracking-[.08em] text-white/70">Tudo o que você precisa em um só lugar</p><a href={item.lots_info_url} target="_blank" rel="noopener noreferrer" className="brand-button mt-5 inline-flex w-full justify-center tablet:w-auto">BAIXAR INFORMAÃ‡Ã•ES DOS LOTES</a></div></SectionContainer></section>;
 }
 
 export default function Show({ item, globalWhatsapp }) {
@@ -157,10 +152,8 @@ export default function Show({ item, globalWhatsapp }) {
     const hasProgress = (item.construction_stages || []).some((stage) => stage?.is_public !== false) || (item.construction_progress_updates || item.constructionProgressUpdates || []).length > 0;
     const hasLocation = !!(item.address || item.latitude || item.longitude);
     const hasVisual = !!(item.about_media || item.promotion_media);
-    const hasFacts = [item.total_lots, item.available_lots, item.minimum_lot_area, item.maximum_lot_area].some(hasValue);
     const promotions = (item.promotions || []).filter((promotion) => promotion.is_active !== false && promotion.title);
 
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><LotFacts item={item} /><InternalMenu item={item} hasGallery={gallery.length > 0} hasPlans={hasPlans} hasVisual={hasVisual} hasLocation={hasLocation} hasProgress={hasProgress} hasLotsInfo={!!item.lots_info_url} /><Features items={item.features || []} /><Promotions items={promotions} /><Gallery item={item} /><Plans item={item} /><VisualSection image={item.about_media || item.promotion_media} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><About item={item} image={image} /><InternalMenu item={item} hasGallery={gallery.length > 0} hasPlans={hasPlans} hasVisual={hasVisual} hasLocation={hasLocation} hasProgress={hasProgress} hasLotsInfo={!!item.lots_info_url} /><LotFacts item={item} /><Features items={item.features || []} /><Promotions items={promotions} /><Gallery item={item} /><Plans item={item} /><VisualSection image={item.about_media || item.promotion_media} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section></PublicLayout>;
 }
-
 
