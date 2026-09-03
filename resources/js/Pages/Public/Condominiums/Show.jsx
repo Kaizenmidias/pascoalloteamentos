@@ -63,7 +63,10 @@ const factIcons = {
 };
 
 function SummaryFacts({ items = [] }) {
-    const facts = items.filter((item) => item?.label?.trim() && item?.value?.trim()).slice(0, 4);
+    const facts = items
+        .filter((item) => item?.label?.trim() && item?.value?.trim())
+        .filter((item) => item.label.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR') !== 'descricao')
+        .slice(0, 4);
     if (!facts.length) return null;
     return <SectionContainer className="pb-14 tablet:pb-16"><div className="grid gap-[10px] overflow-hidden rounded-xl bg-white p-3 shadow-[0_12px_32px_rgba(17,17,17,.1)] tablet:grid-cols-2 desktop:grid-cols-4">{facts.map((fact) => <article key={`${fact.label}-${fact.value}`} className="flex min-h-24 items-center gap-4 rounded-lg border border-line px-5 py-4"><svg viewBox="0 0 24 24" aria-hidden="true" className="size-8 shrink-0 fill-none stroke-brand stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round"><path d={factIcons[fact.icon] || factIcons.building} /></svg><div><span className="block text-[.65rem] uppercase text-muted">{fact.label}</span><strong className="mt-1 block text-lg font-medium text-brand">{fact.value}</strong></div></article>)}</div></SectionContainer>;
 }
