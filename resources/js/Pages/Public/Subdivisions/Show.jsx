@@ -78,7 +78,7 @@ function Features({ items = [] }) {
     return <section id="diferenciais" className="bg-surface py-14 tablet:py-16"><SectionContainer><div className="text-center"><Eyebrow>Diferenciais</Eyebrow><Title>Tudo o que você precisa em um só lugar</Title></div><div className="mt-8 grid grid-cols-2 gap-3 tablet:grid-cols-4 desktop:grid-cols-6">{items.map((feature) => <article key={feature.id} className="grid min-h-28 place-items-center rounded-xl bg-white p-4 text-center shadow-[0_5px_18px_rgba(17,17,17,.05)]"><div><FeatureIcon feature={feature} className="mx-auto mb-3 size-9" /><h3 className="text-xs font-normal leading-5 text-ink">{feature.name}</h3></div></article>)}</div></SectionContainer></section>;
 }
 
-function InternalMenu({ item, hasGallery, hasPlans, hasVisual, hasLocation, hasProgress, hasLotsInfo }) {
+function InternalMenu({ item, hasGallery, hasPlans, hasVisual, hasLocation, hasProgress, hasLotsInfo, hasFacts }) {
     const links = [
         ['sobre', 'Sobre', !!(item.about_title || item.about_text)],
         ['diferenciais', 'Diferenciais', Array.isArray(item.features) && item.features.length > 0],
@@ -92,7 +92,7 @@ function InternalMenu({ item, hasGallery, hasPlans, hasVisual, hasLocation, hasP
 
     if (!links.length) return null;
 
-    return <SectionContainer className="relative z-30 -mt-12"><nav aria-label="Seções do loteamento" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label]) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><QuickLinkIcon id={id} />{label}</span></a>)}</nav></SectionContainer>;
+    return <SectionContainer className={`relative z-30 ${hasFacts ? 'mt-8' : '-mt-12'}`}><nav aria-label="Seções do loteamento" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label]) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><QuickLinkIcon id={id} />{label}</span></a>)}</nav></SectionContainer>;
 }
 
 const money = (value) => value ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : null;
@@ -148,7 +148,8 @@ export default function Show({ item, globalWhatsapp }) {
     const hasProgress = (item.construction_stages || []).some((stage) => stage?.is_public !== false) || (item.construction_progress_updates || item.constructionProgressUpdates || []).length > 0;
     const hasLocation = !!(item.address || item.latitude || item.longitude);
     const hasVisual = !!(item.about_media || item.promotion_media);
+    const hasFacts = [item.total_lots, item.available_lots, item.minimum_lot_area, item.maximum_lot_area].some(hasValue);
     const promotions = (item.promotions || []).filter((promotion) => promotion.is_active !== false && promotion.title);
 
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu item={item} hasGallery={gallery.length > 0} hasPlans={hasPlans} hasVisual={hasVisual} hasLocation={hasLocation} hasProgress={hasProgress} hasLotsInfo={!!item.lots_info_url} /><About item={item} image={image} /><Features items={item.features || []} /><Promotions items={promotions} /><Gallery item={item} /><Plans item={item} /><VisualSection image={item.about_media || item.promotion_media} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu item={item} hasGallery={gallery.length > 0} hasPlans={hasPlans} hasVisual={hasVisual} hasLocation={hasLocation} hasProgress={hasProgress} hasLotsInfo={!!item.lots_info_url} hasFacts={hasFacts} /><About item={item} image={image} /><Features items={item.features || []} /><Promotions items={promotions} /><Gallery item={item} /><Plans item={item} /><VisualSection image={item.about_media || item.promotion_media} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section></PublicLayout>;
 }

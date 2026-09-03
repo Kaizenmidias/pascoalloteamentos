@@ -72,10 +72,11 @@ function CircularStage({ item }) {
     const percentage = clamp(item?.progress_percent);
     const complete = percentage === 100;
     const status = complete ? 'Concluído' : percentage > 0 ? 'Em andamento' : 'Não iniciado';
+    const segments = Array.from({ length: 12 }, (_, index) => index);
     return <article className="w-28 shrink-0 text-center">
-        <div className="mx-auto grid size-24 place-items-center rounded-full" style={{ background: complete ? '#e6f4ea' : `conic-gradient(var(--color-brand, #8f1d2c) ${percentage * 3.6}deg, #eadfe1 0deg)` }}>
+        <div className="mx-auto grid size-24 place-items-center rounded-full" style={{ background: complete ? '#e6f4ea' : '#eadfe1' }}>
             <div className={`grid size-[4.9rem] place-items-center rounded-full ${complete ? 'bg-[#e6f4ea]' : 'bg-white'}`}>
-                {complete ? <svg viewBox="0 0 24 24" aria-label="Concluído" className="size-11 fill-none stroke-[#238636] stroke-[2.5]" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 4.5 4.5L19 7" /></svg> : <svg viewBox="0 0 24 24" aria-label="Em andamento" className="size-10 fill-none stroke-brand stroke-[2] motion-safe:animate-[spin_2.8s_linear_infinite] motion-reduce:animate-none" strokeLinecap="round"><path d="M12 3a9 9 0 1 1-6.36 2.64" strokeDasharray="2 3" /></svg>}
+                {complete ? <svg viewBox="0 0 24 24" aria-label="Concluído" className="size-11 fill-none stroke-[#238636] stroke-[2.5]" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 4.5 4.5L19 7" /></svg> : <svg viewBox="0 0 24 24" aria-label="Em andamento" className="size-10 motion-safe:animate-[spin_1.5s_linear_infinite] motion-reduce:animate-none">{segments.map((index) => <line key={index} x1="12" y1="3" x2="12" y2="6" className="stroke-brand" strokeWidth="1.8" strokeLinecap="round" opacity={0.25 + ((index + 1) / segments.length) * 0.75} transform={`rotate(${index * 30} 12 12)`} />)}</svg>}
             </div>
         </div>
         <h3 className="mt-3 text-xs font-medium leading-4 text-ink">{item?.name || 'Etapa da obra'}</h3>
