@@ -66,11 +66,11 @@ function LotFacts({ item }) {
     const facts = [
         ['Total de lotes', item.total_lots, 'M4 6h9M4 12h9M4 18h9M17 5h3v6h-3m0 8h3m-3-3h3'],
         ['Lotes disponíveis', item.available_lots, 'm4 6 2 2 4-5M4 13l2 2 4-5m3-4h7m-7 7h7m-7 7h7'],
-        ['Área mínima', item.minimum_lot_area && Number(item.minimum_lot_area).toLocaleString('pt-BR'), 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0-14Zm5 12 4 4M3 8V3h5M14 3h5v5'],
-        ['Área máxima', item.maximum_lot_area && Number(item.maximum_lot_area).toLocaleString('pt-BR'), 'M10 4a6 6 0 1 0 0 12 6 6 0 0 0-12Zm4 10 6 6m-10-9V7m-2 2h4M2 8V3h5'],
+        ['Área mínima', item.minimum_lot_area && Number(item.minimum_lot_area).toLocaleString('pt-BR'), 'M9 4H4v5M15 4h5v5M20 15v5h-5M9 20H4v-5'],
+        ['Área máxima', item.maximum_lot_area && Number(item.maximum_lot_area).toLocaleString('pt-BR'), 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5'],
     ].filter(([, value]) => hasValue(value));
     if (!facts.length) return null;
-    return <SectionContainer className="mt-8"><div className="grid gap-[10px] rounded-xl bg-white p-3 shadow-[0_12px_32px_rgba(17,17,17,.1)] tablet:grid-cols-2 desktop:grid-cols-4">{facts.map(([label, value, path]) => <article key={label} className="flex min-h-24 items-center gap-4 rounded-lg border border-line px-5 py-4"><svg viewBox="0 0 24 24" className="size-8 shrink-0 fill-none stroke-brand stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg><div><span className="block text-[.65rem] uppercase text-muted">{label}</span><strong className="mt-1 block text-lg font-medium text-brand">{value}</strong></div></article>)}</div></SectionContainer>;
+    return <SectionContainer className="mt-8 mb-[40px]"><div className="grid gap-[10px] rounded-xl bg-white p-3 shadow-[0_12px_32px_rgba(17,17,17,.1)] tablet:grid-cols-2 desktop:grid-cols-4">{facts.map(([label, value, path]) => <article key={label} className="flex min-h-24 items-center gap-4 rounded-lg border border-line px-5 py-4"><svg viewBox="0 0 24 24" className="size-8 shrink-0 fill-none stroke-brand stroke-[1.5]" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg><div><span className="block text-[.65rem] uppercase text-muted">{label}</span><strong className="mt-1 block text-lg font-medium text-brand">{value}</strong></div></article>)}</div></SectionContainer>;
 }
 function About({ item, image }) {
     if (!item.about_title && !item.about_text) return null;
