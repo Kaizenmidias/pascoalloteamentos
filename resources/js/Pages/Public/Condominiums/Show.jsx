@@ -40,8 +40,18 @@ function InternalMenu() {
     return <SectionContainer className="relative z-30 -mt-12"><nav aria-label="Secoes do condominio" className="flex min-h-24 overflow-x-auto rounded-xl bg-white px-4 shadow-[0_10px_28px_rgba(0,0,0,.1)] [scrollbar-width:none]">{links.map(([id, label], index) => <a key={id} href={`#${id}`} className="grid min-w-28 flex-1 place-items-center border-r border-line px-3 py-5 text-center text-[.62rem] font-normal text-muted transition hover:text-brand last:border-r-0"><span><svg viewBox="0 0 24 24" aria-hidden="true" className="mx-auto mb-2 size-6 fill-none stroke-brand stroke-[1.35]" strokeLinecap="round" strokeLinejoin="round"><path d={paths[index]} /></svg>{label}</span></a>)}</nav></SectionContainer>;
 }
 
+function hasRealText(value) {
+    if (value == null) return false;
+    const text = String(value)
+        .replace(/<br\s*\/?\s*>/gi, ' ')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;|&#160;/gi, ' ')
+        .trim();
+    return text.length > 0;
+}
+
 function AboutContent({ item, image }) {
-    if (!item.about_title && !item.about_text) return null;
+    if (!hasRealText(item.about_text)) return null;
     return <section id="sobre" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.88fr_1.12fr] tablet:items-center"><div><Eyebrow>Sobre o empreendimento</Eyebrow><SectionTitle>{item.about_title}</SectionTitle>{item.about_text && <p className="mt-5 whitespace-pre-line text-sm font-light leading-[1.75] text-muted">{item.about_text}</p>}</div>{image && <img src={image.url} alt={image.alt_text || item.about_title || item.title} className="aspect-[1.45/1] w-full rounded-xl object-cover" />}</SectionContainer></section>;
 }
 
