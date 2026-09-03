@@ -20,12 +20,6 @@ const titleFor = (entityType) => (entityType === 'subdivision' ? 'Loteamentos' :
 
 const listDocuments = (documents = []) => documents.filter((document) => document.media_asset?.url || document.url || document.file_url);
 
-const introTitleFor = (entityType, item) => {
-    if (entityType === 'property') return 'Detalhes do imóvel';
-    if (entityType === 'condominium') return item.about_title || 'Apresentação do condomínio';
-    return item.about_title || 'Apresentação do loteamento';
-};
-
 const featureTitleFor = (entityType) => {
     if (entityType === 'property') return 'Características que valorizam o imóvel';
     if (entityType === 'condominium') return 'Infraestrutura e diferenciais do condomínio';
@@ -39,6 +33,15 @@ const plansTitleFor = (entityType) => {
 };
 
 const progressTitleFor = () => 'Acompanhe nosso projeto em andamento';
+
+const hasRealText = (value) => {
+    if (value == null) return false;
+    return String(value)
+        .replace(/<br\s*\/?\s*>/gi, ' ')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;|&#160;/gi, ' ')
+        .trim().length > 0;
+};
 
 export default function EntityDetail({ item, entityType, priceKey }) {
     const media = item.media_assets || [];
@@ -165,16 +168,16 @@ export default function EntityDetail({ item, entityType, priceKey }) {
                 </Container>
             ) : (
                 <>
-                    <section className="py-[var(--section-space)]">
+                    {(entityType !== 'condominium' || hasRealText(item.about_text)) && <section className="py-[var(--section-space)]">
                         <Container className="grid gap-12 desktop:grid-cols-2 desktop:items-center">
                             <div>
                                 <p className="eyebrow">Sobre o empreendimento</p>
-                                <h2 className="section-title mt-3">{introTitleFor(entityType, item)}</h2>
-                                <p className="mt-6 whitespace-pre-line text-base font-light leading-[1.7] text-muted desktop:text-lg">{item.about_text || item.description}</p>
+                                <h2 className="section-title mt-3">{entityType === 'condominium' ? item.about_title : (item.about_title || `Apresentação do ${entityType === 'subdivision' ? 'loteamento' : 'imóvel'}`)}</h2>
+                                <p className="mt-6 whitespace-pre-line text-base font-light leading-[1.7] text-muted desktop:text-lg">{entityType === 'condominium' ? item.about_text : (item.about_text || item.description)}</p>
                             </div>
                             <img src={media[1]?.url || galleryItems[0]?.url} alt="" className="aspect-[16/10] w-full rounded-card object-cover" />
                         </Container>
-                    </section>
+                    </section>}
                     {item.features?.length > 0 && (
                         <section className="pb-[var(--section-space)]">
                             <Container>
