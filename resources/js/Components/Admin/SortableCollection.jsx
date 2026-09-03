@@ -2,8 +2,8 @@ import { useState } from 'react';
 
 export default function SortableCollection({ items = [], onChange, renderItem, getKey = (item, index) => item.id || index, onRemove, label = 'item', gridClass = 'space-y-4', itemClass = '' }) {
     const [dragging, setDragging] = useState(null);
-    const navButtonClass = 'inline-flex size-6 items-center justify-center rounded-full text-sm text-muted transition-colors hover:bg-line hover:text-ink disabled:cursor-not-allowed disabled:opacity-30';
-    const removeButtonClass = 'grid size-6 place-items-center rounded-full bg-brand text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60';
+    const navButtonClass = 'inline-flex size-6 cursor-pointer items-center justify-center rounded-full text-sm text-muted transition-colors hover:bg-line hover:text-ink disabled:cursor-not-allowed disabled:opacity-30';
+    const removeButtonClass = 'grid size-6 cursor-pointer place-items-center rounded-full bg-brand text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60';
     const move = (from, to) => {
         if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) return;
         const copy = [...items];
