@@ -4,6 +4,8 @@ import SortableCollection from './SortableCollection';
 
 const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
 const allowedExtensions = [...imageExtensions, 'mp4', 'mov'];
+const imageAccept = 'image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif';
+const mediaAccept = `${imageAccept},video/mp4,video/quicktime,.mp4,.mov`;
 const maxItemsFallback = 50;
 const xsrfToken = () => {
     const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
@@ -163,7 +165,7 @@ export default function AsyncMediaUploader({
         >
             <span className="text-sm font-medium text-brand">{dragActive ? 'Solte os arquivos aqui' : 'Arraste ou clique para enviar'}</span>
             <span className="mt-1 block text-[.65rem] text-muted">{singleImage ? 'JPG, PNG, WebP, HEIC ou HEIF.' : 'JPG, PNG, WebP, HEIC, HEIF, MP4 ou MOV.'} Limite de {Math.round(maxBytes / 1024 / 1024)} MB por arquivo{singleImage ? '.' : ' e até ' + maxItems + ' itens.'}</span>
-            <input type="file" multiple={!singleImage} accept={singleImage ? '.jpg,.jpeg,.png,.webp,.heic,.heif' : '.jpg,.jpeg,.png,.webp,.heic,.heif,.mp4,.mov'} className="sr-only" onChange={(event) => { selectFiles(Array.from(event.target.files || [])); event.target.value = ''; }} />
+            <input type="file" multiple={!singleImage} accept={singleImage ? imageAccept : mediaAccept} className="sr-only" onChange={(event) => { selectFiles(Array.from(event.target.files || [])); event.target.value = ''; }} />
         </label>
         {tasks.length > 0 && <div className="mt-4 space-y-3">{tasks.map((task) => <div key={task.key} className="rounded-lg bg-surface p-3 text-xs"><div className="flex justify-between gap-3"><span className="truncate">{task.name}</span><span className={task.error ? 'text-red-700' : 'text-muted'}>{task.status}</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line"><div className="h-full bg-brand transition-[width]" style={{ width: `${task.progress}%` }} /></div>{task.error && <p className="mt-2 text-red-700">{task.error}</p>}</div>)}</div>}
         {ordered.length > 0 && (
@@ -185,7 +187,7 @@ export default function AsyncMediaUploader({
                             </div>
                             <div className="flex min-h-10 items-center justify-between gap-1 p-2 text-[.65rem]">
                                 <span className="truncate text-muted">{video ? 'Vídeo' : 'Foto'} #{String(index + 1).padStart(2, '0')}</span>
-                                {!singleImage && !video && <button type="button" onClick={() => setData('featured_media_id', asset.id)} className={String(data.featured_media_id) === String(asset.id) ? 'font-medium text-brand' : 'text-muted'}>{String(data.featured_media_id) === String(asset.id) ? 'Capa' : 'Capa?'}</button>}
+                                {!singleImage && !video && <button type="button" onClick={() => setData('featured_media_id', asset.id)} className={`rounded px-2 py-1 font-medium transition-colors hover:bg-line ${String(data.featured_media_id) === String(asset.id) ? 'cursor-default text-brand' : 'cursor-pointer text-muted hover:text-ink'}`}>{String(data.featured_media_id) === String(asset.id) ? 'Capa' : 'Capa?'}</button>}
                             </div>
                         </>
                     );
