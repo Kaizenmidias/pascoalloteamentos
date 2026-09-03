@@ -42,6 +42,7 @@ function InternalMenu() {
 
 function hasRealText(value) {
     if (value == null) return false;
+    if (typeof value !== 'string') return false;
     const text = String(value)
         .replace(/<br\s*\/?\s*>/gi, ' ')
         .replace(/<[^>]*>/g, ' ')
@@ -51,8 +52,10 @@ function hasRealText(value) {
 }
 
 function AboutContent({ item, image }) {
-    if (!hasRealText(item.about_text)) return null;
-    return <section id="sobre" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.88fr_1.12fr] tablet:items-center"><div><Eyebrow>Sobre o empreendimento</Eyebrow><SectionTitle>{item.about_title}</SectionTitle>{item.about_text && <p className="mt-5 whitespace-pre-line text-sm font-light leading-[1.75] text-muted">{item.about_text}</p>}</div>{image && <img src={image.url} alt={image.alt_text || item.about_title || item.title} className="aspect-[1.45/1] w-full rounded-xl object-cover" />}</SectionContainer></section>;
+    const aboutTitle = item.about_title;
+    const aboutText = item.about_text;
+    if (!hasRealText(aboutTitle) && !hasRealText(aboutText)) return null;
+    return <section id="sobre" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer className="grid gap-10 tablet:grid-cols-[.88fr_1.12fr] tablet:items-center"><div><Eyebrow>Sobre o empreendimento</Eyebrow>{hasRealText(aboutTitle) && <SectionTitle>{aboutTitle}</SectionTitle>}{hasRealText(aboutText) && <p className="mt-5 whitespace-pre-line text-sm font-light leading-[1.75] text-muted">{aboutText}</p>}</div>{image && <img src={image.url} alt={image.alt_text || aboutTitle || 'Sobre o empreendimento'} className="aspect-[1.45/1] w-full rounded-xl object-cover" />}</SectionContainer></section>;
 }
 
 const factIcons = {
