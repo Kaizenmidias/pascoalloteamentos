@@ -38,7 +38,7 @@ const friendlyError = (key, message) => message?.startsWith('validation.')
     : message;
 
 export default function Form({ item, options }) {
-    const editing = Boolean(item);
+    const editing = Boolean(item?.id);
     const featuredImage = item?.media_assets?.find((asset) => asset.pivot?.is_featured);
     const { data, setData, transform, post, processing, errors } = useForm({
         _method: editing ? 'put' : undefined,

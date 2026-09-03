@@ -13,7 +13,7 @@ const numericFields = [['regular_price', 'PreÃ§o regular'], ['sale_price', 'PreÃ
 const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function Form({ item, options }) {
-    const editing = Boolean(item);
+    const editing = Boolean(item?.id);
     const legacyPlan = item?.floor_plans?.[0];
     const legacyPlanDocument = item?.documents?.find((document) => document.kind === 'property_plan') || item?.documents?.find((document) => document.media_asset?.mime_type === 'application/pdf');
     const { data, setData, transform, post, processing, errors } = useForm({

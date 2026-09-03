@@ -22,7 +22,7 @@ const summaryLimit = 400;
 const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function Form({ item, options }) {
-    const editing = Boolean(item);
+    const editing = Boolean(item?.id);
     const featuredImage = item?.media_assets?.find((asset) => asset.pivot?.is_featured);
     const { data, setData, post, processing, errors } = useForm({
         _method: editing ? 'put' : undefined,
