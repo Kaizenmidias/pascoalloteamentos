@@ -15,7 +15,6 @@ const text = {
     title: 'T\u00edtulo do condom\u00ednio',
     initialText: 'Breve resumo',
     section: 'Se\u00e7\u00e3o inicial',
-    description: 'Descri\u00e7\u00e3o',
     address: 'Endere\u00e7o',
     business: 'Tipo de neg\u00f3cio',
 };
@@ -80,7 +79,6 @@ export default function Form({ item, options }) {
                 <SelectField label={`Tipo de ${text.condominium}`} options={options.types} value={data.condominium_type_id} onChange={(event) => setData('condominium_type_id', event.target.value)} />
                 <SelectField label={text.business} options={options.businessTypes} value={data.business_type_id} onChange={(event) => setData('business_type_id', event.target.value)} />
                 <Field label={text.address} value={data.address} onChange={(event) => setData('address', event.target.value)} error={errors.address} />
-                <Field label={text.description} as="textarea" value={data.description} onChange={(event) => setData('description', event.target.value)} />
             </section>
 
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-3">
