@@ -33,7 +33,7 @@ return new class extends Migration
                         ->where(function ($query): void {
                             $query->where('kind', 'plans')
                                 ->orWhere('title', "Informa\u{00e7}\u{00f5}es dos lotes")
-                                ->orWhere('title', 'InformaÃ§Ãµes dos lotes');
+                                ->orWhere('title', 'Informações dos lotes');
                         })
                         ->orderBy('sort_order')
                         ->value('external_url');

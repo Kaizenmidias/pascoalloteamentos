@@ -102,12 +102,12 @@ class MediaAssetService
     private function storeConvertedHeic(UploadedFile $file, string $collection, string $disk): MediaAsset
     {
         if (! class_exists(\Imagick::class)) {
-            throw new RuntimeException('Upload HEIC requer a extensÃ£o PHP Imagick com suporte ao formato HEIC/HEIF.');
+            throw new RuntimeException('Upload HEIC requer a extensão PHP Imagick com suporte ao formato HEIC/HEIF.');
         }
 
         $temporary = tempnam(sys_get_temp_dir(), 'pascoal-heic-');
         if ($temporary === false) {
-            throw new RuntimeException('NÃ£o foi possÃ­vel criar o arquivo temporÃ¡rio para conversÃ£o HEIC.');
+            throw new RuntimeException('Não foi possível criar o arquivo temporário para conversão HEIC.');
         }
         try {
             $image = new \Imagick();
@@ -118,7 +118,7 @@ class MediaAssetService
             $image->setImageCompressionQuality((int) config('media.webp_quality', 85));
             $image->stripImage();
             if (! $image->writeImage($temporary)) {
-                throw new RuntimeException('NÃ£o foi possÃ­vel converter o arquivo HEIC para WebP.');
+                throw new RuntimeException('Não foi possível converter o arquivo HEIC para WebP.');
             }
             $image->clear();
 

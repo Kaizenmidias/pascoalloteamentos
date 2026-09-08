@@ -32,12 +32,12 @@ class CmsController extends Controller
     private const STRUCTURAL_PAGES = [
         ['title' => 'Home', 'slug' => 'home', 'template' => 'home', 'status' => 'published', 'path' => '/admin/pages/home', 'locked' => true],
         ['title' => 'Sobre nós', 'slug' => 'sobre-nos', 'template' => 'institutional', 'status' => 'published', 'path' => '/admin/pages/sobre-nos/edit', 'locked' => true],
-        ['title' => 'CondomÃƒÂ­nios', 'slug' => 'condominios', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/condominios/edit', 'locked' => true],
+        ['title' => 'Condomínios', 'slug' => 'condominios', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/condominios/edit', 'locked' => true],
         ['title' => 'Loteamentos', 'slug' => 'loteamentos', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/loteamentos/edit', 'locked' => true],
-        ['title' => 'ImÃƒÂ³veis', 'slug' => 'imoveis', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/imoveis/edit', 'locked' => true],
+        ['title' => 'Imóveis', 'slug' => 'imoveis', 'template' => 'listing', 'status' => 'published', 'path' => '/admin/pages/imoveis/edit', 'locked' => true],
         ['title' => 'Contato', 'slug' => 'contato', 'template' => 'contact', 'status' => 'published', 'path' => '/admin/pages/contato/edit', 'locked' => true],
-        ['title' => 'PolÃƒÂ­tica de Privacidade', 'slug' => 'politica-de-privacidade', 'template' => 'page', 'status' => 'published', 'path' => '/admin/pages/politica-de-privacidade/edit', 'locked' => false],
-    ];
+        ['title' => 'Política de Privacidade', 'slug' => 'politica-de-privacidade', 'template' => 'page', 'status' => 'published', 'path' => '/admin/pages/politica-de-privacidade/edit', 'locked' => false],
+];
 
     public function pages(): Response
     {
@@ -129,7 +129,7 @@ class CmsController extends Controller
         $page = new Page();
         $this->savePage($request, $page);
 
-        return redirect()->route('admin.pages.edit', $page)->with('success', 'PÃƒÂ¡gina criada.');
+        return redirect()->route('admin.pages.edit', $page)->with('success', 'Página criada.');
     }
 
     public function updatePage(Request $request, Page $page): RedirectResponse
@@ -140,18 +140,18 @@ class CmsController extends Controller
 
         $this->savePage($request, $page);
 
-        return back()->with('success', 'PÃƒÂ¡gina atualizada.');
+        return back()->with('success', 'Página atualizada.');
     }
 
     public function destroyPage(Page $page): RedirectResponse
     {
         if (in_array($page->slug, array_column(self::STRUCTURAL_PAGES, 'slug'), true)) {
-            return back()->with('error', 'Esta ÃƒÂ© uma pÃƒÂ¡gina estrutural e nÃƒÂ£o pode ser excluÃƒÂ­da.');
+            return back()->with('error', 'Esta é uma página estrutural e não pode ser excluída.');
         }
 
         $page->delete();
 
-        return back()->with('success', 'PÃƒÂ¡gina movida para a lixeira.');
+        return back()->with('success', 'Página movida para a lixeira.');
     }
 
     public function posts(): Response
@@ -343,7 +343,7 @@ class CmsController extends Controller
             SiteSetting::updateOrCreate(['key' => $key], ['group' => 'general', 'value' => $value, 'is_public' => true]);
         }
 
-        return back()->with('success', 'ConfiguraÃƒÂ§ÃƒÂµes salvas.');
+        return back()->with('success', 'Configurações salvas.');
     }
 
     public function homeNumbers(): Response
@@ -450,7 +450,7 @@ class CmsController extends Controller
             'is_public' => true,
         ]);
 
-        return back()->with('success', 'NÃƒÂºmeros da Home atualizados.');
+        return back()->with('success', 'Números da Home atualizados.');
     }
 
     public function integrations(): Response
@@ -473,7 +473,7 @@ class CmsController extends Controller
             SiteSetting::updateOrCreate(['key' => $key], ['group' => 'integrations', 'value' => $value, 'is_public' => false]);
         }
 
-        return back()->with('success', 'IntegraÃƒÂ§ÃƒÂµes atualizadas.');
+        return back()->with('success', 'Integrações atualizadas.');
     }
 
 
@@ -635,10 +635,10 @@ class CmsController extends Controller
     {
         return match ($slug) {
             'home' => [
-                ['type' => 'hero', 'data' => ['label' => 'InÃƒÂ­cio', 'title' => 'Encontre o lugar onde sua prÃƒÂ³xima histÃƒÂ³ria comeÃƒÂ§a.', 'subtitle' => 'Empreendimentos de alto padrÃƒÂ£o, condomÃƒÂ­nios e loteamentos planejados para viver melhor.', 'image' => '/reference-assets/hero-home.jpg']],
-                ['type' => 'filter', 'data' => ['label' => 'Filtro de Empreendimentos', 'title' => 'Encontre o empreendimento ideal', 'subtitle' => 'Use os filtros abaixo para refinar a busca.', 'content' => 'Cidades, tipos e status jÃƒÂ¡ vÃƒÂªm da base de empreendimentos.']],
-                ['type' => 'numbers', 'data' => ['label' => 'Nossos NÃƒÂºmeros', 'title' => 'Resultados que contam a nossa histÃƒÂ³ria', 'subtitle' => 'Indicadores institucionais da Pascoal.', 'content' => [['value' => '20+', 'title' => 'Anos de experiÃƒÂªncia', 'description' => 'de atuaÃƒÂ§ÃƒÂ£o no mercado.'], ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelÃƒÂªncia.'], ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presenÃƒÂ§a consolidada.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.']]]],
-                ['type' => 'differentials', 'data' => ['label' => 'Diferenciais', 'title' => 'ExcelÃƒÂªncia em cada detalhe.', 'subtitle' => 'Projetos exclusivos pensados para unir qualidade, valorizaÃƒÂ§ÃƒÂ£o e bem-estar em cada detalhe.', 'content' => [['title' => 'Arquitetura autoral', 'text' => 'Projetos exclusivos desenvolvidos para unir estÃƒÂ©tica, funcionalidade e conforto.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'LocalizaÃƒÂ§ÃƒÂµes estratÃƒÂ©gicas', 'text' => 'Empreendimentos em regiÃƒÂµes com alto potencial de valorizaÃƒÂ§ÃƒÂ£o.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Sustentabilidade', 'text' => 'PrÃƒÂ¡ticas conscientes e soluÃƒÂ§ÃƒÂµes inteligentes para reduzir impactos ambientais.', 'image' => '/reference-assets/blog-city.jpg']]]],
+                ['type' => 'hero', 'data' => ['label' => 'Início', 'title' => 'Encontre o lugar onde sua próxima história começa.', 'subtitle' => 'Empreendimentos de alto padrão, condomínios e loteamentos planejados para viver melhor.', 'image' => '/reference-assets/hero-home.jpg']],
+                ['type' => 'filter', 'data' => ['label' => 'Filtro de Empreendimentos', 'title' => 'Encontre o empreendimento ideal', 'subtitle' => 'Use os filtros abaixo para refinar a busca.', 'content' => 'Cidades, tipos e status já vêm da base de empreendimentos.']],
+                ['type' => 'numbers', 'data' => ['label' => 'Nossos Números', 'title' => 'Resultados que contam a nossa história', 'subtitle' => 'Indicadores institucionais da Pascoal.', 'content' => [['value' => '20+', 'title' => 'Anos de experiência', 'description' => 'de atuação no mercado.'], ['value' => '15+', 'title' => 'Empreendimentos', 'description' => 'entregues com excelência.'], ['value' => '2+', 'title' => 'Cidades', 'description' => 'com presença consolidada.'], ['value' => '2', 'title' => 'Distritos', 'description' => 'atendidos pela empresa.']]]],
+                ['type' => 'differentials', 'data' => ['label' => 'Diferenciais', 'title' => 'Excelência em cada detalhe.', 'subtitle' => 'Projetos exclusivos pensados para unir qualidade, valorização e bem-estar em cada detalhe.', 'content' => [['title' => 'Arquitetura autoral', 'text' => 'Projetos exclusivos desenvolvidos para unir estética, funcionalidade e conforto.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Localizações estratégicas', 'text' => 'Empreendimentos em regiões com alto potencial de valorização.', 'image' => '/reference-assets/blog-city.jpg'], ['title' => 'Sustentabilidade', 'text' => 'Práticas conscientes e soluções inteligentes para reduzir impactos ambientais.', 'image' => '/reference-assets/blog-city.jpg']]]],
             ],
             'sobre-nos' => [
                 ['type' => 'hero', 'data' => ['label' => 'Sobre nós', 'title' => 'Construindo cidades, realizando sonhos e deixando um legado para as próximas gerações.', 'subtitle' => 'Pascoal Loteamentos', 'image' => '/reference-assets/hero-home.jpg']],
@@ -652,14 +652,14 @@ class CmsController extends Controller
                 ['type' => 'cta', 'data' => ['title' => 'Vamos construir o próximo capítulo dessa história juntos.', 'content' => 'Se você procura um loteamento para morar, investir ou desenvolver seu patrimônio com segurança, conte com a experiência e a credibilidade da Pascoal Loteamentos.', 'button_label' => 'Conheça nossos empreendimentos', 'button_url' => '/imoveis']],
             ],
             'contato' => [
-                ['type' => 'hero', 'data' => ['label' => 'Contato', 'title' => 'Estamos prontos para ajudar vocÃƒÂª a encontrar o empreendimento ideal.', 'subtitle' => 'Fale com nossa equipe', 'content' => 'Nossa equipe estÃƒÂ¡ ÃƒÂ  disposiÃƒÂ§ÃƒÂ£o para esclarecer dÃƒÂºvidas, apresentar oportunidades e oferecer o suporte necessÃƒÂ¡rio.', 'image' => '/reference-assets/hero-contact.webp']],
-                ['type' => 'contact-data', 'data' => ['label' => 'Dados de contato', 'content' => [['EscritÃƒÂ³rio administrativo', "Av. Ministro Cirne Lima, nÃ‚Âº 3951\nJardim Coopagro\nToledo - PR\nCEP 85904-460"], ['Telefones', "Telefone Comercial\n(45) 3252-7023\n\nPlantÃƒÂ£o de Vendas\n(45) 9 9111-9653"], ['E-mail', 'contato@pascoalloteamentos.com.br']]]],
+                ['type' => 'hero', 'data' => ['label' => 'Contato', 'title' => 'Estamos prontos para ajudar você a encontrar o empreendimento ideal.', 'subtitle' => 'Fale com nossa equipe', 'content' => 'Nossa equipe está à disposição para esclarecer dúvidas, apresentar oportunidades e oferecer o suporte necessário.', 'image' => '/reference-assets/hero-contact.webp']],
+                ['type' => 'contact-data', 'data' => ['label' => 'Dados de contato', 'content' => [['Escritório administrativo', "Av. Ministro Cirne Lima, nº 3951\nJardim Coopagro\nToledo - PR\nCEP 85904-460"], ['Telefones', "Telefone Comercial\n(45) 3252-7023\n\nPlantão de Vendas\n(45) 9 9111-9653"], ['E-mail', 'contato@pascoalloteamentos.com.br']]]],
                 ['type' => 'contact-form', 'data' => ['label' => 'Formulário', 'title' => 'Fale com Nossa Equipe', 'subtitle' => 'Estamos disponíveis para atender você.', 'content' => 'Preencha o formulário abaixo e nossa equipe entrará em contato o mais breve possível para esclarecer suas dúvidas ou apresentar as melhores oportunidades disponíveis.', 'button_label' => 'Enviar mensagem', 'recipient_email' => 'contato@pascoalloteamentos.com.br']],
                 ['type' => 'social', 'data' => ['label' => 'Redes sociais', 'content' => [['Instagram', SocialLinks::DEFAULTS['instagram_url']], ['Facebook', SocialLinks::DEFAULTS['facebook_url']], ['YouTube', SocialLinks::DEFAULTS['youtube_url']]]]],
             ],
             default => in_array($slug, ['condominios', 'loteamentos', 'imoveis'], true) ? [
-                ['type' => 'hero', 'data' => ['label' => ucfirst(str_replace('-', ' ', $slug)), 'title' => 'ConteÃƒÂºdo da listagem', 'subtitle' => 'Texto introdutÃƒÂ³rio da pÃƒÂ¡gina.', 'content' => 'Use esta ÃƒÂ¡rea para editar o cabeÃƒÂ§alho e o texto de apresentaÃƒÂ§ÃƒÂ£o.', 'image' => '/reference-assets/hero-home.jpg']],
-                ['type' => 'filter', 'data' => ['label' => 'Filtro', 'title' => 'Filtrar empreendimentos', 'subtitle' => 'Ajuste apenas textos auxiliares e mensagens.', 'content' => 'As opÃƒÂ§ÃƒÂµes de filtro continuam vindo da base de dados.']],
+                ['type' => 'hero', 'data' => ['label' => ucfirst(str_replace('-', ' ', $slug)), 'title' => 'Conteúdo da listagem', 'subtitle' => 'Texto introdutório da página.', 'content' => 'Use esta área para editar o cabeçalho e o texto de apresentação.', 'image' => '/reference-assets/hero-home.jpg']],
+                ['type' => 'filter', 'data' => ['label' => 'Filtro', 'title' => 'Filtrar empreendimentos', 'subtitle' => 'Ajuste apenas textos auxiliares e mensagens.', 'content' => 'As opções de filtro continuam vindo da base de dados.']],
             ] : [],
         };
     }

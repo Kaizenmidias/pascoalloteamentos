@@ -63,34 +63,34 @@ class StoreSubdivisionRequest extends FormRequest
         return $rules;
     }
 
-    public function messages(): array
-    {
-        return [
-            'required' => 'O campo :attribute Ã© obrigatÃ³rio.',
-            'exists' => 'O valor selecionado para :attribute Ã© invÃ¡lido.',
-            'lots_info_url.url' => 'Informe um link vÃ¡lido para as informaÃ§Ãµes dos lotes.',
-        ];
-    }
+public function messages(): array
+{
+    return [
+        'required' => 'O campo :attribute é obrigatório.',
+        'exists' => 'O valor selecionado para :attribute é inválido.',
+        'lots_info_url.url' => 'Informe um link válido para as informações dos lotes.',
+    ];
+}
 
-    public function attributes(): array
-    {
-        return [
-            'title' => 'TÃ­tulo',
-            'slug' => 'Slug',
-            'reference_code' => 'CÃ³digo de referÃªncia',
-            'subdivision_type_id' => 'Tipo de loteamento',
-            'development_status_id' => 'Status do empreendimento',
-            'business_type_id' => 'Tipo de negÃ³cio',
-            'city_id' => 'Cidade',
-            'summary' => 'Breve resumo',
-            'lots_info_url' => 'Link das informacoes dos lotes',
-            'address' => 'EndereÃ§o',
-            'postal_code' => 'CEP',
-            'expected_delivery_date' => 'Data prevista de entrega',
-            'status' => 'Status de publicaÃ§Ã£o',
-            'promotions.*.title' => 'TÃ­tulo da promoÃ§Ã£o',
-            'construction_stages.*.name' => 'Nome da etapa',
-            'construction_stages.*.progress_percent' => 'Percentual da etapa',
+public function attributes(): array
+{
+    return [
+        'title' => 'Título',
+        'slug' => 'Slug',
+        'reference_code' => 'Código de referência',
+        'subdivision_type_id' => 'Tipo de loteamento',
+        'development_status_id' => 'Status do empreendimento',
+        'business_type_id' => 'Tipo de negócio',
+        'city_id' => 'Cidade',
+        'summary' => 'Breve resumo',
+        'lots_info_url' => 'Link das informações dos lotes',
+        'address' => 'Endereço',
+        'postal_code' => 'CEP',
+        'expected_delivery_date' => 'Data prevista de entrega',
+        'status' => 'Status de publicação',
+        'promotions.*.title' => 'Título da promoção',
+        'construction_stages.*.name' => 'Nome da etapa',
+        'construction_stages.*.progress_percent' => 'Percentual da etapa',
         ];
     }
 }
