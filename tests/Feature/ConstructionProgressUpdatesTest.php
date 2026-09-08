@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Condominium;
 use App\Models\MediaAsset;
 use App\Models\Subdivision;
+use App\Services\Admin\RealEstateContentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -55,6 +56,24 @@ class ConstructionProgressUpdatesTest extends TestCase
             $this->assertSame('2026-11-01', $updates->first()->progress_date->toDateString());
             $this->assertSame([$second->id, $first->id], $newer->fresh()->mediaAssets->pluck('id')->all());
             $this->assertSame($older->id, $updates->last()->id);
+        }
+    }
+
+    public function test_saving_a_period_without_id_reuses_the_existing_date_for_the_same_entity(): void
+    {
+        foreach ([
+            Subdivision::create(['title' => 'Jardim Horizonte', 'slug' => 'jardim-horizonte']),
+            Condominium::create(['title' => 'Residencial Horizonte', 'slug' => 'residencial-horizonte']),
+        ] as $entity) {
+            $existing = $entity->constructionProgressUpdates()->create(['progress_date' => '2024-04-01']);
+
+            app(RealEstateContentService::class)->save($entity, [
+                'progress_updates' => [['progress_date' => '2024-04-01']],
+            ]);
+
+            $fresh = $entity->fresh();
+            $this->assertSame(1, $fresh->constructionProgressUpdates()->count());
+            $this->assertTrue($fresh->constructionProgressUpdates()->whereKey($existing->id)->exists());
         }
     }
 

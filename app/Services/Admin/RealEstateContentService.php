@@ -114,7 +114,10 @@ class RealEstateContentService
                     $mediaOrder = Arr::pull($row, 'media_order', []);
                     $update = ! empty($row['id'])
                         ? $item->constructionProgressUpdates()->findOrFail($row['id'])
-                        : $item->constructionProgressUpdates()->create(['progress_date' => $row['progress_date']]);
+                        : $item->constructionProgressUpdates()->firstOrNew(['progress_date' => $row['progress_date']]);
+                    if (! $update->exists) {
+                        $update->save();
+                    }
                     $update->update(['progress_date' => $row['progress_date']]);
                     $keptUpdateIds[] = $update->id;
 
