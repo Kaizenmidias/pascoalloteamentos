@@ -90,7 +90,7 @@ export default function Form({ item, options }) {
                     <Field label="Longitude" type="number" step="any" value={data.longitude} onChange={(e) => setData('longitude', e.target.value)} />
                 </section>
                 <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-3">
-                    {numericFields.map(([key, label]) => <Field key={key} label={label} type="number" step="0.01" min="0" value={data[key]} onChange={(e) => setData(key, e.target.value)} error={errors[key]} />)}
+                    {numericFields.filter(([key]) => !['condominium_fee', 'iptu'].includes(key)).map(([key, label]) => <Field key={key} label={label} type="number" step="0.01" min="0" value={data[key]} onChange={(e) => setData(key, e.target.value)} error={errors[key]} />)}
                 </section>
                 <section className="rounded-xl border border-line bg-white p-6 shadow-sm">
                     <FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} />

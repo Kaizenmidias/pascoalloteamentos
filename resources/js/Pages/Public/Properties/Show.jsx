@@ -130,10 +130,6 @@ export default function Show({ item, similar = [] }) {
                             <div className="mt-4 space-y-4 rounded-xl border border-line p-4">
                                 {item.price_on_request ? <><span className="text-xs font-medium uppercase">Valor</span><strong className="block text-3xl font-medium text-brand">Sob consulta</strong></> : <>{showSale && <div>{item.regular_price && item.sale_price && Number(item.regular_price) !== Number(item.sale_price) && <p className="text-lg text-muted line-through">{money(item.regular_price)}</p>}<span className="text-xs font-medium uppercase">Venda</span><strong className="block text-3xl font-medium text-brand">{money(salePrice)}</strong></div>}{showRent && <div><span className="text-xs font-medium uppercase">Locação</span><strong className="block text-3xl font-medium text-brand">{money(item.rent_price)} <small className="text-sm font-normal">/ mês</small></strong></div>}{!showSale && !showRent && <strong className="block text-2xl font-medium text-brand">Sob consulta</strong>}</>}
                             </div>
-                            <div className="mt-4 space-y-2 border-t border-line pt-4">
-                                <SidebarRow label="Condomínio" value={moneyOrUnavailable(item.condominium_fee)} />
-                                <SidebarRow label="IPTU" value={moneyOrUnavailable(item.iptu)} />
-                            </div>
                         </div>
 
                         <section className="space-y-4">
