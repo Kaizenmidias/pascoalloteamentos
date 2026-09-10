@@ -111,7 +111,7 @@ function Plans({ item }) {
     const media = plans.map((plan) => plan.media_asset && ({ ...plan.media_asset, alt_text: plan.media_asset.alt_text || plan.name })).filter(Boolean);
     if (!plans.length) return null;
     let mediaIndex = -1;
-    const header = <div className="w-full text-center"><Eyebrow>Plantas</Eyebrow><h2 className="mx-auto mt-3 text-[1.8rem] font-light leading-[1.08] tracking-[-.02em] text-ink tablet:text-[2.15rem] desktop:text-[2.35rem]">Conheça as plantas disponíveis</h2></div>;
+    const header = <div className="w-full text-center"><Eyebrow>Plantas</Eyebrow><h2 className="mx-auto mt-3 text-[1.8rem] font-light leading-[1.08] tracking-[-.02em] text-ink tablet:text-[2.15rem] desktop:text-[2.35rem]">{item.floor_plans_title || 'Conheça as plantas disponíveis'}</h2></div>;
     return <section id="plantas" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer><Carousel header={header} className={plans.length === 1 ? '[&_[class*="aspect-"]]:aspect-auto' : plans.length === 2 ? '[&_button]:hidden' : 'mt-1'} label="Plantas disponíveis" itemClassName={plans.length === 1 ? 'w-full' : 'w-full tablet:w-[calc((100%-1.25rem)/2)]'} paused={lightbox !== null} autoPlay={false} edgeControls={plans.length > 1}>{plans.map((plan) => { if (plan.media_asset) mediaIndex += 1; return <PlanCard key={plan.id} plan={plan} mediaIndex={mediaIndex} onOpen={setLightbox} single={plans.length === 1} />; })}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
