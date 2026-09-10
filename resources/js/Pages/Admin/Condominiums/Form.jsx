@@ -91,6 +91,10 @@ export default function Form({ item, options }) {
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Sobre o empreendimento</h2><p className="mt-1 text-sm text-muted">A imagem usada ser&aacute; automaticamente a imagem principal.</p></div><Field label={'T\u00edtulo'} value={data.about_title} onChange={(event) => setData('about_title', event.target.value)} /><Field label="Texto" as="textarea" value={data.about_text} onChange={(event) => setData('about_text', event.target.value)} /></section>
             <CondominiumSummaryFacts value={data.summary_facts} onChange={(rows) => setData('summary_facts', rows)} />
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
+            <section className="grid gap-5 rounded-card bg-white p-6 shadow-card">
+                <div><h2 className="text-lg font-medium text-ink">Seção de plantas</h2><p className="mt-1 text-sm text-muted">Personalize o título exibido acima das plantas no site.</p></div>
+                <Field label="Título da seção de plantas" value={data.floor_plans_title} onChange={(event) => setData('floor_plans_title', event.target.value)} error={errors.floor_plans_title} placeholder="Conheça as plantas disponíveis" />
+            </section>
             <ContentManager data={data} setData={setData} item={item} showGallery={false} showSpecialImages={false} showFaqs={false} showDocuments={false} showSeo={false} />
 
         </ProductFormLayout>
