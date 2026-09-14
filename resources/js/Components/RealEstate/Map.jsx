@@ -8,8 +8,8 @@ export default function Map({ latitude, longitude, address = '', title = 'Locali
     }
 
     const url = hasCoordinates
-        ? `https://maps.google.com/maps?q=${numericLatitude},${numericLongitude}&t=m&z=16&output=embed`
-        : `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=m&z=16&output=embed`;
+        ? `https://www.google.com/maps?q=${numericLatitude},${numericLongitude}&t=m&z=16&hl=pt-BR&output=embed`
+        : `https://www.google.com/maps?q=${encodeURIComponent(address)}&t=m&z=16&hl=pt-BR&output=embed`;
     const mapsQuery = hasCoordinates ? `${numericLatitude},${numericLongitude}` : address;
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`;
 
