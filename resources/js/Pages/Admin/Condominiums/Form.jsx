@@ -24,7 +24,7 @@ const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, ''
 export default function Form({ item, options }) {
     const editing = Boolean(item?.id);
     const featuredImage = item?.media_assets?.find((asset) => asset.pivot?.is_featured);
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, transform, post, processing, errors } = useForm({
         _method: editing ? 'put' : undefined,
         title: item?.title || '', slug: item?.slug || '', reference_code: item?.reference_code || '',
         condominium_type_id: item?.condominium_type_id || '', development_status_id: item?.development_status_id || '',
@@ -43,6 +43,7 @@ export default function Form({ item, options }) {
 
     const submit = (event) => {
         event.preventDefault();
+        transform((payload) => ({ ...payload, _method: editing ? 'put' : undefined }));
         post(editing ? `/admin/condominiums/${item.slug}` : '/admin/condominiums', { forceFormData: true });
     };
 

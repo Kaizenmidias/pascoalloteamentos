@@ -57,7 +57,7 @@ export default function Form({ item, options }) {
 
     const submit = (event) => {
         event.preventDefault();
-        transform(({ floor_plans, documents, construction_stages, faqs, floor_plans_support_text, about_image, promotion_image, featured_image, gallery_images, gallery_videos, gallery_video_urls, ...payload }) => payload);
+        transform(({ floor_plans, documents, construction_stages, faqs, floor_plans_support_text, about_image, promotion_image, featured_image, gallery_images, gallery_videos, gallery_video_urls, ...payload }) => ({ ...payload, _method: editing ? 'put' : undefined }));
         post(editing ? `/admin/properties/${item.slug}` : '/admin/properties', { forceFormData: true });
     };
 

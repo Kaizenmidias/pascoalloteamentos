@@ -85,6 +85,7 @@ export default function Form({ item, options }) {
             const { faqs, floor_plans, documents, description, ...cleanPayload } = payload;
             return cleanPayload;
         });
+        transform((payload) => ({ ...payload, _method: editing ? 'put' : undefined }));
         post(editing ? `/admin/subdivisions/${item.slug}` : '/admin/subdivisions', {
             forceFormData: true,
             preserveScroll: true,

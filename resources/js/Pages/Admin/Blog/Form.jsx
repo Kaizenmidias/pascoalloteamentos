@@ -8,8 +8,8 @@ import Button from '../../../Components/UI/Button';
 const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function Form({ item, categories }) {
-    const editing = Boolean(item);
-    const { data, setData, post, processing, errors, recentlySuccessful } = useForm({
+    const editing = Boolean(item?.id);
+    const { data, setData, transform, post, processing, errors, recentlySuccessful } = useForm({
         _method: editing ? 'put' : undefined,
         title: item?.title || '', slug: item?.slug || '', excerpt: item?.excerpt || '', content: item?.content || '',
         status: item?.status || 'draft', published_at: item?.published_at?.slice(0, 16) || '',
@@ -18,7 +18,7 @@ export default function Form({ item, categories }) {
         seo_title: item?.seo?.title || '', seo_description: item?.seo?.description || '',
     });
     const updateTitle = (value) => { const automatic = slugify(data.title); setData((current) => ({ ...current, title: value, slug: !current.slug || current.slug === automatic ? slugify(value) : current.slug })); };
-    const submit = (event) => { event.preventDefault(); post(editing ? `/admin/blog/posts/${item.slug}` : '/admin/blog/posts', { forceFormData: true, preserveScroll: true }); };
+    const submit = (event) => { event.preventDefault(); transform((payload) => ({ ...payload, _method: editing ? 'put' : undefined })); post(editing ? `/admin/blog/posts/${item.slug}` : '/admin/blog/posts', { forceFormData: true, preserveScroll: true }); };
 
     return <AdminLayout title={editing ? 'Editar postagem' : 'Nova postagem'}><form onSubmit={submit} className="mx-auto max-w-[1500px] space-y-5">
         {Object.keys(errors).length > 0 && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">Nao foi possivel salvar. Revise os campos destacados abaixo.</div>}

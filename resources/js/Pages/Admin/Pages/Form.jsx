@@ -168,7 +168,7 @@ const structuredSchemas = {
 export default function Form({ item }) {
     const { socialLinks = {} } = usePage().props;
     const serializedSocialLinks = JSON.stringify(socialProfiles.map(([label, key]) => [label, socialLinks[key]]), null, 2);
-    const editing = Boolean(item);
+    const editing = Boolean(item?.id);
     const schema = structuredSchemas[item?.slug] || null;
     const isStructured = structuredTemplates.has(item?.template) || Boolean(schema);
     const canAddSections = !schema;
