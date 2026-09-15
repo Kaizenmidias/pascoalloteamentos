@@ -33,6 +33,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'appName' => config('app.name'),
             'socialLinks' => SocialLinks::all(),
+            'whatsappNumber' => config('leads.whatsapp'),
             'mediaUpload' => [
                 'url' => config('media.upload_url') ?: null,
                 'maxKb' => config('media.max_upload_kb'),

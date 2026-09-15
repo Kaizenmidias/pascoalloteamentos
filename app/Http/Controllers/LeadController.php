@@ -8,6 +8,7 @@ use App\Mail\LeadSubmitted;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Jobs\SyncLeadToRdStation;
 
 class LeadController extends Controller
 {
@@ -21,6 +22,7 @@ class LeadController extends Controller
             default => ['contact', 'Contato', null],
         };
         $lead = Lead::create([...$data, 'metadata' => ['source_type' => $source[0], 'source_label' => $source[1], 'product_name' => $source[2]], 'consented_at' => now()]);
+        SyncLeadToRdStation::dispatch($lead->id);
 
         try {
             Mail::to(config('leads.mail_to'))->queue(new LeadSubmitted($lead));

@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'rdstation' => [
+        'api_key' => env('RD_STATION_API_KEY'),
+        'conversions_url' => env('RD_STATION_CONVERSIONS_URL', 'https://api.rd.services/platform/conversions'),
+    ],
+
 ];
