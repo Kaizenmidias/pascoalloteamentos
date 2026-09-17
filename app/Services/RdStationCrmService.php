@@ -2,54 +2,168 @@
 
 namespace App\Services;
 
+use App\Models\IntegrationCredential;
 use App\Models\Lead;
 use App\Models\SiteSetting;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class RdStationCrmService
 {
+    private const PROVIDER = 'rd_station_crm';
     private const BASE = 'https://api.rd.services/crm/v2/';
+    private const TOKEN_URL = 'https://api.rd.services/oauth2/token';
 
     public function authorizationUrl(): string
     {
-        return 'https://accounts.rdstation.com/oauth/authorize?'.http_build_query(['response_type' => 'code', 'client_id' => config('services.rdstation.client_id'), 'redirect_uri' => config('services.rdstation.redirect_uri')]);
+        return 'https://accounts.rdstation.com/oauth/authorize?'.http_build_query([
+            'response_type' => 'code',
+            'client_id' => config('services.rdstation.client_id'),
+            'redirect_uri' => config('services.rdstation.redirect_uri'),
+        ]);
     }
 
     public function exchangeCode(string $code): void
     {
-        $response = Http::asForm()->post('https://api.rd.services/oauth2/token', ['grant_type' => 'authorization_code', 'code' => $code, 'client_id' => config('services.rdstation.client_id'), 'client_secret' => config('services.rdstation.client_secret'), 'redirect_uri' => config('services.rdstation.redirect_uri')])->throw()->json();
+        $response = Http::asForm()->post(self::TOKEN_URL, [
+            'grant_type' => 'authorization_code',
+            'code' => $code,
+            'client_id' => config('services.rdstation.client_id'),
+            'client_secret' => config('services.rdstation.client_secret'),
+            'redirect_uri' => config('services.rdstation.redirect_uri'),
+        ])->throw()->json();
+
         $this->storeTokens($response);
     }
 
     public function sync(Lead $lead): void
     {
-        $token = $this->accessToken();
-        if (! $token) return;
-        $headers = ['Authorization' => 'Bearer '.$token];
-        $contact = null;
-        if ($lead->email) $contact = Http::withHeaders($headers)->get(self::BASE.'contacts', ['filter' => 'email:'.$lead->email])->throw()->json('data.0');
-        $contact ??= Http::withHeaders($headers)->asJson()->post(self::BASE.'contacts', ['data' => array_filter(['name' => $lead->name, 'email' => $lead->email, 'phone' => $lead->phone], fn ($v) => filled($v))])->throw()->json('data');
-        $metadata = is_array($lead->metadata) ? $lead->metadata : [];
-        $deal = ['name' => 'Lead Site - '.$lead->name.(! empty($metadata['product_name']) ? ' - '.$metadata['product_name'] : ''), 'status' => 'ongoing', 'contact_id' => $contact['id']];
-        if (config('services.rdstation.pipeline_id')) $deal['pipeline_id'] = config('services.rdstation.pipeline_id');
-        if (config('services.rdstation.stage_id')) $deal['stage_id'] = config('services.rdstation.stage_id');
-        Http::withHeaders($headers)->asJson()->post(self::BASE.'deals', ['data' => $deal])->throw();
+        Cache::lock('rd-station-lead-sync-'.$lead->id, 60)->block(10, fn () => $this->syncLead($lead));
     }
 
-    private function accessToken(): ?string
+    private function syncLead(Lead $lead): void
     {
-        $setting = SiteSetting::where('key', 'rdstation_crm_tokens')->first();
-        $tokens = $setting?->value ?: [];
-        if (! empty($tokens['expires_at']) && now()->lt($tokens['expires_at'])) return $tokens['access_token'] ?? null;
-        if (empty($tokens['refresh_token'])) return null;
-        $response = Http::asForm()->post('https://api.rd.services/oauth2/token', ['grant_type' => 'refresh_token', 'refresh_token' => $tokens['refresh_token'], 'client_id' => config('services.rdstation.client_id'), 'client_secret' => config('services.rdstation.client_secret')])->throw()->json();
-        $this->storeTokens($response);
-        return $response['access_token'] ?? null;
+        $lead->refresh();
+        if ($lead->rd_deal_id) return;
+
+        $lead->update(['rd_sync_status' => 'syncing']);
+        $token = $this->accessToken();
+        if (! $token) {
+            $lead->update(['rd_sync_status' => 'not_connected']);
+            return;
+        }
+
+        $contact = $this->requestWithRetry($token, 'get', 'contacts', [
+            'filter' => 'email:'.$lead->email,
+        ])->json('data.0');
+
+        if (! $contact) {
+            $contact = $this->requestWithRetry($token, 'post', 'contacts', [
+                'data' => array_filter([
+                    'name' => $lead->name,
+                    'email' => $lead->email,
+                    'phone' => $lead->phone,
+                ], fn ($value) => filled($value)),
+            ])->json('data');
+        }
+
+        $metadata = is_array($lead->metadata) ? $lead->metadata : [];
+        $deal = [
+            'name' => 'Lead Site #'.$lead->id.' - '.$lead->name.(! empty($metadata['product_name']) ? ' - '.$metadata['product_name'] : ''),
+            'status' => 'ongoing',
+            'contact_id' => $contact['id'],
+        ];
+        if (config('services.rdstation.stage_id')) {
+            $deal['stage_id'] = config('services.rdstation.stage_id');
+        }
+
+        $existingDeals = $this->requestWithRetry($token, 'get', 'deals', [
+            'filter' => 'contact_id:'.$contact['id'],
+        ])->json('data');
+        foreach (is_array($existingDeals) ? $existingDeals : [] as $candidate) {
+            if (($candidate['name'] ?? null) === $deal['name']) {
+                $lead->update([
+                    'rd_contact_id' => $contact['id'],
+                    'rd_deal_id' => $candidate['id'],
+                    'rd_sync_status' => 'synced',
+                ]);
+                return;
+            }
+        }
+
+        $remoteDeal = $this->requestWithRetry($token, 'post', 'deals', ['data' => $deal])->json('data');
+        $lead->update([
+            'rd_contact_id' => $contact['id'],
+            'rd_deal_id' => $remoteDeal['id'] ?? null,
+            'rd_sync_status' => ! empty($remoteDeal['id']) ? 'synced' : 'failed',
+        ]);
+    }
+
+    private function accessToken(bool $forceRefresh = false): ?string
+    {
+        $credential = IntegrationCredential::where('provider', self::PROVIDER)->first();
+        if (! $credential) {
+            $legacy = SiteSetting::where('key', 'rdstation_crm_tokens')->first()?->value ?: [];
+            if (empty($legacy['access_token']) && empty($legacy['refresh_token'])) return null;
+            $credential = IntegrationCredential::create([
+                'provider' => self::PROVIDER,
+                'access_token' => $legacy['access_token'] ?? null,
+                'refresh_token' => $legacy['refresh_token'] ?? null,
+                'expires_at' => $legacy['expires_at'] ?? null,
+            ]);
+        }
+
+        if (! $forceRefresh && $credential->access_token && $credential->expires_at?->isFuture()) {
+            return $credential->access_token;
+        }
+
+        return Cache::lock('rd-station-token-refresh', 30)->block(10, function () use ($credential, $forceRefresh) {
+            $credential->refresh();
+            if (! $forceRefresh && $credential->access_token && $credential->expires_at?->isFuture()) {
+                return $credential->access_token;
+            }
+            if (! $credential->refresh_token) {
+                return null;
+            }
+
+            $response = Http::asForm()->post(self::TOKEN_URL, [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $credential->refresh_token,
+                'client_id' => config('services.rdstation.client_id'),
+                'client_secret' => config('services.rdstation.client_secret'),
+            ])->throw()->json();
+
+            $this->storeTokens($response);
+            return $response['access_token'] ?? null;
+        });
+    }
+
+    private function requestWithRetry(string $token, string $method, string $path, array $payload): \Illuminate\Http\Client\Response
+    {
+        $request = Http::withToken($token);
+        $response = $method === 'get'
+            ? $request->get(self::BASE.$path, $payload)
+            : $request->asJson()->{$method}(self::BASE.$path, $payload);
+        if ($response->status() !== 401) {
+            return $response->throw();
+        }
+
+        $freshToken = $this->accessToken(true);
+        if (! $freshToken || $freshToken === $token) {
+            return $response->throw();
+        }
+
+        return $method === 'get'
+            ? Http::withToken($freshToken)->get(self::BASE.$path, $payload)->throw()
+            : Http::withToken($freshToken)->asJson()->{$method}(self::BASE.$path, $payload)->throw();
     }
 
     private function storeTokens(array $response): void
     {
-        SiteSetting::updateOrCreate(['key' => 'rdstation_crm_tokens'], ['group' => 'integrations', 'value' => ['access_token' => $response['access_token'], 'refresh_token' => $response['refresh_token'] ?? null, 'expires_at' => now()->addSeconds((int) ($response['expires_in'] ?? 7200) - 60)->toIso8601String()], 'is_public' => false]);
+        IntegrationCredential::updateOrCreate(['provider' => self::PROVIDER], [
+            'access_token' => $response['access_token'],
+            'refresh_token' => $response['refresh_token'] ?? null,
+            'expires_at' => now()->addSeconds(max(60, (int) ($response['expires_in'] ?? 7200) - 300)),
+        ]);
     }
 }
