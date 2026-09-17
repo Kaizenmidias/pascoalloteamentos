@@ -69,7 +69,7 @@ export default function Form({ item, options }) {
         commercial_purpose: item?.commercial_purpose || '', commercial_status: item?.commercial_status || '',
         regular_price: item?.regular_price || '', sale_price: item?.sale_price || '', minimum_lot_area: item?.minimum_lot_area || '',
         maximum_lot_area: item?.maximum_lot_area || '', total_lots: item?.total_lots || '', available_lots: item?.available_lots || '',
-        about_title: item?.about_title || '', about_text: item?.about_text || '', promotion_headline: item?.promotion_headline || '',
+        about_title: item?.about_title || '', about_text: item?.about_text || '', promotion_headline: item?.promotion_headline || '', visual_section_title: item?.visual_section_title || '',
         promotion_url: item?.promotion_url || '', expected_delivery_date: item?.expected_delivery_date ? String(item.expected_delivery_date).slice(0, 10) : '',
         status: item?.status || 'draft', featured: Boolean(item?.featured), price_on_request: Boolean(item?.price_on_request),
         feature_ids: item?.features?.map((feature) => feature.id) || [], promotions: item?.promotions || [], uploaded_media_ids: [],
@@ -155,7 +155,7 @@ export default function Form({ item, options }) {
 
             <section className="rounded-card bg-white p-6 shadow-card"><FeatureChoices features={options.features} selected={data.feature_ids} onChange={(ids) => setData('feature_ids', ids)} /></section>
             <PromotionManager rows={data.promotions} onChange={(rows) => setData('promotions', rows)} />
-            <ContentManager data={data} setData={setData} item={item} showGallery={false} showPlans={false} showSpecialImages={true} showFaqs={false} showDocuments={false} showSeo={false} />
+            <ContentManager data={data} setData={setData} item={item} showGallery={false} showPlans={false} showSpecialImages={true} showSectionTitle showFaqs={false} showDocuments={false} showSeo={false} />
 
         </ProductFormLayout>
     </AdminLayout>;
