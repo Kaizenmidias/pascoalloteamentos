@@ -7,6 +7,8 @@ use App\Models\Lead;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\RequestException;
 
 class RdStationCrmService
 {
@@ -43,6 +45,20 @@ class RdStationCrmService
         return (bool) ($credential?->access_token || $credential?->refresh_token);
     }
 
+    public function users(): array
+    {
+        $token = $this->accessToken();
+        if (! $token) return [];
+
+        return collect($this->requestWithRetry($token, 'get', 'users', [
+            'filter' => 'is:active:true is:visible:true',
+        ])->json('data') ?: [])->map(fn (array $user) => [
+            'id' => $user['id'] ?? null,
+            'name' => $user['name'] ?? null,
+            'email' => $user['email'] ?? null,
+        ])->values()->all();
+    }
+
     public function sync(Lead $lead): void
     {
         Cache::lock('rd-station-lead-sync-'.$lead->id, 60)->block(10, fn () => $this->syncLead($lead));
@@ -74,11 +90,22 @@ class RdStationCrmService
             ])->json('data');
         }
 
+        $ownerId = config('services.rdstation.owner_id');
+        if (! $ownerId) {
+            $lead->update(['rd_sync_status' => 'missing_owner']);
+            Log::warning('RD Station CRM deal skipped: owner is not configured.', [
+                'operation' => 'create_deal',
+                'lead_id' => $lead->id,
+            ]);
+            return;
+        }
+
         $metadata = is_array($lead->metadata) ? $lead->metadata : [];
         $deal = [
             'name' => 'Lead Site #'.$lead->id.' - '.$lead->name.(! empty($metadata['product_name']) ? ' - '.$metadata['product_name'] : ''),
             'status' => 'ongoing',
             'contact_id' => $contact['id'],
+            'owner_id' => $ownerId,
         ];
         if (config('services.rdstation.stage_id')) {
             $deal['stage_id'] = config('services.rdstation.stage_id');
@@ -98,7 +125,20 @@ class RdStationCrmService
             }
         }
 
-        $remoteDeal = $this->requestWithRetry($token, 'post', 'deals', ['data' => $deal])->json('data');
+        try {
+            $remoteDeal = $this->requestWithRetry($token, 'post', 'deals', ['data' => $deal])->json('data');
+        } catch (RequestException $exception) {
+            if ($exception->response?->status() !== 422) throw $exception;
+
+            $lead->update(['rd_sync_status' => 'failed_validation']);
+            Log::warning('RD Station CRM validation error.', [
+                'operation' => 'create_deal',
+                'lead_id' => $lead->id,
+                'status' => 422,
+                'errors' => $exception->response->json('errors'),
+            ]);
+            return;
+        }
         $lead->update([
             'rd_contact_id' => $contact['id'],
             'rd_deal_id' => $remoteDeal['id'] ?? null,
