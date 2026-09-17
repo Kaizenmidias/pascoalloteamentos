@@ -36,6 +36,13 @@ class RdStationCrmService
         $this->storeTokens($response);
     }
 
+    public function isConnected(): bool
+    {
+        $credential = IntegrationCredential::where('provider', self::PROVIDER)->first();
+
+        return (bool) ($credential?->access_token || $credential?->refresh_token);
+    }
+
     public function sync(Lead $lead): void
     {
         Cache::lock('rd-station-lead-sync-'.$lead->id, 60)->block(10, fn () => $this->syncLead($lead));

@@ -456,7 +456,10 @@ class CmsController extends Controller
 
     public function integrations(): Response
     {
-        return Inertia::render('Admin/Integrations', ['settings' => SiteSetting::where('group', 'integrations')->get()->pluck('value', 'key'), 'rdStationConnected' => SiteSetting::where('key', 'rdstation_crm_tokens')->exists()]);
+        return Inertia::render('Admin/Integrations', [
+            'settings' => SiteSetting::where('group', 'integrations')->get()->pluck('value', 'key'),
+            'rdStationConnected' => app(RdStationCrmService::class)->isConnected(),
+        ]);
     }
 
     public function connectRdStation(RdStationCrmService $rdStation)
