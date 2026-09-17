@@ -50,9 +50,7 @@ class RdStationCrmService
         $token = $this->accessToken();
         if (! $token) return [];
 
-        return collect($this->requestWithRetry($token, 'get', 'users', [
-            'filter' => 'is:active:true is:visible:true',
-        ])->json('data') ?: [])->map(fn (array $user) => [
+        return collect($this->requestWithRetry($token, 'get', 'users', [])->json('data') ?: [])->map(fn (array $user) => [
             'id' => $user['id'] ?? null,
             'name' => $user['name'] ?? null,
             'email' => $user['email'] ?? null,
