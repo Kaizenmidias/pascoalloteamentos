@@ -68,6 +68,8 @@ Route::middleware(['auth', 'can:access-admin'])->prefix('admin')->name('admin.')
         Route::get('settings', [CmsController::class, 'settings'])->name('settings.edit');
         Route::put('settings', [CmsController::class, 'updateSettings'])->name('settings.update');
         Route::get('integrations', [CmsController::class, 'integrations'])->name('integrations.edit');
+        Route::get('integrations/rd-station/connect', [CmsController::class, 'connectRdStation'])->name('integrations.rd.connect');
+        Route::get('integrations/rd-station/callback', [CmsController::class, 'rdStationCallback'])->name('integrations.rd.callback');
         Route::put('integrations', [CmsController::class, 'updateIntegrations'])->name('integrations.update');
         Route::resource('users', UserController::class)->except(['show']);
     });

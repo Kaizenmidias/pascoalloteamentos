@@ -10,6 +10,7 @@ use App\Models\Lead;
 use App\Models\MediaAsset;
 use App\Models\Page;
 use App\Models\SiteSetting;
+use App\Services\RdStationCrmService;
 use App\Services\Media\MediaAssetService;
 use App\Support\HomeContent;
 use App\Support\SafeRichHtml;
@@ -455,7 +456,19 @@ class CmsController extends Controller
 
     public function integrations(): Response
     {
-        return Inertia::render('Admin/Integrations', ['settings' => SiteSetting::where('group', 'integrations')->get()->pluck('value', 'key')]);
+        return Inertia::render('Admin/Integrations', ['settings' => SiteSetting::where('group', 'integrations')->get()->pluck('value', 'key'), 'rdStationConnected' => SiteSetting::where('key', 'rdstation_crm_tokens')->exists()]);
+    }
+
+    public function connectRdStation(RdStationCrmService $rdStation)
+    {
+        return redirect($rdStation->authorizationUrl());
+    }
+
+    public function rdStationCallback(Request $request, RdStationCrmService $rdStation): RedirectResponse
+    {
+        abort_unless($request->filled('code'), 422, 'Código de autorização ausente.');
+        $rdStation->exchangeCode($request->string('code')->toString());
+        return redirect()->route('admin.integrations.edit')->with('success', 'RD Station CRM conectado.');
     }
 
     public function updateIntegrations(Request $request): RedirectResponse

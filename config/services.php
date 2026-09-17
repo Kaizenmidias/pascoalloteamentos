@@ -36,8 +36,11 @@ return [
     ],
 
     'rdstation' => [
-        'api_key' => env('RD_STATION_API_KEY'),
-        'conversions_url' => env('RD_STATION_CONVERSIONS_URL', 'https://api.rd.services/platform/conversions'),
+        'client_id' => env('RD_STATION_CRM_CLIENT_ID'),
+        'client_secret' => env('RD_STATION_CRM_CLIENT_SECRET'),
+        'redirect_uri' => env('RD_STATION_CRM_REDIRECT_URI'),
+        'pipeline_id' => env('RD_STATION_CRM_PIPELINE_ID'),
+        'stage_id' => env('RD_STATION_CRM_STAGE_ID'),
     ],
 
 ];

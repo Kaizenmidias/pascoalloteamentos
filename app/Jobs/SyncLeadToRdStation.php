@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Lead;
-use App\Services\RdStationService;
+use App\Services\RdStationCrmService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,7 +19,7 @@ class SyncLeadToRdStation implements ShouldQueue
 
     public function __construct(public int $leadId) {}
 
-    public function handle(RdStationService $service): void
+    public function handle(RdStationCrmService $service): void
     {
         $lead = Lead::find($this->leadId);
         if ($lead) $service->sync($lead);
