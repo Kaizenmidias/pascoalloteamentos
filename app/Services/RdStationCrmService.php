@@ -57,6 +57,28 @@ class RdStationCrmService
         ])->values()->all();
     }
 
+    public function pipelines(): array
+    {
+        $token = $this->accessToken();
+        if (! $token) return [];
+
+        return collect($this->requestWithRetry($token, 'get', 'pipelines', [])->json('data') ?: [])->map(fn (array $pipeline) => [
+            'id' => $pipeline['id'] ?? null,
+            'name' => $pipeline['name'] ?? null,
+        ])->filter(fn (array $pipeline) => $pipeline['id'] && $pipeline['name'])->values()->all();
+    }
+
+    public function pipelineStages(string $pipelineId): array
+    {
+        $token = $this->accessToken();
+        if (! $token) return [];
+
+        return collect($this->requestWithRetry($token, 'get', 'pipelines/'.rawurlencode($pipelineId).'/stages', [])->json('data') ?: [])->map(fn (array $stage) => [
+            'id' => $stage['id'] ?? null,
+            'name' => $stage['name'] ?? null,
+        ])->filter(fn (array $stage) => $stage['id'] && $stage['name'])->values()->all();
+    }
+
     public function sync(Lead $lead): void
     {
         Cache::lock('rd-station-lead-sync-'.$lead->id, 60)->block(10, fn () => $this->syncLead($lead));
