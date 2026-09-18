@@ -7,6 +7,7 @@ use App\Models\MediaAsset;
 use App\Models\Subdivision;
 use App\Services\Admin\RealEstateContentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -75,6 +76,19 @@ class ConstructionProgressUpdatesTest extends TestCase
             $this->assertSame(1, $fresh->constructionProgressUpdates()->count());
             $this->assertTrue($fresh->constructionProgressUpdates()->whereKey($existing->id)->exists());
         }
+    }
+
+    public function test_changing_a_period_to_an_existing_date_returns_validation_error_instead_of_database_failure(): void
+    {
+        $subdivision = Subdivision::create(['title' => 'Jardim Horizonte', 'slug' => 'jardim-horizonte']);
+        $current = $subdivision->constructionProgressUpdates()->create(['progress_date' => '2024-04-01']);
+        $subdivision->constructionProgressUpdates()->create(['progress_date' => '2024-05-01']);
+
+        $this->expectException(ValidationException::class);
+
+        app(RealEstateContentService::class)->save($subdivision, [
+            'progress_updates' => [['id' => $current->id, 'progress_date' => '2024-05-01']],
+        ]);
     }
 
     public function test_public_pages_receive_separate_periods_with_their_ordered_media(): void

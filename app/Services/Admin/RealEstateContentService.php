@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 
 class RealEstateContentService
 {
@@ -117,6 +118,15 @@ class RealEstateContentService
                         : $item->constructionProgressUpdates()->firstOrNew(['progress_date' => $row['progress_date']]);
                     if (! $update->exists) {
                         $update->save();
+                    }
+                    $duplicateDate = $item->constructionProgressUpdates()
+                        ->whereDate('progress_date', $row['progress_date'])
+                        ->where('id', '!=', $update->id)
+                        ->exists();
+                    if ($duplicateDate) {
+                        throw ValidationException::withMessages([
+                            "progress_updates.{$index}.progress_date" => 'Já existe um período cadastrado para esta data.',
+                        ]);
                     }
                     $update->update(['progress_date' => $row['progress_date']]);
                     $keptUpdateIds[] = $update->id;
