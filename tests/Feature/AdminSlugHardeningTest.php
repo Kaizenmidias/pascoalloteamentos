@@ -69,6 +69,49 @@ class AdminSlugHardeningTest extends TestCase
         $this->assertSame('casa-do-sol', $property->fresh()->slug);
     }
 
+    public function test_subdivision_slug_validation_recovers_after_a_duplicate_attempt(): void
+    {
+        $admin = $this->adminUser();
+        Subdivision::create(['title' => 'Loteamento Existente', 'slug' => 'loteamento-existente', 'status' => 'draft', 'commercial_purpose' => 'sale']);
+
+        $this->actingAs($admin)->post('/admin/subdivisions', [
+            'title' => 'Novo Loteamento',
+            'slug' => 'loteamento-existente',
+            'status' => 'draft',
+            'commercial_purpose' => 'sale',
+        ])->assertSessionHasErrors('slug');
+
+        $this->actingAs($admin)->post('/admin/subdivisions', [
+            'title' => 'Novo Loteamento',
+            'slug' => 'novo-loteamento',
+            'status' => 'draft',
+            'commercial_purpose' => 'sale',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('subdivisions', ['slug' => 'novo-loteamento']);
+    }
+
+    public function test_subdivision_update_ignores_its_own_slug_but_rejects_another_slug(): void
+    {
+        $admin = $this->adminUser();
+        $first = Subdivision::create(['title' => 'Loteamento Um', 'slug' => 'loteamento-um', 'status' => 'draft', 'commercial_purpose' => 'sale']);
+        $second = Subdivision::create(['title' => 'Loteamento Dois', 'slug' => 'loteamento-dois', 'status' => 'draft', 'commercial_purpose' => 'sale']);
+
+        $this->actingAs($admin)->put('/admin/subdivisions/'.$first->slug, [
+            'title' => $first->title,
+            'slug' => $first->slug,
+            'status' => 'published',
+            'commercial_purpose' => 'sale',
+        ])->assertRedirect();
+
+        $this->actingAs($admin)->put('/admin/subdivisions/'.$first->fresh()->slug, [
+            'title' => $first->title,
+            'slug' => $second->slug,
+            'status' => 'draft',
+            'commercial_purpose' => 'sale',
+        ])->assertSessionHasErrors('slug');
+    }
+
     public function test_admin_edit_and_delete_urls_use_slug_route_binding_for_real_estate_entities(): void
     {
         $admin = $this->adminUser();

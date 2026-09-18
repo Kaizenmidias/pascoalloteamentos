@@ -58,7 +58,7 @@ const friendlyError = (key, message) => message?.startsWith('validation.')
 export default function Form({ item, options }) {
     const editing = Boolean(item?.id);
     const featuredImage = item?.media_assets?.find((asset) => asset.pivot?.is_featured);
-    const { data, setData, transform, post, processing, errors } = useForm({
+    const { data, setData, transform, post, processing, errors, clearErrors } = useForm({
         _method: editing ? 'put' : undefined,
         title: item?.title || '', slug: item?.slug || '', reference_code: item?.reference_code || '',
         subdivision_type_id: item?.subdivision_type_id || '', development_status_id: item?.development_status_id || '',
@@ -83,9 +83,8 @@ export default function Form({ item, options }) {
         event.preventDefault();
         transform((payload) => {
             const { faqs, floor_plans, documents, description, ...cleanPayload } = payload;
-            return cleanPayload;
+            return { ...cleanPayload, _method: editing ? 'put' : undefined };
         });
-        transform((payload) => ({ ...payload, _method: editing ? 'put' : undefined }));
         post(editing ? `/admin/subdivisions/${item.slug}` : '/admin/subdivisions', {
             forceFormData: true,
             preserveScroll: true,
@@ -101,7 +100,7 @@ export default function Form({ item, options }) {
         <ProductFormLayout onSubmit={submit} errors={errors} processing={processing} submitLabel={`Salvar ${text.subdivision}`} sidebar={<><PublicationCard data={data} setData={setData} errors={errors} flags={[["featured", "Destaque"], ["price_on_request", "Preço sob consulta"]]} /><SidebarMediaIntro image={featuredImage} help="Usada no card, Hero e seção Sobre o loteamento." /><AsyncMediaUploader compact existing={item?.media_assets || []} removed={data.remove_media_ids || []} data={data} setData={setData} /><SeoCard data={data} setData={setData} /></>}>
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><p className="text-xs font-medium uppercase tracking-[.08em] text-brand">Se&ccedil;&atilde;o inicial</p><h2 className="mt-2 text-lg font-medium text-ink">Hero do {text.subdivision}</h2><p className="mt-1 text-sm text-muted">Estes campos formam a abertura da p&aacute;gina. Estado e cidade s&atilde;o selecionados no bloco seguinte.</p></div>
-                <Field label={text.title} value={data.title} onChange={(event) => { const title = event.target.value; setData((current) => ({ ...current, title, slug: !editing && (!current.slug || current.slug === slugify(current.title)) ? slugify(title) : current.slug })); }} error={friendlyError('title', errors.title)} />
+                <Field label={text.title} value={data.title} onChange={(event) => { const title = event.target.value; const automaticSlug = !editing && (!data.slug || data.slug === slugify(data.title)); setData((current) => ({ ...current, title, slug: automaticSlug ? slugify(title) : current.slug })); if (automaticSlug) clearErrors('slug'); }} error={friendlyError('title', errors.title)} />
                 <SelectField label="Status da obra" options={options.statuses} value={data.development_status_id} onChange={(event) => setData('development_status_id', event.target.value)} error={friendlyError('development_status_id', errors.development_status_id)} />
                 <div className="tablet:col-span-2">
                     <label className="block space-y-2">
@@ -125,7 +124,7 @@ export default function Form({ item, options }) {
 
             <section className="grid gap-5 rounded-card bg-white p-6 shadow-card tablet:grid-cols-2">
                 <div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Identifica&ccedil;&atilde;o</h2><p className="mt-1 text-sm text-muted">Dados internos e classifica&ccedil;&otilde;es do {text.subdivision}.</p></div>
-                <div><Field label="Slug" value={data.slug} onChange={(event) => setData('slug', slugify(event.target.value))} error={friendlyError('slug', errors.slug)} /><button type="button" onClick={() => setData('slug', slugify(data.title))} className="mt-2 text-xs font-medium text-brand">Gerar novamente</button></div>
+                <div><Field label="Slug" value={data.slug} onChange={(event) => { setData('slug', slugify(event.target.value)); clearErrors('slug'); }} error={friendlyError('slug', errors.slug)} /><button type="button" onClick={() => { setData('slug', slugify(data.title)); clearErrors('slug'); }} className="mt-2 text-xs font-medium text-brand">Gerar novamente</button></div>
                 <Field label={'C\u00f3digo de refer\u00eancia'} value={data.reference_code} onChange={(event) => setData('reference_code', event.target.value)} error={errors.reference_code} />
                 <SelectField label={`Tipo de ${text.subdivision}`} options={options.types} value={data.subdivision_type_id} onChange={(event) => setData('subdivision_type_id', event.target.value)} />
                 <SelectField label={text.business} options={options.businessTypes} value={data.business_type_id} onChange={(event) => setData('business_type_id', event.target.value)} />
