@@ -79,6 +79,71 @@ class RdStationCrmService
         ])->filter(fn (array $stage) => $stage['id'] && $stage['name'])->values()->all();
     }
 
+    public function inspectLead(Lead $lead): array
+    {
+        $token = $this->accessToken();
+        $result = [
+            'lead_id' => $lead->id,
+            'rd_contact_id' => $lead->rd_contact_id,
+            'rd_deal_id' => $lead->rd_deal_id,
+            'rd_sync_status' => $lead->rd_sync_status,
+            'contact' => $this->inspectRemoteResource($token, 'contacts/'.$lead->rd_contact_id, function (array $data): array {
+                $dealIds = array_values(array_filter(array_merge(
+                    is_array($data['deal_ids'] ?? null) ? $data['deal_ids'] : [],
+                    collect($data['deals'] ?? [])->map(fn ($deal) => is_array($deal) ? ($deal['id'] ?? null) : $deal)->all(),
+                )));
+
+                return [
+                    'contact_id' => $data['id'] ?? null,
+                    'contact_has_name' => filled($data['name'] ?? null),
+                    'contact_has_email' => ! empty($data['emails']) || filled($data['email'] ?? null),
+                    'contact_has_phone' => ! empty($data['phones']) || filled($data['phone'] ?? null),
+                    'contact_deal_count' => count($dealIds),
+                    'contact_deal_ids' => $dealIds,
+                    'contact_data_keys' => array_keys($data),
+                ];
+            }),
+            'deal' => $this->inspectRemoteResource($token, 'deals/'.$lead->rd_deal_id, function (array $data): array {
+                $contactIds = array_values(array_filter(array_merge(
+                    is_array($data['contact_ids'] ?? null) ? $data['contact_ids'] : [],
+                    ($data['contact_id'] ?? null) ? [$data['contact_id']] : [],
+                    collect($data['contacts'] ?? [])->map(fn ($contact) => is_array($contact) ? ($contact['id'] ?? null) : $contact)->all(),
+                )));
+
+                return [
+                    'deal_id' => $data['id'] ?? null,
+                    'owner_id' => $data['owner_id'] ?? null,
+                    'stage_id' => $data['stage_id'] ?? null,
+                    'contact_id' => $data['contact_id'] ?? null,
+                    'contact_ids' => $data['contact_ids'] ?? [],
+                    'contacts_count' => count($contactIds),
+                    'contact_ids_from_collections' => $contactIds,
+                    'deal_data_keys' => array_keys($data),
+                ];
+            }),
+        ];
+
+        return $result;
+    }
+
+    private function inspectRemoteResource(?string $token, string $path, callable $sanitize): array
+    {
+        if (! $token || str_ends_with($path, '/')) {
+            return ['exists' => false];
+        }
+
+        try {
+            $data = $this->requestWithRetry($token, 'get', $path, [])->json('data');
+        } catch (RequestException $exception) {
+            if ($exception->response?->status() === 404) {
+                return ['exists' => false];
+            }
+            throw $exception;
+        }
+
+        return array_merge(['exists' => is_array($data)], is_array($data) ? $sanitize($data) : []);
+    }
+
     public function sync(Lead $lead): void
     {
         Cache::lock('rd-station-lead-sync-'.$lead->id, 60)->block(10, fn () => $this->syncLead($lead));
