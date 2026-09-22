@@ -137,7 +137,7 @@ class RdStationCrmContactSyncTest extends TestCase
         app(RdStationCrmService::class)->sync($lead);
 
         Http::assertSent(fn ($request) => $request->method() === 'PUT'
-            && $request['data'] === ['contact_id' => 'contact-id']);
+            && $request['data'] === ['contact_ids' => ['contact-id']]);
         Http::assertNotSent(fn ($request) => $request->method() === 'POST'
             && str_contains($request->url(), '/deals'));
         $this->assertSame('synced', $lead->fresh()->rd_sync_status);

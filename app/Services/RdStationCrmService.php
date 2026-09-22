@@ -195,8 +195,12 @@ class RdStationCrmService
 
         $result['association_before'] = $this->dealHasContact($deal, $contactId);
         if (! $result['association_before']) {
+            $existingContactIds = array_values(array_unique(array_filter(
+                is_array($deal['contact_ids'] ?? null) ? $deal['contact_ids'] : [],
+                'is_string',
+            )));
             $this->requestWithRetry($token, 'put', 'deals/'.rawurlencode($dealId), [
-                'data' => ['contact_id' => $contactId],
+                'data' => ['contact_ids' => array_values(array_unique([...$existingContactIds, $contactId]))],
             ]);
             $deal = $this->requestWithRetry($token, 'get', 'deals/'.rawurlencode($dealId), [])->json('data');
         }
@@ -207,67 +211,6 @@ class RdStationCrmService
         }
 
         return $result;
-    }
-
-    public function debugDealAssociation(Lead $lead): array
-    {
-        $token = $this->accessToken();
-        $contactId = (string) $lead->rd_contact_id;
-        $dealId = (string) $lead->rd_deal_id;
-        if (! $token || $contactId === '' || $dealId === '') {
-            return ['status' => 'invalid_reference'];
-        }
-
-        $contact = $this->requestWithRetry($token, 'get', 'contacts/'.rawurlencode($contactId), [])->json('data');
-        $deal = $this->requestWithRetry($token, 'get', 'deals/'.rawurlencode($dealId), [])->json('data');
-        $associationBefore = is_array($deal) && $this->dealHasContact($deal, $contactId);
-        $requestData = ['contact_id' => $contactId];
-
-        $response = Http::withToken($token)->asJson()->put(self::BASE.'deals/'.rawurlencode($dealId), [
-            'data' => $requestData,
-        ]);
-        $responseBody = $response->json();
-        $responseData = is_array($responseBody['data'] ?? null) ? $responseBody['data'] : [];
-        $responseErrors = is_array($responseBody['errors'] ?? null) ? $responseBody['errors'] : [];
-
-        $afterDeal = $this->requestWithRetry($token, 'get', 'deals/'.rawurlencode($dealId), [])->json('data');
-        $filteredDeals = $this->requestWithRetry($token, 'get', 'deals', [
-            'filter' => 'contact_id:'.$contactId,
-        ])->json('data');
-        $filteredIds = collect(is_array($filteredDeals) ? $filteredDeals : [])
-            ->map(fn ($item) => is_array($item) ? ($item['id'] ?? null) : null)
-            ->filter()
-            ->values()
-            ->all();
-
-        return [
-            'request_method' => 'PUT',
-            'request_endpoint' => '/crm/v2/deals/'.$dealId,
-            'request_data_keys' => array_keys($requestData),
-            'request_contact_id_matches_lead' => $contactId === (string) $lead->rd_contact_id,
-            'http_status' => $response->status(),
-            'response_content_type' => $response->header('Content-Type'),
-            'response_top_level_keys' => array_keys(is_array($responseBody) ? $responseBody : []),
-            'response_data_keys' => array_keys($responseData),
-            'response_error_keys' => collect($responseErrors)->filter('is_array')->flatMap(fn (array $error) => array_keys($error))->unique()->values()->all(),
-            'response_errors_sanitized' => $this->sanitizeApiErrors($responseErrors),
-            'returned_deal_id' => $responseData['id'] ?? null,
-            'returned_contact_id' => $responseData['contact_id'] ?? null,
-            'returned_contact_ids' => $responseData['contact_ids'] ?? [],
-            'association_before' => $associationBefore,
-            'association_in_put_response' => is_array($responseData) && $this->dealHasContact($responseData, $contactId),
-            'association_after_by_deal_get' => is_array($afterDeal) && $this->dealHasContact($afterDeal, $contactId),
-            'association_after_by_filter' => in_array($dealId, $filteredIds, true),
-            'lead_unchanged' => $lead->fresh()->only(['rd_contact_id', 'rd_deal_id', 'rd_sync_status']) === $lead->only(['rd_contact_id', 'rd_deal_id', 'rd_sync_status']),
-        ];
-    }
-
-    private function sanitizeApiErrors(array $errors): array
-    {
-        return collect($errors)->map(function ($error) {
-            if (! is_array($error)) return ['type' => gettype($error)];
-            return collect($error)->only(['code', 'status', 'title'])->all();
-        })->values()->all();
     }
 
     private function inspectRemoteResource(?string $token, string $path, callable $sanitize): array
