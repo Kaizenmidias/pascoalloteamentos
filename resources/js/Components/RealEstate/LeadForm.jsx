@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import Button from '../UI/Button';
 import { whatsappUrl } from '../../Support/whatsapp';
+import { formatBrazilianPhoneInput } from '../../Support/phone';
 
 export default function LeadForm({ entityType, entityId, entityName = '', title = 'Tenho interesse' }) {
     const idKey = entityType ? `${entityType}_id` : null;
@@ -13,7 +14,7 @@ export default function LeadForm({ entityType, entityId, entityName = '', title 
         <form onSubmit={submit} className="space-y-3 rounded-card bg-white p-6 shadow-card">
             <h2 className="text-xl font-normal text-ink">{title}</h2>
             {recentlySuccessful && <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800"><p>Recebemos seu contato. Nossa equipe falará com você em breve.</p>{followUp && <a href={followUp} target="_blank" rel="noreferrer" className="mt-3 inline-flex font-medium underline underline-offset-4">Falar agora pelo WhatsApp</a>}</div>}
-            {[['name', 'Nome', 'text'], ['email', 'E-mail', 'email'], ['phone', 'Telefone', 'tel']].map(([key, label, type]) => <label key={key} className="block"><span className="sr-only">{label}</span><input type={type} className="admin-input bg-surface" value={data[key]} onChange={(event) => setData(key, event.target.value)} placeholder={label} required={key !== 'email'} />{errors[key] && <span className="text-xs text-red-700">{errors[key]}</span>}</label>)}
+            {[['name', 'Nome', 'text'], ['email', 'E-mail', 'email'], ['phone', 'Telefone', 'tel']].map(([key, label, type]) => <label key={key} className="block"><span className="sr-only">{label}</span><input type={type} inputMode={key === 'phone' ? 'numeric' : undefined} autoComplete={key === 'phone' ? 'tel' : undefined} className="admin-input bg-surface" value={data[key]} onChange={(event) => setData(key, key === 'phone' ? formatBrazilianPhoneInput(event.target.value) : event.target.value)} placeholder={key === 'phone' ? '(00) 00000-0000' : label} required={key !== 'email'} />{errors[key] && <span className="text-xs text-red-700">{errors[key]}</span>}</label>)}
             <label className="block"><span className="sr-only">Mensagem</span><textarea className="admin-input min-h-28 bg-surface" value={data.message} onChange={(event) => setData('message', event.target.value)} placeholder="Mensagem" /></label>
             <label className="flex gap-2 text-[.65rem] text-muted"><input type="checkbox" checked={data.consent} onChange={(event) => setData('consent', event.target.checked)} required /> Autorizo o uso dos dados para retorno do contato.</label>
             <Button type="submit" disabled={processing || recentlySuccessful} className="w-full">{processing ? 'Enviando...' : recentlySuccessful ? 'Contato enviado' : 'Enviar'}</Button>
