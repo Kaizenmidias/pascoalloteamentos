@@ -96,18 +96,38 @@ class RdStationCrmService
             return;
         }
 
-        $contact = $this->requestWithRetry($token, 'get', 'contacts', [
-            'filter' => 'email:'.$lead->email,
-        ])->json('data.0');
+        $email = $this->normalizeEmail($lead->email);
+        $phone = $this->normalizePhone($lead->phone);
+        $contact = $email
+            ? $this->requestWithRetry($token, 'get', 'contacts', [
+                'filter' => 'email:'.$email,
+            ])->json('data.0')
+            : null;
 
         if (! $contact) {
             $contact = $this->requestWithRetry($token, 'post', 'contacts', [
                 'data' => array_filter([
-                    'name' => $lead->name,
-                    'email' => $lead->email,
-                    'phone' => $lead->phone,
+                    'name' => trim($lead->name),
+                    'emails' => $email ? [['email' => $email]] : null,
+                    'phones' => $phone ? [['phone' => $phone, 'type' => 'work']] : null,
                 ], fn ($value) => filled($value)),
             ])->json('data');
+        } else {
+            $missingFields = [];
+            if (! $this->contactEmail($contact) && $email) {
+                $missingFields['emails'] = [['email' => $email]];
+            }
+            if (! $this->contactPhone($contact) && $phone) {
+                $missingFields['phones'] = [['phone' => $phone, 'type' => 'work']];
+            }
+            if ($missingFields) {
+                $updatedContact = $this->requestWithRetry($token, 'put', 'contacts/'.rawurlencode($contact['id']), [
+                    'data' => $missingFields,
+                ])->json('data');
+                if (is_array($updatedContact) && $updatedContact) {
+                    $contact = $updatedContact;
+                }
+            }
         }
 
         $ownerId = config('services.rdstation.owner_id');
@@ -164,6 +184,42 @@ class RdStationCrmService
             'rd_deal_id' => $remoteDeal['id'] ?? null,
             'rd_sync_status' => ! empty($remoteDeal['id']) ? 'synced' : 'failed',
         ]);
+    }
+
+    private function normalizeEmail(?string $email): ?string
+    {
+        $email = strtolower(trim((string) $email));
+
+        return $email !== '' ? $email : null;
+    }
+
+    private function normalizePhone(?string $phone): ?string
+    {
+        $digits = preg_replace('/\D+/', '', trim((string) $phone)) ?? '';
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+        if ($digits === '') {
+            return null;
+        }
+        if (str_starts_with($digits, '55')) {
+            return '+'.$digits;
+        }
+        if (in_array(strlen($digits), [10, 11], true)) {
+            return '+55'.$digits;
+        }
+
+        return strlen($digits) >= 8 ? '+'.$digits : null;
+    }
+
+    private function contactEmail(array $contact): ?string
+    {
+        return $this->normalizeEmail(data_get($contact, 'emails.0.email') ?? $contact['email'] ?? null);
+    }
+
+    private function contactPhone(array $contact): ?string
+    {
+        return $this->normalizePhone(data_get($contact, 'phones.0.phone') ?? $contact['phone'] ?? null);
     }
 
     private function accessToken(bool $forceRefresh = false): ?string
