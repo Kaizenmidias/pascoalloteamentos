@@ -27,6 +27,9 @@ class RdStationCrmContactSyncTest extends TestCase
                 return Http::response(['data' => ['id' => 'contact-id']]);
             },
             'https://api.rd.services/crm/v2/deals*' => function ($request) {
+                if ($request->method() === 'GET' && str_ends_with($request->url(), '/deals/deal-id')) {
+                    return Http::response(['data' => ['id' => 'deal-id', 'contact_ids' => ['contact-id']]]);
+                }
                 return $request->method() === 'GET'
                     ? Http::response(['data' => []])
                     : Http::response(['data' => ['id' => 'deal-id']]);
@@ -63,6 +66,9 @@ class RdStationCrmContactSyncTest extends TestCase
                 return Http::response(['data' => ['id' => 'contact-id']]);
             },
             'https://api.rd.services/crm/v2/deals*' => function ($request) {
+                if ($request->method() === 'GET' && str_ends_with($request->url(), '/deals/deal-id')) {
+                    return Http::response(['data' => ['id' => 'deal-id', 'contact_ids' => ['contact-id']]]);
+                }
                 return $request->method() === 'GET'
                     ? Http::response(['data' => []])
                     : Http::response(['data' => ['id' => 'deal-id']]);

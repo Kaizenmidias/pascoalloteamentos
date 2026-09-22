@@ -184,6 +184,43 @@ class RdStationCrmService
             'rd_deal_id' => $remoteDeal['id'] ?? null,
             'rd_sync_status' => ! empty($remoteDeal['id']) ? 'synced' : 'failed',
         ]);
+
+        if (! empty($remoteDeal['id'])) {
+            $createdDeal = $this->requestWithRetry($token, 'get', 'deals/'.rawurlencode($remoteDeal['id']), [])->json('data');
+            if (! is_array($createdDeal) || ! $this->dealHasContact($createdDeal, (string) $contact['id'])) {
+                $lead->update([
+                    'rd_deal_id' => null,
+                    'rd_sync_status' => 'failed_association',
+                ]);
+                Log::warning('RD Station CRM deal contact association could not be confirmed.', [
+                    'operation' => 'create_deal',
+                    'lead_id' => $lead->id,
+                    'rd_contact_id' => $contact['id'],
+                    'rd_deal_id' => $remoteDeal['id'],
+                ]);
+            }
+        }
+    }
+
+    private function dealHasContact(array $deal, string $contactId): bool
+    {
+        if (($deal['contact_id'] ?? null) === $contactId) {
+            return true;
+        }
+        if (in_array($contactId, $deal['contact_ids'] ?? [], true)) {
+            return true;
+        }
+
+        foreach ($deal['contacts'] ?? [] as $contact) {
+            if (is_array($contact) && ($contact['id'] ?? null) === $contactId) {
+                return true;
+            }
+            if (is_string($contact) && $contact === $contactId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function normalizeEmail(?string $email): ?string
