@@ -109,6 +109,40 @@ class RdStationCrmContactSyncTest extends TestCase
             && str_contains($request->url(), '/contacts/'));
     }
 
+    public function test_existing_unassociated_deal_is_repaired_without_creating_another_deal(): void
+    {
+        $this->connect();
+        $lead = $this->lead('cliente@example.test', '11999998888');
+        $lead->update([
+            'rd_contact_id' => 'contact-id',
+            'rd_deal_id' => 'deal-id',
+            'rd_sync_status' => 'failed_association',
+        ]);
+
+        Http::fake([
+            'https://api.rd.services/crm/v2/contacts/contact-id' => Http::response(['data' => ['id' => 'contact-id']]),
+            'https://api.rd.services/crm/v2/deals/deal-id' => function ($request) {
+                if ($request->method() === 'PUT') {
+                    return Http::response(['data' => ['id' => 'deal-id']]);
+                }
+                static $reads = 0;
+                $reads++;
+                return Http::response(['data' => [
+                    'id' => 'deal-id',
+                    'contact_ids' => $reads === 1 ? [] : ['contact-id'],
+                ]]);
+            },
+        ]);
+
+        app(RdStationCrmService::class)->sync($lead);
+
+        Http::assertSent(fn ($request) => $request->method() === 'PUT'
+            && $request['data'] === ['contact_id' => 'contact-id']);
+        Http::assertNotSent(fn ($request) => $request->method() === 'POST'
+            && str_contains($request->url(), '/deals'));
+        $this->assertSame('synced', $lead->fresh()->rd_sync_status);
+    }
+
     private function connect(): void
     {
         IntegrationCredential::create([

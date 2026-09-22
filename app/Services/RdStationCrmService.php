@@ -126,6 +126,57 @@ class RdStationCrmService
         return $result;
     }
 
+    public function repairLeadContact(Lead $lead): array
+    {
+        $token = $this->accessToken();
+        $contactId = (string) $lead->rd_contact_id;
+        $dealId = (string) $lead->rd_deal_id;
+        $result = [
+            'lead_id' => $lead->id,
+            'deal_id' => $dealId ?: null,
+            'contact_id' => $contactId ?: null,
+            'association_before' => false,
+            'association_after' => false,
+            'status' => 'failed_association',
+        ];
+
+        if (! $token || $contactId === '' || $dealId === '') {
+            $result['status'] = 'invalid_reference';
+            return $result;
+        }
+
+        try {
+            $contact = $this->requestWithRetry($token, 'get', 'contacts/'.rawurlencode($contactId), [])->json('data');
+            $deal = $this->requestWithRetry($token, 'get', 'deals/'.rawurlencode($dealId), [])->json('data');
+        } catch (RequestException $exception) {
+            if ($exception->response?->status() === 404) {
+                $result['status'] = 'remote_resource_missing';
+                return $result;
+            }
+            throw $exception;
+        }
+
+        if (! is_array($contact) || ! is_array($deal)) {
+            $result['status'] = 'remote_resource_missing';
+            return $result;
+        }
+
+        $result['association_before'] = $this->dealHasContact($deal, $contactId);
+        if (! $result['association_before']) {
+            $this->requestWithRetry($token, 'put', 'deals/'.rawurlencode($dealId), [
+                'data' => ['contact_id' => $contactId],
+            ]);
+            $deal = $this->requestWithRetry($token, 'get', 'deals/'.rawurlencode($dealId), [])->json('data');
+        }
+
+        $result['association_after'] = is_array($deal) && $this->dealHasContact($deal, $contactId);
+        if ($result['association_after']) {
+            $result['status'] = 'synced';
+        }
+
+        return $result;
+    }
+
     private function inspectRemoteResource(?string $token, string $path, callable $sanitize): array
     {
         if (! $token || str_ends_with($path, '/')) {
@@ -152,7 +203,11 @@ class RdStationCrmService
     private function syncLead(Lead $lead): void
     {
         $lead->refresh();
-        if ($lead->rd_deal_id) return;
+        if ($lead->rd_deal_id) {
+            $repair = $this->repairLeadContact($lead);
+            $lead->update(['rd_sync_status' => $repair['status'] === 'synced' ? 'synced' : 'failed_association']);
+            return;
+        }
 
         $lead->update(['rd_sync_status' => 'syncing']);
         $token = $this->accessToken();
@@ -247,23 +302,12 @@ class RdStationCrmService
         $lead->update([
             'rd_contact_id' => $contact['id'],
             'rd_deal_id' => $remoteDeal['id'] ?? null,
-            'rd_sync_status' => ! empty($remoteDeal['id']) ? 'synced' : 'failed',
+            'rd_sync_status' => ! empty($remoteDeal['id']) ? 'syncing' : 'failed',
         ]);
 
         if (! empty($remoteDeal['id'])) {
-            $createdDeal = $this->requestWithRetry($token, 'get', 'deals/'.rawurlencode($remoteDeal['id']), [])->json('data');
-            if (! is_array($createdDeal) || ! $this->dealHasContact($createdDeal, (string) $contact['id'])) {
-                $lead->update([
-                    'rd_deal_id' => null,
-                    'rd_sync_status' => 'failed_association',
-                ]);
-                Log::warning('RD Station CRM deal contact association could not be confirmed.', [
-                    'operation' => 'create_deal',
-                    'lead_id' => $lead->id,
-                    'rd_contact_id' => $contact['id'],
-                    'rd_deal_id' => $remoteDeal['id'],
-                ]);
-            }
+            $repair = $this->repairLeadContact($lead->fresh());
+            $lead->update(['rd_sync_status' => $repair['status'] === 'synced' ? 'synced' : 'failed_association']);
         }
     }
 
