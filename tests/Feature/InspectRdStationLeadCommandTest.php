@@ -44,6 +44,7 @@ class InspectRdStationLeadCommandTest extends TestCase
                 'stage_id' => 'stage-id',
                 'contact_ids' => ['contact-id'],
             ]]),
+            'https://api.rd.services/crm/v2/deals*' => Http::response(['data' => []]),
         ]);
 
         $this->artisan('rdstation:inspect-lead', ['lead_id' => 1])
@@ -54,7 +55,7 @@ class InspectRdStationLeadCommandTest extends TestCase
             ->doesntExpectOutputToContain('+5511999998888')
             ->doesntExpectOutputToContain('test-access-token');
 
-        Http::assertSentCount(2);
+        Http::assertSentCount(3);
         Http::assertNotSent(fn ($request) => in_array($request->method(), ['POST', 'PUT', 'PATCH'], true));
         $this->assertDatabaseHas('leads', ['id' => 1, 'rd_sync_status' => 'synced']);
     }
@@ -78,6 +79,7 @@ class InspectRdStationLeadCommandTest extends TestCase
         Http::fake([
             'https://api.rd.services/crm/v2/contacts/missing-contact' => Http::response([], 404),
             'https://api.rd.services/crm/v2/deals/missing-deal' => Http::response([], 404),
+            'https://api.rd.services/crm/v2/deals*' => Http::response([], 404),
         ]);
 
         $this->artisan('rdstation:inspect-lead', ['lead_id' => 1])

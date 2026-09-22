@@ -82,6 +82,7 @@ class RdStationCrmService
     public function inspectLead(Lead $lead): array
     {
         $token = $this->accessToken();
+        $dealsForContact = $this->inspectDealsForContact($token, $lead->rd_contact_id);
         $result = [
             'lead_id' => $lead->id,
             'rd_contact_id' => $lead->rd_contact_id,
@@ -121,9 +122,40 @@ class RdStationCrmService
                     'deal_data_keys' => array_keys($data),
                 ];
             }),
+            'association_by_deal_get' => false,
+            'association_by_contact_get' => false,
+            'association_by_deals_filter' => in_array((string) $lead->rd_deal_id, $dealsForContact['deal_ids'], true),
+            'deals_found_for_contact' => $dealsForContact['count'],
+            'deal_ids_found_for_contact' => $dealsForContact['deal_ids'],
         ];
 
+        $result['association_by_deal_get'] = $this->associationFlag($lead->rd_deal_id, $lead->rd_contact_id, $result['deal']);
+        $result['association_by_contact_get'] = in_array((string) $lead->rd_deal_id, $result['contact']['contact_deal_ids'] ?? [], true);
+
         return $result;
+    }
+
+    private function inspectDealsForContact(?string $token, ?string $contactId): array
+    {
+        if (! $token || ! $contactId) {
+            return ['count' => 0, 'deal_ids' => []];
+        }
+
+        $data = $this->requestWithRetry($token, 'get', 'deals', [
+            'filter' => 'contact_id:'.$contactId,
+        ])->json('data');
+        $dealIds = collect(is_array($data) ? $data : [])
+            ->map(fn ($deal) => is_array($deal) ? ($deal['id'] ?? null) : null)
+            ->filter()
+            ->values()
+            ->all();
+
+        return ['count' => count($dealIds), 'deal_ids' => $dealIds];
+    }
+
+    private function associationFlag(?string $dealId, ?string $contactId, array $deal): bool
+    {
+        return $dealId !== null && $contactId !== null && $this->dealHasContact($deal, $contactId);
     }
 
     public function repairLeadContact(Lead $lead): array
