@@ -7,7 +7,6 @@ import ConstructionProgress from '../../../Components/RealEstate/ConstructionPro
 import Map from '../../../Components/RealEstate/Map';
 import { featuredMedia, galleryMedia } from '../../../Components/RealEstate/DetailSections';
 import MediaLightbox, { MediaLightboxTrigger } from '../../../Components/RealEstate/MediaLightbox';
-import VisualSection from '../../../Components/RealEstate/VisualSection';
 import { whatsappUrl } from '../../../Support/whatsapp';
 import LeadForm from '../../../Components/RealEstate/LeadForm';
 import PublicMediaGallery from '../../../Components/RealEstate/PublicMediaGallery';
@@ -127,6 +126,18 @@ function Plans({ item }) {
     return <section id="plantas" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer><Carousel header={header} className={plans.length === 1 ? '[&_[class*="aspect-"]]:aspect-auto' : plans.length === 2 ? '[&_button]:hidden' : 'mt-1'} label="Plantas disponíveis" itemClassName={plans.length === 1 ? 'w-full' : 'w-full tablet:w-[calc((100%-1.25rem)/2)]'} paused={lightbox !== null} autoPlay={false} edgeControls={plans.length > 1}>{plans.map((plan) => { if (plan.media_asset) mediaIndex += 1; return <article key={plan.id} className="overflow-hidden rounded-xl border border-line bg-white"><div className="p-4"><span className="rounded-sm bg-brand px-2 py-1 text-[.58rem] uppercase text-white">Planta</span><h3 className="mt-2 text-sm font-normal text-ink">{plan.name}</h3></div>{plan.media_asset && <MediaLightboxTrigger index={mediaIndex} onOpen={setLightbox} className="aspect-[1.22/1] w-full p-4" label={`Ampliar planta ${plan.name}`}><img src={plan.media_asset.url} alt={plan.name} className="h-full w-full object-contain" /></MediaLightboxTrigger>}<div className="grid grid-cols-2 gap-[10px] border-t border-line p-3 tablet:grid-cols-4">{[['Área privativa', plan.area && `${Number(plan.area).toLocaleString('pt-BR')} m²`], ['Quartos', plan.bedrooms], ['Banheiros', plan.bathrooms], ['Vagas', plan.parking_spaces]].filter(([, value]) => hasValue(value)).map(([label, value]) => <div key={label} className="rounded-lg border border-line p-3 text-center"><span className="block text-[.55rem] uppercase text-muted">{label}</span><strong className="mt-1 block text-xs font-normal text-ink">{value}</strong></div>)}</div></article>; })}</Carousel></SectionContainer><MediaLightbox items={media} open={lightbox !== null} initialIndex={lightbox || 0} onClose={() => setLightbox(null)} /></section>;
 }
 
+function SectionImages({ item }) {
+    const cards = (item.section_images?.length ? item.section_images : item.about_media ? [{ title: '', media_asset: item.about_media }] : [])
+        .filter((card) => card?.media_asset?.url);
+    if (!cards.length) return null;
+
+    const header = <div className="w-full text-center"><Eyebrow>Plantas</Eyebrow><h2 className="mx-auto mt-3 text-[1.8rem] font-light leading-[1.08] tracking-[-.02em] text-ink tablet:text-[2.15rem] desktop:text-[2.35rem]">{item.visual_section_title || 'Conheça as plantas disponíveis'}</h2></div>;
+    const card = (sectionImage) => <article className="overflow-hidden rounded-xl border border-line bg-white p-4"><span className="rounded-sm bg-brand px-2 py-1 text-[.58rem] uppercase text-white">Planta</span>{sectionImage.title && <h3 className="mt-3 text-lg font-normal text-ink">{sectionImage.title}</h3>}<div className="mt-5 flex min-h-56 items-center justify-center rounded-lg bg-surface p-3 tablet:min-h-72"><img src={sectionImage.media_asset.url} alt={sectionImage.title || item.title} className="max-h-[560px] w-full object-contain" /></div></article>;
+
+    if (cards.length === 1) return <section id="visual" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer>{header}<div className="mt-10">{card(cards[0])}</div></SectionContainer></section>;
+    return <section id="visual" className="scroll-mt-28 py-14 tablet:py-[72px]"><SectionContainer><Carousel header={header} className={cards.length === 2 ? '[&_button]:hidden' : ''} label="Imagens das seções" itemClassName="w-full tablet:w-[calc((100%-1.25rem)/2)]" paused={false} autoPlay={false} edgeControls>{cards.map((sectionImage, index) => <div key={sectionImage.id || `${sectionImage.media_asset.id}-${index}`}>{card(sectionImage)}</div>)}</Carousel></SectionContainer></section>;
+}
+
 function Location({ item, globalWhatsapp }) {
     if (!item.address && !item.latitude && !item.longitude) return null;
     const address = [item.address, item.address_number, item.neighborhood, item.city?.name, item.city?.state?.code].filter(Boolean).join(', ');
@@ -151,9 +162,9 @@ export default function Show({ item, globalWhatsapp }) {
     const hasPlans = (item.floor_plans || []).some((plan) => plan && plan.is_active !== false);
     const hasProgress = (item.construction_stages || []).some((stage) => stage?.is_public !== false) || (item.construction_progress_updates || item.constructionProgressUpdates || []).length > 0;
     const hasLocation = !!(item.address || item.latitude || item.longitude);
-    const hasVisual = !!(item.about_media || item.promotion_media || String(item.visual_section_title || '').trim());
+    const hasVisual = !!((item.section_images || []).some((card) => card?.media_asset?.url) || item.about_media || String(item.visual_section_title || '').trim());
     const promotions = (item.promotions || []).filter((promotion) => promotion.is_active !== false && promotion.title);
 
-    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu item={item} hasGallery={gallery.length > 0} hasPlans={hasPlans} hasVisual={hasVisual} hasLocation={hasLocation} hasProgress={hasProgress} hasLotsInfo={!!item.lots_info_url} /><About item={item} image={image} /><LotFacts item={item} /><Features items={item.features || []} /><Promotions items={promotions} /><Gallery item={item} /><Plans item={item} /><VisualSection image={item.about_media || item.promotion_media} title={item.visual_section_title} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section></PublicLayout>;
+    return <PublicLayout><SeoHead title={item.seo?.title || item.title} description={item.seo?.description || item.card_summary} /><Hero item={item} image={image} globalWhatsapp={globalWhatsapp} /><InternalMenu item={item} hasGallery={gallery.length > 0} hasPlans={hasPlans} hasVisual={hasVisual} hasLocation={hasLocation} hasProgress={hasProgress} hasLotsInfo={!!item.lots_info_url} /><About item={item} image={image} /><LotFacts item={item} /><Features items={item.features || []} /><Promotions items={promotions} /><Gallery item={item} /><Plans item={item} /><SectionImages item={item} /><Location item={item} globalWhatsapp={globalWhatsapp} /><Progress item={item} /><LotsInfoSection item={item} /><section className="py-14 tablet:py-16"><SectionContainer className="max-w-2xl"><LeadForm entityType="subdivision" entityId={item.id} entityName={item.title} title="Tenho interesse neste loteamento" /></SectionContainer></section></PublicLayout>;
 }
 

@@ -75,4 +75,9 @@ class Subdivision extends Model
     {
         return $this->hasMany(SubdivisionPromotion::class)->orderBy('sort_order');
     }
+
+    public function sectionImages(): HasMany
+    {
+        return $this->hasMany(SubdivisionSectionImage::class)->with('mediaAsset')->orderBy('sort_order');
+    }
 }

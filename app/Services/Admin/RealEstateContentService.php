@@ -31,6 +31,7 @@ class RealEstateContentService
             $featuredImage = Arr::pull($data, 'featured_image');
             $aboutImage = Arr::pull($data, 'about_image');
             $promotionImage = Arr::pull($data, 'promotion_image');
+            $sectionImages = Arr::pull($data, 'section_images');
             $floorPlans = Arr::pull($data, 'floor_plans');
             $stages = Arr::pull($data, 'construction_stages');
             $progressUpdates = Arr::pull($data, 'progress_updates');
@@ -69,6 +70,22 @@ class RealEstateContentService
             }
             if ($item->isDirty(['about_media_id', 'promotion_media_id'])) {
                 $item->save();
+            }
+            if ($item->getTable() === 'subdivisions' && is_array($sectionImages)) {
+                $item->sectionImages()->delete();
+                foreach (array_values($sectionImages) as $index => $row) {
+                    $image = Arr::pull($row, 'image');
+                    if ($image) {
+                        $row['media_asset_id'] = $this->media->store($image, 'real-estate/section-images')->id;
+                    }
+                    if (! empty($row['media_asset_id'])) {
+                        $item->sectionImages()->create([
+                            'media_asset_id' => $row['media_asset_id'],
+                            'title' => $row['title'] ?? null,
+                            'sort_order' => $index,
+                        ]);
+                    }
+                }
             }
             $item->features()->sync($features);
 
