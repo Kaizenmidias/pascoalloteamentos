@@ -15,6 +15,8 @@ class StoreSubdivisionRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $this->merge(['section_images' => $this->input('section_images', [])]);
+
         if ($this->has('lots_info_url')) {
             $this->merge(['lots_info_url' => trim((string) $this->input('lots_info_url')) ?: null]);
         }
