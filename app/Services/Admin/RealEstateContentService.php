@@ -80,8 +80,8 @@ class RealEstateContentService
                     }
                     if (! empty($row['media_asset_id'])) {
                         $item->sectionImages()->create([
-                            'media_asset_id' => $row['media_asset_id'],
-                            'title' => $row['title'] ?? null,
+                            ...Arr::only($row, ['media_asset_id', 'title', 'description', 'area', 'bedrooms', 'suites', 'bathrooms', 'parking_spaces', 'external_url', 'is_active']),
+                            'is_active' => $row['is_active'] ?? true,
                             'sort_order' => $index,
                         ]);
                     }
