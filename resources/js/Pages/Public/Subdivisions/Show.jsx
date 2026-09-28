@@ -127,6 +127,7 @@ function Plans({ item }) {
 }
 
 function SectionImages({ item }) {
+    const [lightbox, setLightbox] = useState(null);
     const cards = (item.section_images?.length ? item.section_images : item.about_media ? [{ title: '', media_asset: item.about_media }] : [])
         .filter((card) => card?.media_asset?.url && card.is_active !== false);
     if (!cards.length) return null;
