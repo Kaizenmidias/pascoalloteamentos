@@ -8,18 +8,35 @@
         @vite(['resources/css/app.css', 'resources/js/app.jsx'])
         @inertiaHead
         @php
-            try {
-                $integrations = \App\Models\SiteSetting::where('group', 'integrations')->pluck('value', 'key');
-            } catch (\Throwable) {
-                $integrations = collect();
-            }
+            try { $trackingHead = app(\App\Services\Tracking\TrackingManager::class)->head(); }
+            catch (\Throwable) { $trackingHead = collect(); }
         @endphp
-        @if($integrations->get('google_analytics_id'))
-            <script async src="https://www.googletagmanager.com/gtag/js?id={{ rawurlencode($integrations->get('google_analytics_id')) }}"></script>
-            <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config',@json($integrations->get('google_analytics_id')));</script>
-        @endif
+        @foreach($trackingHead as $trackingCode)
+            {!! $trackingCode !!}
+        @endforeach
+        <script>
+            (function () {
+                var lastUrl = window.location.href;
+                document.addEventListener('inertia:navigate', function () {
+                    if (window.location.href === lastUrl) return;
+                    lastUrl = window.location.href;
+                    if (typeof window.fbq === 'function') window.fbq('track', 'PageView');
+                    if (typeof window.gtag === 'function' && Array.isArray(window.__pascoalGoogleAnalyticsIds)) window.gtag('event', 'page_view', {send_to: window.__pascoalGoogleAnalyticsIds, page_path: window.location.pathname + window.location.search});
+                });
+            })();
+        </script>
     </head>
     <body class="bg-white font-sans text-text antialiased">
+        @php
+            try { $trackingManager = app(\App\Services\Tracking\TrackingManager::class); $trackingBodyStart = $trackingManager->bodyStart(); $trackingBodyEnd = $trackingManager->bodyEnd(); }
+            catch (\Throwable) { $trackingBodyStart = collect(); $trackingBodyEnd = collect(); }
+        @endphp
+        @foreach($trackingBodyStart as $trackingCode)
+            {!! $trackingCode !!}
+        @endforeach
         @inertia
+        @foreach($trackingBodyEnd as $trackingCode)
+            {!! $trackingCode !!}
+        @endforeach
     </body>
 </html>

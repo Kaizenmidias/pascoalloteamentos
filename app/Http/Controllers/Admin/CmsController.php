@@ -10,6 +10,7 @@ use App\Models\Lead;
 use App\Models\MediaAsset;
 use App\Models\Page;
 use App\Models\SiteSetting;
+use App\Models\TrackingScript;
 use App\Services\RdStationCrmService;
 use App\Services\Media\MediaAssetService;
 use App\Support\HomeContent;
@@ -20,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use App\Support\UniqueSlug;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -458,6 +460,15 @@ class CmsController extends Controller
     {
         return Inertia::render('Admin/Integrations', [
             'settings' => SiteSetting::where('group', 'integrations')->get()->pluck('value', 'key'),
+            'trackingScripts' => TrackingScript::query()->orderBy('sort_order')->orderBy('id')->get(['id', 'name', 'type', 'identifier', 'code', 'position', 'is_active', 'sort_order']),
+            'trackingTypes' => [
+                'meta_pixel' => 'Meta Pixel',
+                'google_analytics' => 'Google Analytics (GA4)',
+                'google_ads' => 'Google Ads',
+                'google_tag' => 'Google Tag',
+                'google_tag_manager' => 'Google Tag Manager',
+                'custom_script' => 'Script personalizado',
+            ],
             'rdStationConnected' => app(RdStationCrmService::class)->isConnected(),
         ]);
     }
@@ -483,11 +494,58 @@ class CmsController extends Controller
             'google_maps_key' => 'nullable|string|max:255',
             'recaptcha_site_key' => 'nullable|string|max:255',
             'custom_head_code' => 'nullable|string|max:20000',
+            'scripts' => ['nullable', 'array'],
+            'scripts.*.id' => ['nullable', 'integer', 'exists:tracking_scripts,id'],
+            'scripts.*.name' => ['required', 'string', 'max:255'],
+            'scripts.*.type' => ['required', Rule::in(['meta_pixel', 'google_analytics', 'google_ads', 'google_tag', 'google_tag_manager', 'custom_script'])],
+            'scripts.*.identifier' => ['nullable', 'string', 'max:100'],
+            'scripts.*.code' => ['nullable', 'string', 'max:50000'],
+            'scripts.*.position' => ['required', Rule::in(['head', 'body_start', 'body_end'])],
+            'scripts.*.is_active' => ['boolean'],
+            'scripts.*.sort_order' => ['required', 'integer', 'min:0'],
         ]);
 
         foreach ($data as $key => $value) {
+            if ($key === 'scripts') continue;
             SiteSetting::updateOrCreate(['key' => $key], ['group' => 'integrations', 'value' => $value, 'is_public' => false]);
         }
+
+        $scripts = collect($data['scripts'] ?? [])->map(function (array $script): array {
+            $script['identifier'] = trim((string) ($script['identifier'] ?? '')) ?: null;
+            $script['code'] = trim((string) ($script['code'] ?? '')) ?: null;
+            $script['is_active'] = (bool) ($script['is_active'] ?? false);
+
+            if ($script['type'] === 'meta_pixel' && ($script['identifier'] === null || ! preg_match('/^\d{5,20}$/', $script['identifier']))) {
+                throw ValidationException::withMessages(['scripts' => 'Cada Meta Pixel deve ter um ID numérico válido.']);
+            }
+            $formats = ['google_analytics' => 'G-[A-Z0-9]+', 'google_ads' => 'AW-[A-Z0-9]+', 'google_tag' => 'GT-[A-Z0-9]+', 'google_tag_manager' => 'GTM-[A-Z0-9]+'];
+            if (isset($formats[$script['type']]) && ($script['identifier'] === null || ! preg_match('/^'.$formats[$script['type']].'$/i', $script['identifier']))) {
+                throw ValidationException::withMessages(['scripts' => 'O identificador de '.$script['type'].' não possui um formato válido.']);
+            }
+            if ($script['type'] === 'custom_script' && $script['code'] === null) {
+                throw ValidationException::withMessages(['scripts' => 'Scripts personalizados precisam conter código.']);
+            }
+            if ($script['type'] !== 'custom_script') $script['code'] = null;
+            return $script;
+        });
+
+        $activeKeys = $scripts->filter(fn (array $script) => $script['is_active'] && $script['identifier'])->groupBy(fn (array $script) => $script['type'].'|'.strtoupper((string) $script['identifier']));
+        if ($activeKeys->contains(fn ($group) => $group->count() > 1)) {
+            throw ValidationException::withMessages(['scripts' => 'A mesma integração não pode ser cadastrada duas vezes como ativa.']);
+        }
+
+        DB::transaction(function () use ($scripts): void {
+            $kept = [];
+            foreach ($scripts as $script) {
+                $id = $script['id'] ?? null;
+                unset($script['id']);
+                $model = $id ? TrackingScript::findOrFail($id) : new TrackingScript();
+                $model->fill($script);
+                $model->save();
+                $kept[] = $model->id;
+            }
+            TrackingScript::query()->when($kept, fn ($query) => $query->whereNotIn('id', $kept), fn ($query) => $query)->delete();
+        });
 
         return back()->with('success', 'Integrações atualizadas.');
     }
