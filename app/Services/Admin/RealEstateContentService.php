@@ -32,6 +32,7 @@ class RealEstateContentService
             $aboutImage = Arr::pull($data, 'about_image');
             $promotionImage = Arr::pull($data, 'promotion_image');
             $sectionImages = Arr::pull($data, 'section_images');
+            $trackingPixels = Arr::pull($data, 'tracking_pixels');
             $floorPlans = Arr::pull($data, 'floor_plans');
             $stages = Arr::pull($data, 'construction_stages');
             $progressUpdates = Arr::pull($data, 'progress_updates');
@@ -85,6 +86,21 @@ class RealEstateContentService
                             'sort_order' => $index,
                         ]);
                     }
+                }
+            }
+            if (is_array($trackingPixels)) {
+                $item->trackingPixels()->delete();
+                $seen = [];
+                foreach (array_values($trackingPixels) as $index => $row) {
+                    $pixelId = trim((string) ($row['pixel_id'] ?? ''));
+                    if ($pixelId === '' || isset($seen[$pixelId])) continue;
+                    $seen[$pixelId] = true;
+                    $item->trackingPixels()->create([
+                        'name' => trim((string) ($row['name'] ?? 'Meta Pixel')),
+                        'pixel_id' => $pixelId,
+                        'is_active' => $row['is_active'] ?? true,
+                        'sort_order' => $index,
+                    ]);
                 }
             }
             $item->features()->sync($features);

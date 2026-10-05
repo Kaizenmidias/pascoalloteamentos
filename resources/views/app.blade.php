@@ -20,7 +20,7 @@
                 document.addEventListener('inertia:navigate', function () {
                     if (window.location.href === lastUrl) return;
                     lastUrl = window.location.href;
-                    if (typeof window.fbq === 'function') window.fbq('track', 'PageView');
+                    if (typeof window.fbq === 'function' && Array.isArray(window.__pascoalMetaPixelIds)) window.__pascoalMetaPixelIds.forEach(function (id) { window.fbq('trackSingle', id, 'PageView'); });
                     if (typeof window.gtag === 'function' && Array.isArray(window.__pascoalGoogleAnalyticsIds)) window.gtag('event', 'page_view', {send_to: window.__pascoalGoogleAnalyticsIds, page_path: window.location.pathname + window.location.search});
                 });
             })();

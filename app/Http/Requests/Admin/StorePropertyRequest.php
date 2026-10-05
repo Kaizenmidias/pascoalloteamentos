@@ -13,6 +13,7 @@ class StorePropertyRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $this->merge(['tracking_pixels' => $this->input('tracking_pixels', [])]);
         if (! $this->filled('slug')) {
             $this->merge(['slug' => UniqueSlug::for('properties', (string) $this->input('title'), $this->route('property')?->id, 'imovel')]);
         }

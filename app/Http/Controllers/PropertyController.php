@@ -35,7 +35,7 @@ class PropertyController extends Controller
     {
         abort_unless($property->status === 'published', 404);
 
-        $relations = ['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features.iconMedia', 'mediaAssets', 'floorPlans.mediaAsset', 'documents.mediaAsset', 'seo'];
+        $relations = ['city.state', 'propertyType', 'developmentStatus', 'businessType', 'condominium', 'features.iconMedia', 'mediaAssets', 'floorPlans.mediaAsset', 'trackingPixels', 'documents.mediaAsset', 'seo'];
         $similar = Property::query()
             ->published()
             ->whereKeyNot($property->id)

@@ -15,6 +15,7 @@ class StoreCondominiumRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $this->merge(['tracking_pixels' => $this->input('tracking_pixels', [])]);
         if (! $this->filled('summary') && $this->filled('excerpt')) {
             $this->merge(['summary' => trim((string) $this->input('excerpt'))]);
         }

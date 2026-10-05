@@ -108,7 +108,7 @@ final class TrackingManager
     private function metaInit(Collection $ids): string
     {
         $json = json_encode($ids->all(), JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-        return "<script>window.__pascoalMetaPixelIds=window.__pascoalMetaPixelIds||[];{$json}.forEach(function(id){if(window.__pascoalMetaPixelIds.indexOf(id)===-1){window.__pascoalMetaPixelIds.push(id);fbq('init',id)}});fbq('track','PageView');</script>";
+        return "<script>window.__pascoalMetaPixelIds=window.__pascoalMetaPixelIds||[];{$json}.forEach(function(id){if(window.__pascoalMetaPixelIds.indexOf(id)===-1){window.__pascoalMetaPixelIds.push(id);fbq('init',id)}fbq('trackSingle',id,'PageView')});</script>";
     }
 
     private function google(Collection $scripts): string
