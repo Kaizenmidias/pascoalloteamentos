@@ -92,12 +92,20 @@ class RealEstateContentService
                 $item->trackingPixels()->delete();
                 $seen = [];
                 foreach (array_values($trackingPixels) as $index => $row) {
-                    $pixelId = trim((string) ($row['pixel_id'] ?? ''));
-                    if ($pixelId === '' || isset($seen[$pixelId])) continue;
-                    $seen[$pixelId] = true;
+                    $type = (string) ($row['type'] ?? 'meta_pixel');
+                    $identifier = trim((string) ($row['identifier'] ?? $row['pixel_id'] ?? ''));
+                    $key = $type.'|'.$identifier;
+                    if ($identifier === '' && $type !== 'custom_script') continue;
+                    if ($type === 'meta_pixel' && ! preg_match('/^[0-9]{5,32}$/', $identifier)) continue;
+                    if (isset($seen[$key])) continue;
+                    $seen[$key] = true;
                     $item->trackingPixels()->create([
                         'name' => trim((string) ($row['name'] ?? 'Meta Pixel')),
-                        'pixel_id' => $pixelId,
+                        'type' => $type,
+                        'identifier' => $identifier ?: null,
+                        'pixel_id' => $type === 'meta_pixel' ? $identifier : null,
+                        'code' => $row['code'] ?? null,
+                        'position' => $row['position'] ?? 'head',
                         'is_active' => $row['is_active'] ?? true,
                         'sort_order' => $index,
                     ]);

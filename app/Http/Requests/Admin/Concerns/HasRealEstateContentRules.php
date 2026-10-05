@@ -11,7 +11,11 @@ trait HasRealEstateContentRules
         return [
             'tracking_pixels' => ['nullable', 'array', 'max:100'],
             'tracking_pixels.*.name' => ['required', 'string', 'max:255'],
-            'tracking_pixels.*.pixel_id' => ['required', 'regex:/^[0-9]{5,32}$/'],
+            'tracking_pixels.*.type' => ['required', 'in:meta_pixel,google_analytics,google_ads,google_tag,google_tag_manager,custom_script'],
+            'tracking_pixels.*.identifier' => ['nullable', 'string', 'max:255'],
+            'tracking_pixels.*.code' => ['nullable', 'string', 'max:100000'],
+            'tracking_pixels.*.position' => ['required', 'in:head,body_start,body_end'],
+            'tracking_pixels.*.pixel_id' => ['nullable', 'regex:/^[0-9]{5,32}$/'],
             'tracking_pixels.*.is_active' => ['nullable', 'boolean'],
             'tracking_pixels.*.sort_order' => ['nullable', 'integer', 'min:0'],
             'gallery_images' => ['nullable', 'array', 'max:'.$limit],
