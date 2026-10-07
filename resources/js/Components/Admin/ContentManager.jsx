@@ -20,6 +20,12 @@ export const normalizeProgressUpdates = (rows = []) => (Array.isArray(rows) ? ro
         media_order: Array.isArray(row.media_order) ? row.media_order : [],
     }));
 
+const progressDebugSnapshot = (rows = []) => (Array.isArray(rows) ? rows : []).filter(Boolean).map((row) => ({
+    id: row.id,
+    _key: row._key,
+    progress_date: row.progress_date,
+}));
+
 export const fixedStageDefaults = (item, definitions = []) => definitions.map((definition) => {
     const candidates = [definition.name, ...(definition.aliases || [])].map(normalize);
     const existing = item?.construction_stages?.find((stage) => stage.code === definition.code || candidates.includes(normalize(stage.name)));
@@ -49,8 +55,18 @@ function ConstructionStageGrid({ data, setData }) {
 
 function ProgressUpdatesManager({ data, setData, limit }) {
     const rows = Array.isArray(data.progress_updates) ? data.progress_updates.filter(Boolean) : [];
-    const updateRows = (nextRows) => setData('progress_updates', nextRows);
-    const update = (index, changes) => updateRows(rows.map((row, rowIndex) => rowIndex === index ? { ...row, ...changes } : row));
+    const updateRows = (nextRows) => {
+        if (nextRows.length > rows.length) {
+            console.info('[PROGRESS_FRONTEND_DEBUG] ADD', { before_count: rows.length, after_count: nextRows.length, created: progressDebugSnapshot([nextRows[nextRows.length - 1]])[0] });
+        }
+        setData('progress_updates', nextRows);
+    };
+    const update = (index, changes) => {
+        if (Object.prototype.hasOwnProperty.call(changes, 'progress_date')) {
+            console.info('[PROGRESS_FRONTEND_DEBUG] DATE_CHANGE', { index, id: rows[index]?.id, _key: rows[index]?._key, progress_date: changes.progress_date, total_count: rows.length });
+        }
+        updateRows(rows.map((row, rowIndex) => rowIndex === index ? { ...row, ...changes } : row));
+    };
     const moveMedia = (rowIndex, mediaIndex, direction) => {
         const assets = [...(Array.isArray(rows[rowIndex]?.media_assets) ? rows[rowIndex].media_assets : [])];
         const destination = mediaIndex + direction;
