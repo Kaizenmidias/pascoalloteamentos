@@ -150,18 +150,21 @@ class RealEstateContentService
             }
             if (is_array($progressUpdates)) {
                 $keptUpdateIds = [];
-                foreach (array_values($progressUpdates) as $row) {
+                foreach (array_values($progressUpdates) as $index => $row) {
                     $photos = Arr::pull($row, 'photos', []);
                     $removeMediaIds = Arr::pull($row, 'remove_media_ids', []);
                     $mediaOrder = Arr::pull($row, 'media_order', []);
+                    $progressDate = $row['progress_date'] ?? null;
+                    if (! $progressDate) {
+                        throw ValidationException::withMessages([
+                            "progress_updates.{$index}.progress_date" => 'Informe a data do período.',
+                        ]);
+                    }
                     $update = ! empty($row['id'])
                         ? $item->constructionProgressUpdates()->findOrFail($row['id'])
-                        : $item->constructionProgressUpdates()->firstOrNew(['progress_date' => $row['progress_date']]);
-                    if (! $update->exists) {
-                        $update->save();
-                    }
+                        : $item->constructionProgressUpdates()->firstOrNew(['progress_date' => $progressDate]);
                     $duplicateDate = $item->constructionProgressUpdates()
-                        ->whereDate('progress_date', $row['progress_date'])
+                        ->whereDate('progress_date', $progressDate)
                         ->where('id', '!=', $update->id)
                         ->exists();
                     if ($duplicateDate) {
@@ -169,7 +172,8 @@ class RealEstateContentService
                             "progress_updates.{$index}.progress_date" => 'Já existe um período cadastrado para esta data.',
                         ]);
                     }
-                    $update->update(['progress_date' => $row['progress_date']]);
+                    $update->progress_date = $progressDate;
+                    $update->save();
                     $keptUpdateIds[] = $update->id;
 
                     if ($removeMediaIds) {
