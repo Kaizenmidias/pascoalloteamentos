@@ -81,12 +81,9 @@ export default function Form({ item, options }) {
 
     const submit = (event) => {
         event.preventDefault();
-        console.info('[PROGRESS_FRONTEND_DEBUG] BEFORE_SUBMIT', { progress_updates_count: Array.isArray(data.progress_updates) ? data.progress_updates.length : 0, progress_updates: Array.isArray(data.progress_updates) ? data.progress_updates.filter(Boolean).map((row) => ({ id: row.id, _key: row._key, progress_date: row.progress_date })) : [] });
         transform((payload) => {
             const { faqs, floor_plans, documents, description, ...cleanPayload } = payload;
-            console.info('[PROGRESS_FRONTEND_DEBUG] TRANSFORM_INPUT', { count: Array.isArray(payload.progress_updates) ? payload.progress_updates.length : 0, progress_updates: Array.isArray(payload.progress_updates) ? payload.progress_updates.filter(Boolean).map((row) => ({ id: row.id, _key: row._key, progress_date: row.progress_date })) : [] });
             const normalized = normalizeProgressUpdates(payload.progress_updates);
-            console.info('[PROGRESS_FRONTEND_DEBUG] TRANSFORM_OUTPUT', { count: normalized.length, progress_updates: normalized.map((row) => ({ id: row.id, progress_date: row.progress_date })) });
             return { ...cleanPayload, progress_updates: normalized, _method: editing ? 'put' : undefined };
         });
         post(editing ? `/admin/subdivisions/${item.slug}` : '/admin/subdivisions', {
