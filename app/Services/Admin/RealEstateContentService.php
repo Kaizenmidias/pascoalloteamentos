@@ -162,16 +162,17 @@ class RealEstateContentService
                     }
                     $update = ! empty($row['id'])
                         ? $item->constructionProgressUpdates()->findOrFail($row['id'])
-                        : $item->constructionProgressUpdates()->firstOrNew(['progress_date' => $progressDate]);
+                        : null;
                     $duplicateDate = $item->constructionProgressUpdates()
                         ->whereDate('progress_date', $progressDate)
-                        ->where('id', '!=', $update->id)
+                        ->when($update, fn ($query) => $query->where('id', '!=', $update->getKey()))
                         ->exists();
                     if ($duplicateDate) {
                         throw ValidationException::withMessages([
                             "progress_updates.{$index}.progress_date" => 'Já existe um período cadastrado para esta data.',
                         ]);
                     }
+                    $update ??= $item->constructionProgressUpdates()->make();
                     $update->progress_date = $progressDate;
                     $update->save();
                     $keptUpdateIds[] = $update->id;

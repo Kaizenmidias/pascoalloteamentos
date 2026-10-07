@@ -78,6 +78,48 @@ class ConstructionProgressUpdatesTest extends TestCase
         }
     }
 
+    public function test_new_period_without_id_is_persisted_for_subdivision_and_condominium(): void
+    {
+        foreach ([
+            Subdivision::create(['title' => 'Jardim Horizonte', 'slug' => 'jardim-horizonte'] ),
+            Condominium::create(['title' => 'Residencial Horizonte', 'slug' => 'residencial-horizonte']),
+        ] as $entity) {
+            app(RealEstateContentService::class)->save($entity, [
+                'progress_updates' => [['progress_date' => '2026-12-31']],
+            ]);
+
+            $this->assertDatabaseHas('construction_progress_updates', [
+                'id' => $entity->fresh()->constructionProgressUpdates()->value('id'),
+                'progressable_type' => $entity->getMorphClass(),
+                'progressable_id' => $entity->id,
+                'progress_date' => '2026-12-31',
+            ]);
+            $this->assertSame(1, $entity->fresh()->constructionProgressUpdates()->count());
+        }
+    }
+
+    public function test_existing_and_new_periods_are_both_kept_after_sync(): void
+    {
+        $subdivision = Subdivision::create(['title' => 'Jardim Horizonte', 'slug' => 'jardim-horizonte']);
+        $existing = $subdivision->constructionProgressUpdates()->create(['progress_date' => '2026-12-01']);
+
+        app(RealEstateContentService::class)->save($subdivision, [
+            'progress_updates' => [
+                ['id' => $existing->id, 'progress_date' => '2026-12-01'],
+                ['progress_date' => '2026-12-31'],
+            ],
+        ]);
+
+        $fresh = $subdivision->fresh();
+        $this->assertDatabaseHas('construction_progress_updates', [
+            'progressable_type' => $subdivision->getMorphClass(),
+            'progressable_id' => $subdivision->id,
+            'progress_date' => '2026-12-31',
+        ]);
+        $this->assertSame(2, $fresh->constructionProgressUpdates()->count());
+        $this->assertTrue($fresh->constructionProgressUpdates()->whereKey($existing->id)->exists());
+    }
+
     public function test_changing_a_period_to_an_existing_date_returns_validation_error_instead_of_database_failure(): void
     {
         $subdivision = Subdivision::create(['title' => 'Jardim Horizonte', 'slug' => 'jardim-horizonte']);
