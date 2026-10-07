@@ -17,7 +17,6 @@ use App\Support\ConstructionStageCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -58,14 +57,7 @@ class SubdivisionController extends Controller
 
     public function update(UpdateSubdivisionRequest $request, Subdivision $subdivision): RedirectResponse
     {
-        $data = $request->validated();
-        $progressUpdates = $data['progress_updates'] ?? [];
-        Log::info('[PROGRESS_PERIOD_DEBUG] CONTROLLER', [
-            'subdivision_id' => $subdivision->id,
-            'progress_updates_count' => is_array($progressUpdates) ? count($progressUpdates) : 0,
-            'progress_dates' => is_array($progressUpdates) ? collect($progressUpdates)->pluck('progress_date')->values()->all() : [],
-        ]);
-        $this->content->save($subdivision, $data);
+        $this->content->save($subdivision, $request->validated());
 
         return redirect()->route('admin.subdivisions.edit', $subdivision)->with('success', 'Loteamento atualizado.');
     }

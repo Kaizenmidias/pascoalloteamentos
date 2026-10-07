@@ -3,7 +3,7 @@ import AdminLayout from '../../../Components/Layout/AdminLayout';
 import FeatureChoices from '../../../Components/Forms/FeatureChoices';
 import Field from '../../../Components/Forms/Field';
 import SelectField from '../../../Components/Forms/SelectField';
-import ContentManager, { contentDefaults } from '../../../Components/Admin/ContentManager';
+import ContentManager, { contentDefaults, normalizeProgressUpdates } from '../../../Components/Admin/ContentManager';
 import LocationFields from '../../../Components/Forms/LocationFields';
 import CondominiumSummaryFacts, { emptySummaryFacts } from '../../../Components/Admin/CondominiumSummaryFacts';
 import Map from '../../../Components/RealEstate/Map';
@@ -43,7 +43,7 @@ export default function Form({ item, options }) {
 
     const submit = (event) => {
         event.preventDefault();
-        transform((payload) => ({ ...payload, _method: editing ? 'put' : undefined }));
+        transform((payload) => ({ ...payload, progress_updates: normalizeProgressUpdates(payload.progress_updates), _method: editing ? 'put' : undefined }));
         post(editing ? `/admin/condominiums/${item.slug}` : '/admin/condominiums', { forceFormData: true });
     };
 

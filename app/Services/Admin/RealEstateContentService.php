@@ -9,7 +9,6 @@ use App\Support\SafeRichHtml;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
@@ -37,12 +36,6 @@ class RealEstateContentService
             $floorPlans = Arr::pull($data, 'floor_plans');
             $stages = Arr::pull($data, 'construction_stages');
             $progressUpdates = Arr::pull($data, 'progress_updates');
-            Log::info('[PROGRESS_PERIOD_DEBUG] SERVICE', [
-                'table' => $item->getTable(),
-                'item_id' => $item->getKey(),
-                'progress_updates_count' => is_array($progressUpdates) ? count($progressUpdates) : 0,
-                'progress_dates' => is_array($progressUpdates) ? collect($progressUpdates)->pluck('progress_date')->values()->all() : [],
-            ]);
             $faqs = Arr::pull($data, 'faqs');
             $documents = Arr::pull($data, 'documents');
             $promotions = Arr::pull($data, 'promotions');
@@ -180,23 +173,8 @@ class RealEstateContentService
                         ]);
                     }
                     $update ??= $item->constructionProgressUpdates()->make();
-                    if (! $update->exists) {
-                        Log::info('[PROGRESS_PERIOD_DEBUG] BEFORE_CREATE', [
-                            'table' => $item->getTable(),
-                            'item_id' => $item->getKey(),
-                            'progress_date' => $progressDate,
-                        ]);
-                    }
                     $update->progress_date = $progressDate;
                     $update->save();
-                    Log::info('[PROGRESS_PERIOD_DEBUG] AFTER_CREATE', [
-                        'created_id' => $update->getKey(),
-                        'progress_date' => $update->progress_date?->toDateString(),
-                        'progressable_type' => $update->progressable_type,
-                        'progressable_id' => $update->progressable_id,
-                        'exists' => $update->exists,
-                        'was_recently_created' => $update->wasRecentlyCreated,
-                    ]);
                     $keptUpdateIds[] = $update->id;
 
                     if ($removeMediaIds) {
@@ -218,12 +196,6 @@ class RealEstateContentService
                     $update->mediaAssets()->detach();
                     $update->delete();
                 });
-                Log::info('[PROGRESS_PERIOD_DEBUG] TRANSACTION_END', [
-                    'table' => $item->getTable(),
-                    'item_id' => $item->getKey(),
-                    'period_ids' => $item->constructionProgressUpdates()->pluck('id')->values()->all(),
-                    'progress_dates' => $item->constructionProgressUpdates()->pluck('progress_date')->values()->all(),
-                ]);
             }
             if (is_array($faqs)) {
                 $item->faqs()->delete();

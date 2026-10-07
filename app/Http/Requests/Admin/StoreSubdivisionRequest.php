@@ -5,7 +5,6 @@ namespace App\Http\Requests\Admin;
 use App\Http\Requests\Admin\Concerns\HasRealEstateContentRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Log;
 use App\Support\UniqueSlug;
 
 class StoreSubdivisionRequest extends FormRequest
@@ -16,13 +15,6 @@ class StoreSubdivisionRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $progressUpdates = $this->input('progress_updates', []);
-        Log::info('[PROGRESS_PERIOD_DEBUG] RAW', [
-            'has_progress_updates' => $this->has('progress_updates'),
-            'progress_updates_count' => is_array($progressUpdates) ? count($progressUpdates) : 0,
-            'progress_dates' => is_array($progressUpdates) ? collect($progressUpdates)->pluck('progress_date')->values()->all() : [],
-        ]);
-
         $this->merge(['section_images' => $this->input('section_images', [])]);
         $this->merge(['tracking_pixels' => $this->input('tracking_pixels', [])]);
 
@@ -37,16 +29,6 @@ class StoreSubdivisionRequest extends FormRequest
         if (! $this->filled('slug')) {
             $this->merge(['slug' => UniqueSlug::for('subdivisions', (string) $this->input('title'), $this->route('subdivision')?->id, 'loteamento')]);
         }
-    }
-
-    protected function passedValidation(): void
-    {
-        $progressUpdates = $this->input('progress_updates', []);
-        Log::info('[PROGRESS_PERIOD_DEBUG] VALIDATED', [
-            'has_progress_updates' => $this->has('progress_updates'),
-            'progress_updates_count' => is_array($progressUpdates) ? count($progressUpdates) : 0,
-            'progress_dates' => is_array($progressUpdates) ? collect($progressUpdates)->pluck('progress_date')->values()->all() : [],
-        ]);
     }
 
     public function authorize(): bool

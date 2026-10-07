@@ -10,6 +10,16 @@ const blankSectionImage = { title: '', description: '', area: '', bedrooms: '', 
 const blankTrackingPixel = { name: '', pixel_id: '', is_active: true, sort_order: 0 };
 const normalize = (value = '') => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
+export const normalizeProgressUpdates = (rows = []) => (Array.isArray(rows) ? rows : [])
+    .filter(Boolean)
+    .map((row) => ({
+        ...(row.id !== undefined && row.id !== null && row.id !== '' ? { id: row.id } : {}),
+        progress_date: row.progress_date || '',
+        photos: Array.isArray(row.photos) ? row.photos : [],
+        remove_media_ids: Array.isArray(row.remove_media_ids) ? row.remove_media_ids : [],
+        media_order: Array.isArray(row.media_order) ? row.media_order : [],
+    }));
+
 export const fixedStageDefaults = (item, definitions = []) => definitions.map((definition) => {
     const candidates = [definition.name, ...(definition.aliases || [])].map(normalize);
     const existing = item?.construction_stages?.find((stage) => stage.code === definition.code || candidates.includes(normalize(stage.name)));
