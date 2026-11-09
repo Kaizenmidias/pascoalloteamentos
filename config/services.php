@@ -40,6 +40,7 @@ return [
         'client_secret' => env('RD_STATION_CRM_CLIENT_SECRET'),
         'redirect_uri' => env('RD_STATION_CRM_REDIRECT_URI'),
         'owner_id' => env('RD_STATION_CRM_OWNER_ID'),
+        'pipeline_id' => env('RD_STATION_CRM_PIPELINE_ID'),
         'stage_id' => env('RD_STATION_CRM_STAGE_ID'),
     ],
 

@@ -11,7 +11,7 @@ function blank(type = 'custom_script') {
 }
 
 export default function Integrations({ settings = {}, trackingScripts = [], trackingTypes = defaultTypes, rdStationConnected = false }) {
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, post, processing, errors } = useForm({
         google_maps_key: settings.google_maps_key || '', recaptcha_site_key: settings.recaptcha_site_key || '',
         scripts: trackingScripts.map((script, index) => ({ ...script, sort_order: script.sort_order ?? index * 10 })),
     });
@@ -33,5 +33,5 @@ export default function Integrations({ settings = {}, trackingScripts = [], trac
         </section>
         <section className="grid gap-5 rounded-xl border border-line bg-white p-6 shadow-sm tablet:grid-cols-2"><div className="tablet:col-span-2"><h2 className="text-lg font-medium text-ink">Outros serviços</h2><p className="mt-1 text-sm text-muted">Estas credenciais permanecem compatíveis com a configuração anterior.</p></div><Field label="Google Maps API Key" value={data.google_maps_key} onChange={(e) => setData('google_maps_key', e.target.value)} /><Field label="reCAPTCHA Site Key" value={data.recaptcha_site_key} onChange={(e) => setData('recaptcha_site_key', e.target.value)} /></section>
         <Button type="submit" disabled={processing}>{processing ? 'Salvando...' : 'Salvar integrações'}</Button>
-    </form><section className="max-w-6xl rounded-xl border border-line bg-white p-6 shadow-sm"><h2 className="text-lg font-medium text-ink">RD Station CRM</h2><p className="mt-1 text-sm text-muted">Status: {rdStationConnected ? 'Conectado' : 'Não conectado'}</p>{!rdStationConnected && <a href="/admin/integrations/rd-station/connect" className="brand-button mt-4 inline-flex">Conectar RD Station CRM</a>}</section></div></AdminLayout>;
+    </form><section className="max-w-6xl rounded-xl border border-line bg-white p-6 shadow-sm"><h2 className="text-lg font-medium text-ink">RD Station CRM</h2><p className="mt-1 text-sm text-muted">Status: {rdStationConnected ? 'Conectado' : 'Não conectado'}</p><div className="mt-4 flex flex-wrap gap-2">{rdStationConnected ? <><a href="/admin/integrations/rd-station/connect" className="brand-button inline-flex">Reconectar RD Station CRM</a><Button type="button" onClick={() => post('/admin/integrations/rd-station/disconnect')} disabled={processing}>Desconectar RD Station CRM</Button></> : <a href="/admin/integrations/rd-station/connect" className="brand-button inline-flex">Conectar RD Station CRM</a>}</div></section></div></AdminLayout>;
 }

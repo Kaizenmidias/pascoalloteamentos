@@ -485,6 +485,13 @@ class CmsController extends Controller
         return redirect()->route('admin.integrations.edit')->with('success', 'RD Station CRM conectado.');
     }
 
+    public function disconnectRdStation(RdStationCrmService $rdStation): RedirectResponse
+    {
+        $rdStation->disconnect();
+
+        return redirect()->route('admin.integrations.edit')->with('success', 'RD Station CRM desconectado.');
+    }
+
     public function updateIntegrations(Request $request): RedirectResponse
     {
         $data = $request->validate([

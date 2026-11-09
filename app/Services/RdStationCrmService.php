@@ -45,6 +45,12 @@ class RdStationCrmService
         return (bool) ($credential?->access_token || $credential?->refresh_token);
     }
 
+    public function disconnect(): void
+    {
+        IntegrationCredential::where('provider', self::PROVIDER)->delete();
+        SiteSetting::where('key', 'rdstation_crm_tokens')->delete();
+    }
+
     public function users(): array
     {
         $token = $this->accessToken();
@@ -303,6 +309,9 @@ class RdStationCrmService
             'contact_id' => $contact['id'],
             'owner_id' => $ownerId,
         ];
+        if (config('services.rdstation.pipeline_id')) {
+            $deal['pipeline_id'] = config('services.rdstation.pipeline_id');
+        }
         if (config('services.rdstation.stage_id')) {
             $deal['stage_id'] = config('services.rdstation.stage_id');
         }
