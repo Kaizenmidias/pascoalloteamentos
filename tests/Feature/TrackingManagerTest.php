@@ -12,6 +12,36 @@ class TrackingManagerTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_google_ads_conversion_label_is_preserved_and_only_base_id_is_configured(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $destination = 'AW-18482697900/SjP9CPajqbodEKytnu1E';
+
+        $this->actingAs($admin)->put('/admin/integrations', ['scripts' => [
+            ['name' => 'WhatsApp', 'type' => 'google_ads', 'identifier' => $destination, 'position' => 'head', 'is_active' => true, 'sort_order' => 0],
+            ['name' => 'GA4', 'type' => 'google_analytics', 'identifier' => 'G-ABC123', 'position' => 'head', 'is_active' => true, 'sort_order' => 1],
+        ]])->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->assertDatabaseHas('tracking_scripts', ['type' => 'google_ads', 'identifier' => $destination]);
+        $html = app(\App\Services\Tracking\TrackingManager::class)->head()->implode('');
+        $this->assertStringContainsString('gtag/js?id=AW-18482697900"', $html);
+        $this->assertStringContainsString('gtag(\'config\',"AW-18482697900");gtag(\'config\',"G-ABC123");', $html);
+        $this->assertStringContainsString('["'.$destination.'"]', $html);
+        $this->assertStringNotContainsString('gtag(\'config\',"'.$destination.'")', $html);
+    }
+
+    public function test_google_ads_base_id_remains_valid_and_malformed_labels_are_rejected(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $script = ['name' => 'Ads', 'type' => 'google_ads', 'identifier' => 'AW-18482697900', 'position' => 'head', 'is_active' => true, 'sort_order' => 0];
+        $this->actingAs($admin)->put('/admin/integrations', ['scripts' => [$script]])->assertSessionHasNoErrors();
+
+        foreach (['AW-18482697900/', 'AW-18482697900/label/extra', 'AW-18482697900/<script>'] as $identifier) {
+            $this->put('/admin/integrations', ['scripts' => [array_replace($script, ['identifier' => $identifier])]])->assertSessionHasErrors('scripts');
+        }
+        $this->assertDatabaseHas('tracking_scripts', ['identifier' => 'AW-18482697900']);
+    }
+
     public function test_admin_can_manage_multiple_tracking_entries_and_public_positions(): void
     {
         $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);

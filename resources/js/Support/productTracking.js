@@ -47,7 +47,7 @@ export function initializeProductTracking(entries = [], item = {}) {
     const googleEntries = scripts.filter((entry) => ['google_analytics', 'google_ads', 'google_tag'].includes(entry.type) && entry.identifier);
     if (googleEntries.length) {
         ensureGoogle();
-        googleEntries.forEach((entry) => window.gtag('config', entry.identifier));
+        [...new Set(googleEntries.map((entry) => entry.identifier.split('/')[0]))].forEach((id) => window.gtag('config', id));
     }
 
     scripts.filter((entry) => entry.type === 'google_tag_manager' && entry.identifier).forEach((entry) => ensureGtm(entry.identifier));
@@ -59,9 +59,11 @@ export function trackProductEvent(eventName, parameters = {}) {
     const metaIds = [...new Set(tracking.scripts.filter((entry) => entry.type === 'meta_pixel' && (entry.pixel_id || entry.identifier)).map((entry) => entry.pixel_id || entry.identifier).filter(Boolean))];
     if (typeof window.fbq === 'function') metaIds.forEach((id) => window.fbq('trackSingle', id, eventName === 'cta_click' ? 'Contact' : 'Lead', payload));
 
-    const googleAds = tracking.scripts.filter((entry) => entry.type === 'google_ads' && entry.identifier).map((entry) => entry.identifier);
+    const googleAds = tracking.scripts.filter((entry) => entry.type === 'google_ads' && entry.identifier?.includes('/')).map((entry) => entry.identifier);
+    // Global conversion labels are configured for WhatsApp clicks, not form submissions.
+    const globalAds = eventName === 'cta_click' && parameters.cta === 'whatsapp' ? (window.__pascoalGoogleAdsConversions || []) : [];
     if (typeof window.gtag === 'function') {
-        googleAds.forEach((id) => window.gtag('event', 'conversion', { ...payload, send_to: id }));
+        [...new Set([...googleAds, ...globalAds])].forEach((id) => window.gtag('event', 'conversion', { ...payload, send_to: id }));
         window.gtag('event', eventName, payload);
     }
 

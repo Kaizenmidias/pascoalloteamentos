@@ -113,17 +113,20 @@ final class TrackingManager
 
     private function google(Collection $scripts): string
     {
-        $ids = $scripts->pluck('identifier')->filter()->unique()->values();
-        $configs = $ids->map(fn (string $id) => "gtag('config',".json_encode($id, JSON_UNESCAPED_SLASHES).')')->implode('');
+        $ids = $scripts->pluck('identifier')->filter()->map(fn (string $id) => explode('/', $id, 2)[0])->unique()->values();
+        $configs = $ids->map(fn (string $id) => "gtag('config',".json_encode($id, JSON_UNESCAPED_SLASHES).');')->implode('');
+        $ads = $scripts->where('type', 'google_ads')->pluck('identifier')->filter(fn ($id) => is_string($id) && str_contains($id, '/'))->unique()->values();
+        $adsJson = json_encode($ads->all(), JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
         $analytics = $scripts->where('type', 'google_analytics')->pluck('identifier')->filter()->unique()->values();
         $analyticsJson = json_encode($analytics->all(), JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
         return <<<HTML
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}{$configs}window.__pascoalGoogleAnalyticsIds=window.__pascoalGoogleAnalyticsIds||[];{$analyticsJson}.forEach(function(id){if(window.__pascoalGoogleAnalyticsIds.indexOf(id)===-1)window.__pascoalGoogleAnalyticsIds.push(id)});</script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}{$configs}window.__pascoalGoogleAdsConversions=window.__pascoalGoogleAdsConversions||[];{$adsJson}.forEach(function(id){if(window.__pascoalGoogleAdsConversions.indexOf(id)===-1)window.__pascoalGoogleAdsConversions.push(id)});window.__pascoalGoogleAnalyticsIds=window.__pascoalGoogleAnalyticsIds||[];{$analyticsJson}.forEach(function(id){if(window.__pascoalGoogleAnalyticsIds.indexOf(id)===-1)window.__pascoalGoogleAnalyticsIds.push(id)});</script>
 HTML;
     }
 
     private function googleLoader(string $id): string
     {
+        $id = explode('/', $id, 2)[0];
         return '<script async src="https://www.googletagmanager.com/gtag/js?id='.rawurlencode($id).'"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag(\'js\',new Date());</script>';
     }
 

@@ -525,8 +525,8 @@ class CmsController extends Controller
             if ($script['type'] === 'meta_pixel' && ($script['identifier'] === null || ! preg_match('/^\d{5,20}$/', $script['identifier']))) {
                 throw ValidationException::withMessages(['scripts' => 'Cada Meta Pixel deve ter um ID numérico válido.']);
             }
-            $formats = ['google_analytics' => 'G-[A-Z0-9]+', 'google_ads' => 'AW-[A-Z0-9]+', 'google_tag' => 'GT-[A-Z0-9]+', 'google_tag_manager' => 'GTM-[A-Z0-9]+'];
-            if (isset($formats[$script['type']]) && ($script['identifier'] === null || ! preg_match('/^'.$formats[$script['type']].'$/i', $script['identifier']))) {
+            $formats = ['google_analytics' => 'G-[A-Z0-9]+', 'google_ads' => 'AW-[0-9]+(?:/[A-Z0-9_-]+)?', 'google_tag' => 'GT-[A-Z0-9]+', 'google_tag_manager' => 'GTM-[A-Z0-9]+'];
+            if (isset($formats[$script['type']]) && ($script['identifier'] === null || ! preg_match('~^'.$formats[$script['type']].'$~i', $script['identifier']))) {
                 throw ValidationException::withMessages(['scripts' => 'O identificador de '.$script['type'].' não possui um formato válido.']);
             }
             if ($script['type'] === 'custom_script' && $script['code'] === null) {
